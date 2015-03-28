@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<SplitPane dividerPositions="0.3241206030150754" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="500.0">
+         <children>
+            <ChoiceBox layoutX="81.0" layoutY="66.0" prefWidth="150.0" />
+            <Label layoutX="26.0" layoutY="71.0" text="Station" />
+            <Label layoutX="26.0" layoutY="43.0" text="System" />
+            <ChoiceBox layoutX="81.0" layoutY="38.0" prefWidth="150.0" />
+            <Label layoutX="6.0" layoutY="99.0" text="Commodity" />
+            <ChoiceBox layoutX="81.0" layoutY="94.0" prefWidth="150.0" />
+            <Label alignment="CENTER" layoutX="7.0" layoutY="14.0" prefHeight="16.0" prefWidth="221.0" text="Origin Of Exchange" />
+            <ChoiceBox layoutX="319.0" layoutY="38.0" prefHeight="26.0" prefWidth="42.0" />
+            <Label layoutX="244.0" layoutY="43.0" text="# of Trades" />
+            <Label layoutX="244.0" layoutY="71.0" text="# of Jumps" />
+            <ChoiceBox layoutX="319.0" layoutY="66.0" prefHeight="26.0" prefWidth="42.0" />
+            <Label alignment="CENTER" layoutX="247.0" layoutY="14.0" prefHeight="16.0" prefWidth="117.0" text="Limit Destination" />
+            <ChoiceBox layoutX="430.0" layoutY="64.0" prefWidth="150.0" />
+            <Label layoutX="375.0" layoutY="69.0" text="Station" />
+            <Label layoutX="375.0" layoutY="41.0" text="System" />
+            <ChoiceBox layoutX="430.0" layoutY="36.0" prefWidth="150.0" />
+            <Label alignment="CENTER" layoutX="361.0" layoutY="14.0" prefHeight="16.0" prefWidth="221.0" text="Set Exchange Destination" />
+         </children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+         <children>
+            <TableView layoutX="199.0" layoutY="46.0" prefHeight="292.0" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn prefWidth="75.0" text="C1" />
+                <TableColumn prefWidth="75.0" text="C2" />
+              </columns>
+            </TableView>
+         </children></AnchorPane>
+  </items>
+</SplitPane>

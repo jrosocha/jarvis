@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<SplitPane fx:id="view" dividerPositions="0.10826771653543307" maxWidth="500.0" orientation="VERTICAL" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.StationOverviewController">
+  <items>
+    <AnchorPane maxHeight="100.0" maxWidth="500.0" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="500.0">
+         <children>
+            <Label fx:id="stationNameLabel" layoutX="261.0" layoutY="7.0" text="Unknown" />
+            <Label fx:id="systemNameLabel" layoutX="68.0" layoutY="6.0" text="Unknown" />
+            <Label layoutX="14.0" layoutY="28.0" text="Black Market:" />
+            <Label fx:id="ageOfDataLabel" layoutX="297.0" layoutY="28.0" text="0" />
+            <Label layoutX="14.0" layoutY="6.0" text="System:" />
+            <Label layoutX="207.0" layoutY="6.0" text="Station:" />
+            <Label fx:id="blackMarketLabel" layoutX="97.0" layoutY="28.0" text="false" />
+            <Label layoutX="207.0" layoutY="28.0" text="Age of Data:" />
+         </children>
+      </AnchorPane>
+      <TableView fx:id="commodityTable" maxWidth="500.0" prefWidth="500.0" style="-fx-font-size: 10;">
+        <columns>
+          <TableColumn fx:id="commodityTypeColumn" prefWidth="150.0" text="Type" />
+          <TableColumn fx:id="commodityNameColumn" prefWidth="150.0" text="Commodity" />
+            <TableColumn fx:id="commodityBuyColumn" prefWidth="40.0" text="Buy @" />
+            <TableColumn fx:id="commoditySupplyColumn" prefWidth="55.0" text="Supply" />
+            <TableColumn fx:id="commoditySellColumn" prefWidth="40.0" text="Sell @" />
+            <TableColumn fx:id="commodityDemandColumn" prefWidth="56.0" text="Demand" />
+        </columns>
+      </TableView>
+  </items>
+</SplitPane>

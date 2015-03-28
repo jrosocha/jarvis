@@ -1,0 +1,11 @@
+{
+  "shipFile" : "../data/Ship.json",
+  "orientGraphDb" : "../data/jarvisDb",
+  "systemsFile" : "../data/System.csv",
+  "commodityFile" : "../data/Commodity.csv",
+  "eliteOcrScanDirectory" : "/Users/jrosocha/trade/Elite Dangerous",
+  "eliteOcrScanArchiveEnabed" : false,
+  "longestDistanceEdge" : 30,
+  "closeSystemDistance" : 30,
+  "eliteDangerousAppDirectory" : "/Users/jrosocha/trade"
+}
