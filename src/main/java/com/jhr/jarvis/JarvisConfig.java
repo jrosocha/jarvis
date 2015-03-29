@@ -19,6 +19,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jhr.jarvis.controllers.CurrentSystemController;
+import com.jhr.jarvis.controllers.ExchangeController;
+import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.ShipController;
+import com.jhr.jarvis.controllers.StationOverviewController;
 
 @Configuration
 @ComponentScan
@@ -47,7 +52,7 @@ class JarvisConfig {
     public RootLayoutController getRootLayoutController() {
 
         try {
-            return (RootLayoutController) springFxmlLoader.loadController("RootLayout.fxml");
+            return (RootLayoutController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/RootLayout.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;
@@ -58,7 +63,7 @@ class JarvisConfig {
     public CurrentSystemController getCurrentSystemController() {
         
         try {
-            return (CurrentSystemController) springFxmlLoader.loadController("CurrentSystem.fxml");
+            return (CurrentSystemController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/CurrentSystem.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;
@@ -70,7 +75,7 @@ class JarvisConfig {
     public StationOverviewController getStationOverviewController() {
         
         try {
-            return (StationOverviewController) springFxmlLoader.loadController("StationOverview.fxml");
+            return (StationOverviewController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/StationOverview.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;
@@ -82,7 +87,18 @@ class JarvisConfig {
     public ShipController getShipController() {
 
         try {
-            return (ShipController) springFxmlLoader.loadController("Ship.fxml");
+            return (ShipController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Ship.fxml");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Bean
+    public ExchangeController getExchangeController() {
+
+        try {
+            return (ExchangeController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Exchange.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;

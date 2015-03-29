@@ -1,4 +1,4 @@
-package com.jhr.jarvis;
+package com.jhr.jarvis.controllers;
 
 import java.io.IOException;
 
@@ -68,12 +68,56 @@ public class ShipController implements ApplicationListener<ShipModifiedEvent> {
     }
     
     @PostConstruct
-    private void initStartingShip() {
+    public void loadShip() {
+        
         try {
             shipService.loadShip();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        
+        shipCargo.setOnAction((event) -> {
+            saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+        });
+        shipCargo.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+            }
+        });
+        
+        shipRange.setOnAction((event) -> {
+            saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+        });
+        shipRange.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+            }
+        });
+        
+        shipCredits.setOnAction((event) -> {
+            saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+        });
+        shipCredits.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                saveShip(shipCargo.getText(), shipRange.getText(), shipCredits.getText());
+            }
+        });
+
+    }
+    
+    public void saveShip(String cargo, String jumpRange, String credits) {
+        
+        try {
+            int iCargo = Integer.parseInt(cargo);
+            float fJumpRange = Float.parseFloat(jumpRange);
+            int iCredits = Integer.parseInt(credits);
+            
+            Ship s = new Ship(iCargo, fJumpRange, iCredits);
+            shipService.saveShip(s);
+        } catch (NumberFormatException | IOException e) {
+            // ignore
+        } 
     }
 
 }

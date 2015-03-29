@@ -1,4 +1,4 @@
-package com.jhr.jarvis;
+package com.jhr.jarvis.controllers;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

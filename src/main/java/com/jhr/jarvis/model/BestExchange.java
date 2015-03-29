@@ -5,21 +5,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class BestExchange {
 
-    private String buySystemName;
-    private String buyStationName;
-    private String commodity;
-    private int buyPrice;
-    private int supply;
+    private StringProperty buySystemName = new SimpleStringProperty("");
+    private StringProperty buyStationName = new SimpleStringProperty("");
+    private StringProperty commodity = new SimpleStringProperty("");
+    private IntegerProperty buyPrice = new SimpleIntegerProperty(0);
+    private IntegerProperty supply = new SimpleIntegerProperty(0);
 
-    private String sellSystemName;
-    private String sellStationName;
-    private int sellPrice;
-    private int demand;
+    private StringProperty sellSystemName = new SimpleStringProperty("");
+    private StringProperty sellStationName = new SimpleStringProperty("");
+    private IntegerProperty sellPrice = new SimpleIntegerProperty(0);
+    private IntegerProperty demand = new SimpleIntegerProperty(0);
     
-    private int perUnitProfit;
-    private int quantity;
+    private IntegerProperty perUnitProfit = new SimpleIntegerProperty(0);
+    private IntegerProperty quantity = new SimpleIntegerProperty(0);
     
     private List<BestExchange> nextTrip = new CopyOnWriteArrayList<BestExchange>();
     private int routePerProfitUnit = 0;
@@ -56,15 +61,15 @@ public class BestExchange {
         out.put("COMMODITY", commodity);
         out.put("BUY @", buyPrice);
         out.put("SUPPLY", supply);
-        out.put("CARGO COST", buyPrice * quantity);
+        out.put("CARGO COST", getBuyPrice() * getQuantity());
          out.put("TO SYSTEM", sellSystemName);
         out.put("TO STATION", sellStationName);
         out.put("SELL @", sellPrice);
         out.put("DEMAND", demand);
         out.put("UNIT PROFIT", perUnitProfit);
-        out.put("PROFIT", perUnitProfit * quantity);
+        out.put("PROFIT", getPerUnitProfit() * getQuantity());
         out.put("ROUTE UNIT PROFIT", routePerProfitUnit);
-        out.put("ROUTE PROFIT", routePerProfitUnit * quantity);
+        out.put("ROUTE PROFIT", getRoutePerProfitUnit() * getQuantity());
         
         return out;
     }
@@ -85,6 +90,10 @@ public class BestExchange {
      * @return the buySystemName
      */
     public String getBuySystemName() {
+        return buySystemName.get();
+    }
+    
+    public StringProperty getBuySystemNameProperty() {
         return buySystemName;
     }
 
@@ -92,13 +101,17 @@ public class BestExchange {
      * @param buySystemName the buySystemName to set
      */
     public void setBuySystemName(String buySystemName) {
-        this.buySystemName = buySystemName;
+        this.buySystemName.set(buySystemName);
     }
 
     /**
      * @return the buyStationName
      */
     public String getBuyStationName() {
+        return buyStationName.get();
+    }
+    
+    public StringProperty getBuyStationNameProperty() {
         return buyStationName;
     }
 
@@ -106,13 +119,17 @@ public class BestExchange {
      * @param buyStationName the buyStationName to set
      */
     public void setBuyStationName(String buyStationName) {
-        this.buyStationName = buyStationName;
+        this.buyStationName.set(buyStationName);
     }
 
     /**
      * @return the commodity
      */
     public String getCommodity() {
+        return commodity.get();
+    }
+    
+    public StringProperty getCommodityProperty() {
         return commodity;
     }
 
@@ -120,13 +137,17 @@ public class BestExchange {
      * @param commodity the commodity to set
      */
     public void setCommodity(String commodity) {
-        this.commodity = commodity;
+        this.commodity.set(commodity);
     }
 
     /**
      * @return the buyPrice
      */
     public int getBuyPrice() {
+        return buyPrice.get();
+    }
+    
+    public IntegerProperty getBuyPriceProperty() {
         return buyPrice;
     }
 
@@ -134,13 +155,17 @@ public class BestExchange {
      * @param buyPrice the buyPrice to set
      */
     public void setBuyPrice(int buyPrice) {
-        this.buyPrice = buyPrice;
+        this.buyPrice.set(buyPrice);
     }
 
     /**
      * @return the supply
      */
     public int getSupply() {
+        return supply.get();
+    }
+    
+    public IntegerProperty getSupplyProperty() {
         return supply;
     }
 
@@ -148,13 +173,17 @@ public class BestExchange {
      * @param supply the supply to set
      */
     public void setSupply(int supply) {
-        this.supply = supply;
+        this.supply.set(supply);
     }
 
     /**
      * @return the sellSystemName
      */
     public String getSellSystemName() {
+        return sellSystemName.get();
+    }
+    
+    public StringProperty getSellSystemNameProperty() {
         return sellSystemName;
     }
 
@@ -162,13 +191,17 @@ public class BestExchange {
      * @param sellSystemName the sellSystemName to set
      */
     public void setSellSystemName(String sellSystemName) {
-        this.sellSystemName = sellSystemName;
+        this.sellSystemName.set(sellSystemName);
     }
 
     /**
      * @return the sellStationName
      */
     public String getSellStationName() {
+        return sellStationName.get();
+    }
+    
+    public StringProperty getSellStationNameProperty() {
         return sellStationName;
     }
 
@@ -176,13 +209,17 @@ public class BestExchange {
      * @param sellStationName the sellStationName to set
      */
     public void setSellStationName(String sellStationName) {
-        this.sellStationName = sellStationName;
+        this.sellStationName.set(sellStationName);
     }
 
     /**
      * @return the sellPrice
      */
     public int getSellPrice() {
+        return sellPrice.get();
+    }
+    
+    public IntegerProperty getSellPriceProperty() {
         return sellPrice;
     }
 
@@ -190,13 +227,17 @@ public class BestExchange {
      * @param sellPrice the sellPrice to set
      */
     public void setSellPrice(int sellPrice) {
-        this.sellPrice = sellPrice;
+        this.sellPrice.set(sellPrice);
     }
 
     /**
      * @return the demand
      */
     public int getDemand() {
+        return demand.get();
+    }
+    
+    public IntegerProperty getDemandProperty() {
         return demand;
     }
 
@@ -204,13 +245,17 @@ public class BestExchange {
      * @param demand the demand to set
      */
     public void setDemand(int demand) {
-        this.demand = demand;
+        this.demand.set(demand);
     }
 
     /**
      * @return the perUnitProfit
      */
     public int getPerUnitProfit() {
+        return perUnitProfit.get();
+    }
+    
+    public IntegerProperty getPerUnitProfitProperty() {
         return perUnitProfit;
     }
 
@@ -218,21 +263,21 @@ public class BestExchange {
      * @param perUnitProfit the perUnitProfit to set
      */
     public void setPerUnitProfit(int perUnitProfit) {
-        this.perUnitProfit = perUnitProfit;
+        this.perUnitProfit.set(perUnitProfit);
     }
 
     /**
      * @return the quantity
      */
     public int getQuantity() {
-        return quantity;
+        return quantity.get();
     }
 
     /**
      * @param quantity the quantity to set
      */
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.quantity.set(quantity);
     }
 
     /**
@@ -275,6 +320,10 @@ public class BestExchange {
      */
     public void setParent(BestExchange parent) {
         this.parent = parent;
+    }
+    
+    public int getExchangeStopProfit() {
+        return getPerUnitProfit() * getQuantity();
     }
 
     

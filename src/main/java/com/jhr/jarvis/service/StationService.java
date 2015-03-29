@@ -240,8 +240,8 @@ public class StationService {
         try {
             graph = orientDbService.getFactory().getTx();
             
-            for (Vertex stationVertex : (Iterable<Vertex>) graph.command(
-                    new OCommandSQL("select from Station where name like '" + partial.toUpperCase() + "%'")).execute()) {
+            String whereClause = StringUtils.isEmpty(partial) ? "" : " where name like '" + partial.toUpperCase() + "%'";
+            for (Vertex stationVertex : (Iterable<Vertex>) graph.command(new OCommandSQL("select from Station" + whereClause)).execute()) {
                 
                 Station station = vertexToStation(stationVertex);
                 out.add(station);

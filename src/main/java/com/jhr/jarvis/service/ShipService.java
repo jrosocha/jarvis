@@ -25,11 +25,14 @@ public class ShipService implements ApplicationEventPublisherAware {
     @Autowired
     private ObjectMapper objectMapper;
     
+    public Ship activeShip;
+    
     private ApplicationEventPublisher eventPublisher;
     
     private File shipFile = null;
     
     public boolean isShipEmpty(Ship ship) {
+        
         if (ship == null || ship.getCargoSpace() == 0 || ship.getCash() == 0 || ship.getJumpDistance() == 0) {
             return true;
         }
@@ -37,32 +40,40 @@ public class ShipService implements ApplicationEventPublisherAware {
     }
     
     public Ship saveShip(Ship ship) throws JsonGenerationException, JsonMappingException, IOException {
-        shipFile = new File(settings.getShipFile());
         
+        shipFile = new File(settings.getShipFile());
         if (shipFile.exists()) {
             shipFile.delete();
         }
-        
         objectMapper.writeValue(shipFile, ship);
-        
         eventPublisher.publishEvent(new ShipModifiedEvent(ship));
-        
+        setActiveShip(ship);
         return ship;
     }
     
     public Ship loadShip() throws JsonParseException, JsonMappingException, IOException {
+        
         shipFile = new File(settings.getShipFile());
-        
         if (shipFile.exists()) {
-            return objectMapper.readValue(shipFile, Ship.class);
+            Ship ship = objectMapper.readValue(shipFile, Ship.class);
+            eventPublisher.publishEvent(new ShipModifiedEvent(ship));
+            setActiveShip(ship);
+            return ship;
         }
-        
         return saveShip(new Ship());
     }
     
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
+    }
+
+    public Ship getActiveShip() {
+        return activeShip;
+    }
+
+    public void setActiveShip(Ship activeShip) {
+        this.activeShip = activeShip;
     }
     
     

@@ -305,9 +305,7 @@ public class StarSystemService {
     }
 
     /**
-     * Matches a system starting with @param partial If more than one system is
-     * found, returns \n separated string. If none is found, returns a message
-     * to that effect.
+     * Matches a system starting with @param partial
      * 
      * @param partial
      * @return
@@ -317,7 +315,10 @@ public class StarSystemService {
         List<StarSystem> out = new ArrayList<>();
         try {
             graph = orientDbService.getFactory().getTx();
-            for (Vertex systemVertex : (Iterable<Vertex>) graph.command(new OCommandSQL("select from System where name like '" + partial.toUpperCase() + "%'")).execute()) {
+            
+            String queryWhere = partial == null ? "" : " where name like '" + partial.toUpperCase() + "%'";
+            
+            for (Vertex systemVertex : (Iterable<Vertex>) graph.command(new OCommandSQL("select from System" + queryWhere)).execute()) {
                 StarSystem foundSystem = new StarSystem(systemVertex.getProperty("name"));
                 foundSystem.setX((float) systemVertex.getProperty("x"));
                 foundSystem.setY((float) systemVertex.getProperty("y"));

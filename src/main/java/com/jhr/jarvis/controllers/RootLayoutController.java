@@ -1,4 +1,4 @@
-package com.jhr.jarvis;
+package com.jhr.jarvis.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;

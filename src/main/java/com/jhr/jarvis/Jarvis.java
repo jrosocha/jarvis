@@ -17,6 +17,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Import;
 
+import com.jhr.jarvis.controllers.CurrentSystemController;
+import com.jhr.jarvis.controllers.ExchangeController;
+import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.ShipController;
+import com.jhr.jarvis.controllers.StationOverviewController;
+
 @Import(JarvisConfig.class)
 public class Jarvis extends AbstractJavaFxApplicationSupport {
 
@@ -25,8 +31,7 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     @Autowired
     private SpringFxmlLoader loader;
         
-    private BorderPane rootLayout;
-    
+    private BorderPane rootLayout;    
     private VBox left;
     private TabPane center;
     
@@ -57,6 +62,7 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         showCurrentSystem();
         showStationOverview();
         showShip();
+        showExchange();
     }
 	
     public void showCurrentSystem() {
@@ -79,6 +85,17 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
 
         ShipController controller = this.getApplicationContext().getBean(ShipController.class);
         left.getChildren().add(controller.getView());
+    }
+    
+    public void showExchange() {
+
+        ExchangeController controller = this.getApplicationContext().getBean(ExchangeController.class);
+        Tab exchnagesTab = new Tab();
+        exchnagesTab.setText("Exchange");
+        exchnagesTab.setContent(controller.getView());
+        center.getTabs().add(exchnagesTab);
+        //controller.x();
+        controller.populateSystems();
     }
 
 }
