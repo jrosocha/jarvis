@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,8 +76,9 @@ public class CommodityService {
         try {
             graph = orientDbService.getFactory().getTx();
             
-            for (Vertex comodityVertex : (Iterable<Vertex>) graph.command(
-                    new OCommandSQL("select from Commodity where name like '" + partial.toUpperCase() + "%'")).execute()) {
+            String whereClause = StringUtils.isBlank(partial) ? "" : " where name like '" + partial.toUpperCase() + "%'"; 
+            
+            for (Vertex comodityVertex : (Iterable<Vertex>) graph.command(new OCommandSQL("select from Commodity" + whereClause)).execute()) {
                 Commodity commodity = new Commodity(comodityVertex.getProperty("name"));
                 commodity.setGroup(getCommodityGroup(commodity.getName()));  
                 out.add(commodity);

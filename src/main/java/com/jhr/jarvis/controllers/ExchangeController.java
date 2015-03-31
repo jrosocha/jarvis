@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 import com.jhr.jarvis.model.BestExchange;
+import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
+import com.jhr.jarvis.service.CommodityService;
 import com.jhr.jarvis.service.ShipService;
 import com.jhr.jarvis.service.StarSystemService;
 import com.jhr.jarvis.service.StationService;
@@ -56,6 +59,18 @@ public class ExchangeController {
     @FXML
     private ComboBox<String> toStationComboBox;
     
+//    @FXML
+//    private ComboBox<String> commodityComboBox;
+   
+    @FXML
+    private ComboBox<Integer> numberOfTradesComboBox;
+    
+    @FXML
+    private ComboBox<Integer> numberOfJumpsBetweenStationsComboBox;
+    
+    @FXML
+    private Button searchButton;
+    
     @Autowired
     private TradeService tradeService;
     
@@ -68,12 +83,20 @@ public class ExchangeController {
     @Autowired
     private StationService stationService;
     
-    /**
-     * Houses the systems list
-     */
+    @Autowired
+    private CommodityService commodityService;
+    
     private ObservableList<String> allSystems = FXCollections.observableArrayList();
     
+//    private ObservableList<String> allCommodities = FXCollections.observableArrayList();
+    
+    private ObservableList<String> fromStation = FXCollections.observableArrayList();
+    
     private ObservableList<String> toStation = FXCollections.observableArrayList();
+    
+    private ObservableList<Integer> numberOfTradesOptions = FXCollections.observableArrayList(0, 1, 2, 3);
+    
+    private ObservableList<Integer> numberOfJumpsBetweenStationsOptions = FXCollections.observableArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10);
     
     /**
      * Houses the results of an exchange search
@@ -93,26 +116,134 @@ public class ExchangeController {
             if (!newValue) {
                 String selectedSystem = FxUtil.getComboBoxValue(fromSystemComboBox);
                 List<String> stations = getStationsBasedOnSystemSelection(selectedSystem);
+                fromStation.clear();
+                fromStation.addAll(stations);
+            }
+        });
+        
+        fromStationComboBox.setItems(fromStation);
+        FxUtil.autoCompleteComboBox(fromStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        toSystemComboBox.setItems(allSystems);
+        FxUtil.autoCompleteComboBox(toSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        toSystemComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                String selectedSystem = FxUtil.getComboBoxValue(toSystemComboBox);
+                List<String> stations = getStationsBasedOnSystemSelection(selectedSystem);
                 toStation.clear();
                 toStation.addAll(stations);
             }
         });
         
-        fromStationComboBox.setItems(toStation);
-        FxUtil.autoCompleteComboBox(fromStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        toStationComboBox.setItems(toStation);
+        FxUtil.autoCompleteComboBox(toStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
-        toSystemComboBox.setItems(allSystems);
-        FxUtil.autoCompleteComboBox(toSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+//        commodityComboBox.setItems(allCommodities);
+//        FxUtil.autoCompleteComboBox(commodityComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        numberOfTradesComboBox.setItems(numberOfTradesOptions);
+        FxUtil.autoCompleteComboBox(numberOfTradesComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        numberOfJumpsBetweenStationsComboBox.setItems(numberOfJumpsBetweenStationsOptions);
+        FxUtil.autoCompleteComboBox(numberOfJumpsBetweenStationsComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        searchButton.setOnAction((event) -> {
+            search();
+        });
         
         populateSystems();
+        //populateCommodities();
+        List<String> allStations = getStationsBasedOnSystemSelection(null);
+        fromStation.clear();
+        fromStation.addAll(allStations);
         toStation.clear();
-        toStation.addAll(getStationsBasedOnSystemSelection(null));
+        toStation.addAll(allStations);
+        
     }
     
-    public void x() {
+    public void search() {
         
-        List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
-        List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb("CAREY STATION", null, shipService.getActiveShip(), 10, 2, endOfRunTrades);
+        exchangesVbox.getChildren().clear();
+        
+        String fromSystem = FxUtil.getComboBoxValue(fromSystemComboBox);
+        String fromStation = FxUtil.getComboBoxValue(fromStationComboBox);
+        String toSystem = FxUtil.getComboBoxValue(toSystemComboBox);
+        String toStation = FxUtil.getComboBoxValue(toStationComboBox);
+        Integer numberOfTrades = FxUtil.getComboBoxValue(numberOfTradesComboBox);
+        Integer numberOfJumpsBetweenStations = FxUtil.getComboBoxValue(numberOfJumpsBetweenStationsComboBox);
+        
+        // crazy state machine to determine type of search. 
+        
+        if (StringUtils.isNotBlank(fromStation)
+                && numberOfTrades != null && numberOfTrades > 1
+                && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
+                && StringUtils.isBlank(toSystem)
+                && StringUtils.isBlank(toStation)) {
+            
+            List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
+            List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
+            multistopTrade(endOfRunTrades);
+        } else if (StringUtils.isNotBlank(fromStation)
+                && numberOfTrades != null && numberOfTrades == 1
+                && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
+                && StringUtils.isBlank(toSystem)
+                && StringUtils.isBlank(toStation)) {
+            
+            List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
+            List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
+            singleStopTrade(sortedBestExchangeList);
+            
+        }
+        
+    }
+    
+    public void singleStopTrade(List<BestExchange> sortedBestExchangeList) {
+ 
+            ObservableList<BestExchange> exchanges = FXCollections.observableArrayList();            
+            exchanges.addAll(sortedBestExchangeList);
+            
+            TableView<BestExchange> exchangeTable = new TableView<>();
+            exchangeTable.setMaxWidth(800);
+            exchangeTable.setPrefWidth(800);
+            
+            TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
+            stopNumber.setPrefWidth(25);
+            exchangeTable.getColumns().add(stopNumber);
+            stopNumber.setCellValueFactory(column -> new SimpleIntegerProperty(column.getTableView().getItems().indexOf(column.getValue()) + 1).asObject());
+            
+            TableColumn<BestExchange,String> from = new TableColumn<>("From");
+            from.setPrefWidth(200);
+            exchangeTable.getColumns().add(from);
+            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            
+            
+            TableColumn<BestExchange,String> to = new TableColumn<>("To");
+            from.setPrefWidth(200);
+            exchangeTable.getColumns().add(to);
+            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            
+            TableColumn<BestExchange,String> commodity = new TableColumn<>("Commodity");
+            commodity.setPrefWidth(125);
+            exchangeTable.getColumns().add(commodity);
+            commodity.setCellValueFactory(column ->column.getValue().getCommodityProperty());
+            
+            TableColumn<BestExchange,Integer> unitPrice = new TableColumn<>("Unit +");
+            unitPrice.setPrefWidth(50);
+            exchangeTable.getColumns().add(unitPrice);
+            unitPrice.setCellValueFactory(column ->column.getValue().getPerUnitProfitProperty().asObject());
+            
+            TableColumn<BestExchange,Integer> routeProfit = new TableColumn<>("Route +");
+            routeProfit.setPrefWidth(50);
+            exchangeTable.getColumns().add(routeProfit);
+            routeProfit.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getRoutePerProfitUnit() * column.getValue().getQuantity()).asObject());
+            
+            exchangeTable.setItems(exchanges);
+            
+            exchangesVbox.getChildren().add(exchangeTable);
+
+    }  
+    
+    public void multistopTrade(List<BestExchange> endOfRunTrades) {
         
         List<BestExchange> endOfRunTradesSorted = endOfRunTrades.parallelStream().sorted((a,b)->{ return Integer.compare(a.getRoutePerProfitUnit(), b.getRoutePerProfitUnit()); }).collect(Collectors.toList());
         endOfRunTradesSorted = Lists.reverse(endOfRunTradesSorted);
@@ -184,6 +315,13 @@ public class ExchangeController {
         
         return stationsAsStrings;
     }
+    
+//    public void populateCommodities() {
+//        List<Commodity> commodities = commodityService.findCommoditiesOrientDb(null);
+//        List<String> commoditiesAsStrings = commodities.parallelStream().map(Commodity::getName).sorted().collect(Collectors.toList());
+//        allCommodities.clear();
+//        allCommodities.addAll(commoditiesAsStrings);
+//    }
 
     
 }
