@@ -407,8 +407,7 @@ public class TradeService {
         return out;
     }
     
-    public String stationToStation(Station fromStation, Station toStation, Ship ship) {
-        Date start = new Date();
+    public List<BestExchange> stationToStation(Station fromStation, Station toStation, Ship ship) {
 
         OrientGraph graph = null;
         Map<String, Commodity> buyCommodities = new HashMap<>();
@@ -431,45 +430,30 @@ public class TradeService {
             graph.rollback();
         }
         
-        if (sellCommodities.size() == 0) {
-            return "No exchange available between provided stations";
-        }
-        
-        List<Map<String, Object>> tableData = new ArrayList<>();
+        List<BestExchange> exchanges = new ArrayList<>();
         for (String key: sellCommodities.keySet()){
-            Map<String, Object> row = new HashMap<>();
-            row.put("COMMODITY", key);
-            row.put("BUY @", buyCommodities.get(key).getBuyPrice());
-            row.put("SUPPLY", buyCommodities.get(key).getSupply());
-            row.put("SELL @", sellCommodities.get(key).getSellPrice());
-            row.put("SUPPLY", sellCommodities.get(key).getDemand());
+            
+            BestExchange e = new BestExchange();
+            e.setBuyPrice(buyCommodities.get(key).getBuyPrice());
+            e.setBuyStationName(fromStation.getName());
+            e.setBuySystemName(fromStation.getSystem());
+            e.setSupply(buyCommodities.get(key).getSupply());
+            e.setCommodity(key);
+            
             int unitProfit = sellCommodities.get(key).getSellPrice() - buyCommodities.get(key).getBuyPrice(); 
-            row.put("UNIT PROFIT", unitProfit);
-            row.put("CARGO PROFIT", unitProfit * ship.getCargoSpace());
-            tableData.add(row);
+            e.setPerUnitProfit(unitProfit);
+            e.setQuantity(ship.getCargoSpace());
+            e.setRoutePerProfitUnit(unitProfit);
+            e.setSellPrice(sellCommodities.get(key).getSellPrice());
+            e.setSellStationName(toStation.getName());
+            e.setSellSystemName(toStation.getSystem());
+            e.setDemand(sellCommodities.get(key).getDemand());
+            
+            exchanges.add(e);
+            
         }
         
-        tableData = tableData.parallelStream().sorted((row1,row2)->{
-            int p1 = (int) row1.get("UNIT PROFIT");
-            int p2 = (int) row2.get("UNIT PROFIT");
-            return Integer.compare(p1, p2);
-        }).collect(Collectors.toList());
-        Collections.reverse(tableData);
-        
-        String out = "";
-        
-//        String out = OsUtils.LINE_SEPARATOR;
-//        out += "From System: " + fromStation.getSystem() + OsUtils.LINE_SEPARATOR;
-//        out += "From Station: " + fromStation.getName()  + OsUtils.LINE_SEPARATOR;
-//        out += "To System: " + toStation.getSystem()+ OsUtils.LINE_SEPARATOR;
-//        out += "To Station: " + toStation.getName() + OsUtils.LINE_SEPARATOR;
-//        out += "Cargo Capacity: " + ship.getCargoSpace() + OsUtils.LINE_SEPARATOR;
-//        out += sellCommodities.size() + " Commodities to exchange between stations." + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, 
-//                ImmutableList.of("COMMODITY", "BUY @", "SELL @", "UNIT PROFIT", "CARGO PROFIT"));
-//        
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds.";
-        return out;
+        return exchanges;
     }
     
     /**

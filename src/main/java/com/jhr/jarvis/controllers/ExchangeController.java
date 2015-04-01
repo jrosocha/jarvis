@@ -1,9 +1,11 @@
 package com.jhr.jarvis.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,18 +14,24 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationListener;
 
 import com.google.common.collect.Lists;
+import com.jhr.jarvis.event.ExchangeCompletedEvent;
+import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
-import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.CommodityService;
@@ -39,7 +47,7 @@ import com.jhr.jarvis.util.FxUtil;
  * @author jrosocha
  *
  */
-public class ExchangeController {
+public class ExchangeController implements ApplicationListener<ExchangeCompletedEvent>, ApplicationEventPublisherAware {
 
     @FXML
     private Node view;
@@ -71,6 +79,9 @@ public class ExchangeController {
     @FXML
     private Button searchButton;
     
+    @FXML
+    private ProgressIndicator searchProgress;
+    
     @Autowired
     private TradeService tradeService;
     
@@ -85,6 +96,8 @@ public class ExchangeController {
     
     @Autowired
     private CommodityService commodityService;
+    
+   
     
     private ObservableList<String> allSystems = FXCollections.observableArrayList();
     
@@ -102,6 +115,8 @@ public class ExchangeController {
      * Houses the results of an exchange search
      */
     private ObservableList<BestExchange> commodities = FXCollections.observableArrayList();       
+    
+    private ApplicationEventPublisher eventPublisher;
     
     public Node getView() {
         return view;
@@ -147,7 +162,9 @@ public class ExchangeController {
         numberOfJumpsBetweenStationsComboBox.setItems(numberOfJumpsBetweenStationsOptions);
         FxUtil.autoCompleteComboBox(numberOfJumpsBetweenStationsComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
+        searchProgress.setVisible(false);
         searchButton.setOnAction((event) -> {
+            searchProgress.setVisible(true);
             search();
         });
         
@@ -179,22 +196,50 @@ public class ExchangeController {
                 && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
                 && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)) {
+            /*
+             * Multiple stop trade
+             */
+            Runnable task = () -> { 
+                List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
+                tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
+                eventPublisher.publishEvent(new ExchangeCompletedEvent(endOfRunTrades, false));
+            };
+            new Thread(task).start();
             
-            List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
-            List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
-            multistopTrade(endOfRunTrades);
         } else if (StringUtils.isNotBlank(fromStation)
                 && numberOfTrades != null && numberOfTrades == 1
                 && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
                 && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)) {
+            /*
+             * Single stop trade
+             */
+            Runnable task = () -> { 
+                List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
+                List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
+                eventPublisher.publishEvent(new ExchangeCompletedEvent(sortedBestExchangeList, true));
+            };
+            new Thread(task).start();
             
-            List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
-            List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
-            singleStopTrade(sortedBestExchangeList);
-            
+        } else if (StringUtils.isNotBlank(toStation) 
+                && StringUtils.isNotBlank(fromStation)) {
+            /*
+             * Station to Station Trade 
+             */
+            Runnable task = () -> { 
+                List<BestExchange> bestExchangeList = new ArrayList<>();
+                try {
+                    bestExchangeList = tradeService.stationToStation(stationService.findExactStationOrientDb(fromStation), stationService.findExactStationOrientDb(toStation), shipService.getActiveShip());
+                } catch (StationNotFoundException e) {
+                    e.printStackTrace();
+                }
+                List<BestExchange> sortedBestExchangeList =  bestExchangeList.parallelStream().sorted((a,b)->{ return Integer.compare(a.getPerUnitProfit(), b.getPerUnitProfit()); }).collect(Collectors.toList());
+                sortedBestExchangeList = Lists.reverse(sortedBestExchangeList);
+                eventPublisher.publishEvent(new ExchangeCompletedEvent(sortedBestExchangeList, true));
+            };
+            new Thread(task).start();
         }
-        
+
     }
     
     public void singleStopTrade(List<BestExchange> sortedBestExchangeList) {
@@ -205,6 +250,8 @@ public class ExchangeController {
             TableView<BestExchange> exchangeTable = new TableView<>();
             exchangeTable.setMaxWidth(800);
             exchangeTable.setPrefWidth(800);
+            exchangeTable.setPrefHeight(800);
+            exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
             stopNumber.setPrefWidth(25);
@@ -232,14 +279,20 @@ public class ExchangeController {
             exchangeTable.getColumns().add(unitPrice);
             unitPrice.setCellValueFactory(column ->column.getValue().getPerUnitProfitProperty().asObject());
             
-            TableColumn<BestExchange,Integer> routeProfit = new TableColumn<>("Route +");
+            TableColumn<BestExchange,Integer> routeProfit = new TableColumn<>("Gross +");
             routeProfit.setPrefWidth(50);
             exchangeTable.getColumns().add(routeProfit);
             routeProfit.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getRoutePerProfitUnit() * column.getValue().getQuantity()).asObject());
             
+            TableColumn<BestExchange,Integer> haulCost = new TableColumn<>("Risk $");
+            haulCost.setPrefWidth(50);
+            exchangeTable.getColumns().add(haulCost);
+            haulCost.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getBuyPrice() * column.getValue().getQuantity()).asObject());
+            
             exchangeTable.setItems(exchanges);
             
             exchangesVbox.getChildren().add(exchangeTable);
+            searchProgress.setVisible(false);
 
     }  
     
@@ -258,6 +311,8 @@ public class ExchangeController {
             TableView<BestExchange> exchangeTable = new TableView<>();
             exchangeTable.setMaxWidth(800);
             exchangeTable.setPrefWidth(800);
+            exchangeTable.setPrefHeight(800);
+            exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("Leg");
             stopNumber.setPrefWidth(25);
@@ -285,14 +340,20 @@ public class ExchangeController {
             exchangeTable.getColumns().add(unitPrice);
             unitPrice.setCellValueFactory(column ->column.getValue().getPerUnitProfitProperty().asObject());
             
-            TableColumn<BestExchange,Integer> routeProfit = new TableColumn<>("Route +");
+            TableColumn<BestExchange,Integer> routeProfit = new TableColumn<>("Gross +");
             routeProfit.setPrefWidth(50);
             exchangeTable.getColumns().add(routeProfit);
             routeProfit.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getRoutePerProfitUnit() * column.getValue().getQuantity()).asObject());
             
+            TableColumn<BestExchange,Integer> haulCost = new TableColumn<>("Risk $");
+            haulCost.setPrefWidth(50);
+            exchangeTable.getColumns().add(haulCost);
+            haulCost.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getBuyPrice() * column.getValue().getQuantity()).asObject());
+            
             exchangeTable.setItems(exchanges);
             
             exchangesVbox.getChildren().add(exchangeTable);
+            searchProgress.setVisible(false);
         }
     }    
     
@@ -315,13 +376,20 @@ public class ExchangeController {
         
         return stationsAsStrings;
     }
-    
-//    public void populateCommodities() {
-//        List<Commodity> commodities = commodityService.findCommoditiesOrientDb(null);
-//        List<String> commoditiesAsStrings = commodities.parallelStream().map(Commodity::getName).sorted().collect(Collectors.toList());
-//        allCommodities.clear();
-//        allCommodities.addAll(commoditiesAsStrings);
-//    }
 
+    @Override
+    public void onApplicationEvent(ExchangeCompletedEvent event) {
+        // TODO Auto-generated method stub
+        if (event.getSingleStop()) {
+           Platform.runLater(()->singleStopTrade(event.getExchanges()));
+        } else {
+           Platform.runLater(()->multistopTrade(event.getExchanges()));
+        }
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.eventPublisher = applicationEventPublisher;
+    }
     
 }

@@ -23,7 +23,8 @@
             <ComboBox fx:id="toStationComboBox" layoutX="406.0" layoutY="66.0" prefWidth="150.0" />
             <ComboBox fx:id="numberOfTradesComboBox" layoutX="283.0" layoutY="39.0" prefHeight="20.0" prefWidth="35.0" />
             <ComboBox fx:id="numberOfJumpsBetweenStationsComboBox" layoutX="283.0" layoutY="67.0" prefHeight="20.0" prefWidth="35.0" />
-            <Button fx:id="searchButton" layoutX="657.0" layoutY="39.0" mnemonicParsing="false" text="Search" />
+            <Button fx:id="searchButton" alignment="CENTER" contentDisplay="TEXT_ONLY" graphicTextGap="0.0" layoutX="606.0" layoutY="39.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="50.0" text="Search" />
+            <ProgressIndicator fx:id="searchProgress" layoutX="663.0" layoutY="43.0" prefHeight="12.0" prefWidth="33.0" />
          </children></AnchorPane>
     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="0.0" minWidth="0.0" prefHeight="492.0" prefWidth="798.0">
          <children>
