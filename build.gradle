@@ -1,12 +1,25 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
+apply plugin:'application'
 
 group = 'jhr.jarvis'
 version = '0.0.1-SNAPSHOT'
 description = 'JarvisFx'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+mainClassName = "com.jhr.jarvis.Jarvis"
+applicationDefaultJvmArgs = ["-Xmx2G"]
+defaultTasks 'installApp'
+
+task copyData(type: Copy) {
+  from 'data'
+  into 'build/data'
+}
+
+applicationDistribution.from(copyData) {
+    into "data"
+}
 
 repositories {
 	mavenCentral()

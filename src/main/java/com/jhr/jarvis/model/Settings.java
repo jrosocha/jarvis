@@ -64,6 +64,13 @@ public class Settings {
         loaded = true;
     }
     
+    public void saveSettings() throws FileNotFoundException, IOException {
+        
+        File settings = new File("../data/jarvis-config.json");
+        System.out.println("Saving to " + settings.getAbsolutePath());
+        objectMapper.writeValue(settings, this);
+    }
+    
     private void load(Settings s) {
         BeanUtils.copyProperties(s, this);
     }

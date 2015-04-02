@@ -19,9 +19,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jhr.jarvis.controllers.CommandsController;
+import com.jhr.jarvis.controllers.ConsoleController;
 import com.jhr.jarvis.controllers.CurrentSystemController;
 import com.jhr.jarvis.controllers.ExchangeController;
 import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
 
@@ -99,6 +102,39 @@ class JarvisConfig {
 
         try {
             return (ExchangeController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Exchange.fxml");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Bean
+    public CommandsController getCommandsController() {
+
+        try {
+            return (CommandsController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Commands.fxml");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Bean
+    public ConsoleController getConsoleController() {
+
+        try {
+            return (ConsoleController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Console.fxml");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Bean
+    public SettingsController getSettingsController() {
+
+        try {
+            return (SettingsController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Settings.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;

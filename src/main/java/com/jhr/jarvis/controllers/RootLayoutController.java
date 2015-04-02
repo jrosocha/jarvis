@@ -28,6 +28,9 @@ public class RootLayoutController {
     private Pane shipPane;
     
     @FXML
+    private Pane commandsPane;
+    
+    @FXML
     private TabPane center;
     
     public Node getView() {
@@ -56,6 +59,14 @@ public class RootLayoutController {
 
     public void setShipPane(Pane shipPane) {
         this.shipPane = shipPane;
+    }
+
+    public Pane getCommandsPane() {
+        return commandsPane;
+    }
+
+    public void setCommandsPane(Pane commandsPane) {
+        this.commandsPane = commandsPane;
     }
 
 }

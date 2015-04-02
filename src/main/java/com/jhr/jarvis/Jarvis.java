@@ -9,9 +9,12 @@ import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
+import com.jhr.jarvis.controllers.CommandsController;
+import com.jhr.jarvis.controllers.ConsoleController;
 import com.jhr.jarvis.controllers.CurrentSystemController;
 import com.jhr.jarvis.controllers.ExchangeController;
 import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
 
@@ -26,7 +29,6 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     RootLayoutController rootLayoutController;
     
     private BorderPane rootLayout;    
-    //private VBox left;
     private TabPane center;
     
 	@Override
@@ -46,7 +48,6 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
 
 	    rootLayoutController = this.getApplicationContext().getBean(RootLayoutController.class);
 	    rootLayout = (BorderPane) rootLayoutController.getView();
-	    //left = rootLayoutController.getLeft();
 	    center = rootLayoutController.getCenter();
 	    
         Scene scene = new Scene(rootLayout);
@@ -56,14 +57,16 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         showCurrentSystem();
         showStationOverview();
         showShip();
+        showCommands();
         showExchange();
+        showConsole();
+        showSettings();
     }
 	
     public void showCurrentSystem() {
 
         CurrentSystemController controller = this.getApplicationContext().getBean(CurrentSystemController.class);
         rootLayoutController.getCurrentSystemPane().getChildren().add(controller.getView());
-        //left.getChildren().add(controller.getView());
     }
     
     public void showStationOverview() {
@@ -80,18 +83,43 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
 
         ShipController controller = this.getApplicationContext().getBean(ShipController.class);
         rootLayoutController.getShipPane().getChildren().add(controller.getView());
-        //left.getChildren().add(controller.getView());
+    }
+    
+    public void showCommands() {
+
+        CommandsController controller = this.getApplicationContext().getBean(CommandsController.class);
+        rootLayoutController.getCommandsPane().getChildren().add(controller.getView());
     }
     
     public void showExchange() {
 
         ExchangeController controller = this.getApplicationContext().getBean(ExchangeController.class);
-        Tab exchnagesTab = new Tab();
-        exchnagesTab.setText("Exchange");
-        exchnagesTab.setContent(controller.getView());
-        center.getTabs().add(exchnagesTab);
+        Tab exchangesTab = new Tab();
+        exchangesTab.setText("Exchange");
+        exchangesTab.setContent(controller.getView());
+        center.getTabs().add(exchangesTab);
         //controller.x();
         controller.populateSystems();
+    }
+    
+    public void showConsole() {
+
+        ConsoleController controller = this.getApplicationContext().getBean(ConsoleController.class);
+        
+        Tab consoleTab = new Tab();
+        consoleTab.setText("Console");
+        consoleTab.setContent(controller.getView());
+        center.getTabs().add(consoleTab);
+    }
+    
+    public void showSettings() {
+
+        SettingsController controller = this.getApplicationContext().getBean(SettingsController.class);
+        
+        Tab settingsTab = new Tab();
+        settingsTab.setText("Settings");
+        settingsTab.setContent(controller.getView());
+        center.getTabs().add(settingsTab);
     }
 
 }

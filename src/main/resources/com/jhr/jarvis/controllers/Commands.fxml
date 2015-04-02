@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<Pane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="200.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="200.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CommandsController">
+   <children>
+      <Button fx:id="ocrButton" layoutX="40.0" layoutY="14.0" mnemonicParsing="false" text="Import From Elite OCR " />
+   </children>
+</Pane>

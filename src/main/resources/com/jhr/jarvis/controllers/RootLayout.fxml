@@ -7,27 +7,6 @@
 <?import javafx.scene.layout.BorderPane?>
 
 <BorderPane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="1000.0" minWidth="1000.0" prefWidth="1000.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.RootLayoutController">
-   <top>
-      <MenuBar BorderPane.alignment="CENTER">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-   </top>
    <center>
       <TabPane fx:id="center" maxHeight="1.7976931348623157E308" maxWidth="800.0" prefHeight="800.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
    </center>
@@ -43,8 +22,9 @@
                   </Label>
                </children>
             </Pane>
-            <Pane fx:id="currentSystemPane" maxHeight="400.0" maxWidth="400.0" prefHeight="400.0" prefWidth="200.0" />
-            <Pane fx:id="shipPane" maxHeight="150.0" maxWidth="200.0" prefHeight="150.0" prefWidth="200.0" />
+            <Pane fx:id="currentSystemPane" maxHeight="1.7976931348623157E308" maxWidth="200.0" prefWidth="200.0" />
+            <Pane fx:id="shipPane" maxHeight="1.7976931348623157E308" maxWidth="200.0" prefWidth="200.0" />
+            <Pane fx:id="commandsPane" maxHeight="1.7976931348623157E308" maxWidth="200.0" prefWidth="200.0" />
          </children></VBox>
    </left>
 </BorderPane>
