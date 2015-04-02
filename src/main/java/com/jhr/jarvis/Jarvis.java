@@ -1,20 +1,12 @@
 package com.jhr.jarvis;
 
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Import;
 
 import com.jhr.jarvis.controllers.CurrentSystemController;
@@ -30,9 +22,11 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     
     @Autowired
     private SpringFxmlLoader loader;
-        
+    
+    RootLayoutController rootLayoutController;
+    
     private BorderPane rootLayout;    
-    private VBox left;
+    //private VBox left;
     private TabPane center;
     
 	@Override
@@ -50,10 +44,10 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
 
 	public void initRootLayout() {
 
-	    RootLayoutController controller = this.getApplicationContext().getBean(RootLayoutController.class);
-	    rootLayout = (BorderPane) controller.getView();
-	    left = controller.getLeft();
-	    center = controller.getCenter();
+	    rootLayoutController = this.getApplicationContext().getBean(RootLayoutController.class);
+	    rootLayout = (BorderPane) rootLayoutController.getView();
+	    //left = rootLayoutController.getLeft();
+	    center = rootLayoutController.getCenter();
 	    
         Scene scene = new Scene(rootLayout);
         primaryStage.setScene(scene);
@@ -68,7 +62,8 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     public void showCurrentSystem() {
 
         CurrentSystemController controller = this.getApplicationContext().getBean(CurrentSystemController.class);
-        left.getChildren().add(controller.getView());
+        rootLayoutController.getCurrentSystemPane().getChildren().add(controller.getView());
+        //left.getChildren().add(controller.getView());
     }
     
     public void showStationOverview() {
@@ -84,7 +79,8 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     public void showShip() {
 
         ShipController controller = this.getApplicationContext().getBean(ShipController.class);
-        left.getChildren().add(controller.getView());
+        rootLayoutController.getShipPane().getChildren().add(controller.getView());
+        //left.getChildren().add(controller.getView());
     }
     
     public void showExchange() {

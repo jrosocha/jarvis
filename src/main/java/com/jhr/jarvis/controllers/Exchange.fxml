@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<SplitPane fx:id="view" dividerPositions="0.1605351170568562" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="600.0" prefWidth="800.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ExchangeController">
-  <items>
-    <AnchorPane minHeight="-Infinity" minWidth="800.0" prefHeight="93.0" prefWidth="800.0">
+
+<VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ExchangeController">
+   <children>
+      <Pane maxHeight="75.0" maxWidth="800.0" minHeight="75.0" minWidth="800.0" prefHeight="75.0" prefWidth="800.0">
          <children>
-            <Label layoutX="6.0" layoutY="71.0" text="Station" />
-            <Label layoutX="6.0" layoutY="43.0" text="System" />
-            <Label alignment="CENTER" layoutX="7.0" layoutY="14.0" prefHeight="16.0" prefWidth="201.0" text="Origin Of Exchange" />
-            <Label layoutX="221.0" layoutY="43.0" text="# of Trades" />
-            <Label layoutX="221.0" layoutY="71.0" text="# of Jumps" />
-            <Label alignment="CENTER" layoutX="224.0" layoutY="14.0" prefHeight="16.0" prefWidth="117.0" text="Limit Destination" />
-            <Label layoutX="350.0" layoutY="71.0" text="Station" />
-            <Label layoutX="349.0" layoutY="41.0" text="System" />
-            <Label alignment="CENTER" layoutX="355.0" layoutY="14.0" prefHeight="16.0" prefWidth="201.0" text="Set Exchange Destination" />
-            <ComboBox fx:id="fromSystemComboBox" layoutX="61.0" layoutY="38.0" prefWidth="150.0" />
-            <ComboBox fx:id="fromStationComboBox" layoutX="61.0" layoutY="66.0" prefWidth="150.0" />
-            <ComboBox fx:id="toSystemComboBox" layoutX="406.0" layoutY="38.0" prefWidth="150.0" />
-            <ComboBox fx:id="toStationComboBox" layoutX="406.0" layoutY="66.0" prefWidth="150.0" />
-            <ComboBox fx:id="numberOfTradesComboBox" layoutX="283.0" layoutY="39.0" prefHeight="20.0" prefWidth="35.0" />
-            <ComboBox fx:id="numberOfJumpsBetweenStationsComboBox" layoutX="283.0" layoutY="67.0" prefHeight="20.0" prefWidth="35.0" />
-            <Button fx:id="searchButton" alignment="CENTER" contentDisplay="TEXT_ONLY" graphicTextGap="0.0" layoutX="606.0" layoutY="39.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="50.0" text="Search" />
-            <ProgressIndicator fx:id="searchProgress" layoutX="663.0" layoutY="43.0" prefHeight="12.0" prefWidth="33.0" />
-         </children></AnchorPane>
-    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="0.0" minWidth="0.0" prefHeight="492.0" prefWidth="798.0">
-         <children>
-            <VBox fx:id="exchangesVbox" maxHeight="1.7976931348623157E308" prefHeight="600.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-         </children></AnchorPane>
-  </items>
-</SplitPane>
+            <Label layoutX="6.0" layoutY="48.0" text="Station" />
+            <Label layoutX="6.0" layoutY="25.0" text="System" />
+            <Label alignment="CENTER" layoutX="7.0" layoutY="2.0" prefHeight="16.0" prefWidth="201.0" text="Origin Of Exchange" />
+            <Label layoutX="221.0" layoutY="25.0" text="# of Trades" />
+            <Label layoutX="221.0" layoutY="48.0" text="# of Jumps" />
+            <Label alignment="CENTER" layoutX="224.0" layoutY="2.0" prefHeight="16.0" prefWidth="117.0" text="Limit Destination" />
+            <Label layoutX="350.0" layoutY="48.0" text="Station" />
+            <Label layoutX="349.0" layoutY="23.0" text="System" />
+            <Label alignment="CENTER" layoutX="355.0" layoutY="2.0" prefHeight="16.0" prefWidth="201.0" text="Set Exchange Destination" />
+            <ComboBox fx:id="fromSystemComboBox" layoutX="61.0" layoutY="20.0" prefWidth="150.0" />
+            <ComboBox fx:id="fromStationComboBox" layoutX="61.0" layoutY="43.0" prefWidth="150.0" />
+            <ComboBox fx:id="toSystemComboBox" layoutX="406.0" layoutY="20.0" prefWidth="150.0" />
+            <ComboBox fx:id="toStationComboBox" layoutX="406.0" layoutY="43.0" prefWidth="150.0" />
+            <ComboBox fx:id="numberOfTradesComboBox" layoutX="283.0" layoutY="21.0" prefHeight="20.0" prefWidth="35.0" />
+            <ComboBox fx:id="numberOfJumpsBetweenStationsComboBox" layoutX="283.0" layoutY="44.0" prefHeight="20.0" prefWidth="35.0" />
+            <Button fx:id="searchButton" alignment="CENTER" contentDisplay="TEXT_ONLY" graphicTextGap="0.0" layoutX="736.0" layoutY="43.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="50.0" style="-fx-background-color: lightgreen;" text="Search" />
+            <ProgressIndicator fx:id="searchProgress" layoutX="711.0" layoutY="47.0" prefHeight="12.0" prefWidth="33.0" />
+            <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="TEXT_ONLY" graphicTextGap="0.0" layoutX="636.0" layoutY="43.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="50.0" text="Cancel" />
+         </children>
+      </Pane>
+      <VBox fx:id="exchangesVbox" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="725.0" minWidth="800.0" prefWidth="800.0" />
+   </children>
+</VBox>

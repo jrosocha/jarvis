@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -21,6 +22,12 @@ public class RootLayoutController {
     private VBox left;
     
     @FXML
+    private Pane currentSystemPane;
+    
+    @FXML
+    private Pane shipPane;
+    
+    @FXML
     private TabPane center;
     
     public Node getView() {
@@ -33,6 +40,22 @@ public class RootLayoutController {
 
     public TabPane getCenter() {
         return center;
+    }
+
+    public Pane getCurrentSystemPane() {
+        return currentSystemPane;
+    }
+
+    public void setCurrentSystemPane(Pane currentSystemPane) {
+        this.currentSystemPane = currentSystemPane;
+    }
+
+    public Pane getShipPane() {
+        return shipPane;
+    }
+
+    public void setShipPane(Pane shipPane) {
+        this.shipPane = shipPane;
     }
 
 }

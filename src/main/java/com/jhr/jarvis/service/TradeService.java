@@ -294,11 +294,9 @@ public class TradeService {
         return out;
     }
     
-    public String bestBuyPriceOrientDb(String commodityName) {
-        Date start = new Date();
+    public List<BestExchange> bestBuyPriceOrientDb(String commodityName) {
         
-        List<Map<String, Object>> tableData = new ArrayList<>();
-        
+        List<BestExchange> out = new ArrayList<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
@@ -313,13 +311,17 @@ public class TradeService {
                 if (supply > 0 && buyPrice > 0) {
                     Vertex stationVertex = hasExchange.getVertex(Direction.OUT);
                     Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
-                    Map<String, Object> row = new HashMap<>();
-                    row.put("TO SYSTEM", systemVertex.getProperty("name"));
-                    row.put("TO STATION", stationVertex.getProperty("name"));
-                    row.put("UNIT PRICE", buyPrice);
-                    row.put("SUPPLY", supply);
-                    row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
-                    tableData.add(row);
+                    
+                    BestExchange exchange = new BestExchange();
+                    exchange.setBuyStationName(stationVertex.getProperty("name"));
+                    exchange.setBuySystemName(systemVertex.getProperty("name"));
+                    exchange.setCommodity(commodityName);
+                    exchange.setSupply(supply);
+                    exchange.setBuyPrice(buyPrice);
+                    
+                    out.add(exchange);
+                    
+                   // row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
                 }
             }
             graph.commit();
@@ -329,23 +331,10 @@ public class TradeService {
             }
         }
         
-        if (tableData.size() == 0) {
-            return "No sale available in data";
-        }
-        
-        tableData = tableData.parallelStream().sorted((row1,row2)->{
-            int p1 = (int) row1.get("UNIT PRICE");
-            int p2 = (int) row2.get("UNIT PRICE");
-            return Integer.compare(p1, p2);
+        out = out.parallelStream().sorted((row1,row2)->{
+            return Integer.compare(row1.getBuyPrice(), row2.getBuyPrice());
         }).collect(Collectors.toList());       
-        
-        String out = "";
-        
-//        String out = OsUtils.LINE_SEPARATOR;
-//        out += tableData.size() + " Best stations to buy " + commodityName + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, 
-//                ImmutableList.of("TO SYSTEM", "TO STATION", "UNIT PRICE", "SUPPLY", "DAYS OLD"));
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds.";
+
         return out;
     }
 

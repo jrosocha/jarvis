@@ -5,32 +5,24 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="view" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CurrentSystemController">
+<VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CurrentSystemController">
    <children>
-      <SplitPane dividerPositions="0.17336683417085427" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefWidth="200.0">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Label fx:id="systemNameLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="-8.0" layoutY="20.0" prefHeight="29.0" prefWidth="200.0" text="Unknown System" textAlignment="CENTER" />
-                  <Label alignment="CENTER" layoutX="-6.0" layoutY="3.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="10.0" />
-                     </font>
-                  </Label>
-               </children>
-            </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
-               <children>
-                  <TableView fx:id="stationTable" layoutX="-1.0" layoutY="44.0" prefHeight="300.0" prefWidth="200.0" style="-fx-font-size: 10;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <columns>
-                      <TableColumn fx:id="stationNameColumn" prefWidth="120.0" text="Station" />
-                      <TableColumn fx:id="stationBlackMarketFlagColumn" prefWidth="39.0" text="BM" />
-                        <TableColumn fx:id="stationDataAgeColumn" prefWidth="38.0" text="Age" />
-                    </columns>
-                  </TableView>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
+    <AnchorPane minHeight="50.0" minWidth="0.0" prefHeight="50.0" prefWidth="200.0">
+         <children>
+            <Label fx:id="systemNameLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="22.0" prefHeight="30.0" prefWidth="200.0" text="Unknown System" textAlignment="CENTER" />
+            <Label alignment="CENTER" layoutX="-4.0" layoutY="13.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="10.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <TableView fx:id="stationTable" prefHeight="300.0" prefWidth="200.0" style="-fx-font-size: 10;">
+        <columns>
+          <TableColumn fx:id="stationNameColumn" prefWidth="120.0" text="Station" />
+          <TableColumn fx:id="stationBlackMarketFlagColumn" prefWidth="39.0" text="BM" />
+            <TableColumn fx:id="stationDataAgeColumn" prefWidth="38.0" text="Age" />
+        </columns>
+      </TableView>
    </children>
-</AnchorPane>
+</VBox>

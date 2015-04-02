@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -52,7 +53,7 @@ public class StationOverviewController implements ApplicationListener<StationOve
     @FXML
     private Label stationNameLabel;
     @FXML
-    private Label blackMarketLabel;
+    private CheckBox blackMarketCheckBox;
     @FXML
     private Label ageOfDataLabel;
     
@@ -84,10 +85,9 @@ public class StationOverviewController implements ApplicationListener<StationOve
             commodities.clear();
             commodities.addAll(station.getAvailableCommodityExchanges());
             
-            
             systemNameLabel.setText(station.getSystem());
             stationNameLabel.setText(station.getName());
-            blackMarketLabel.setText(station.getBlackMarket().toString());
+            blackMarketCheckBox.setSelected(station.getBlackMarket() != null && station.getBlackMarket() ? true : false);
             ageOfDataLabel.setText(ChronoUnit.DAYS.between(station.getDate(), LocalDateTime.now()) + "");
         }
     }

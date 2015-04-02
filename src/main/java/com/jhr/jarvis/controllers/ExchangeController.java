@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
+import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.CommodityService;
@@ -67,8 +68,11 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
     @FXML
     private ComboBox<String> toStationComboBox;
     
-//    @FXML
-//    private ComboBox<String> commodityComboBox;
+    //@FXML
+    //private ComboBox<String> commodityComboBox;
+    
+    //@FXML
+    //private ComboBox<String> buyOrSellComboBox;
    
     @FXML
     private ComboBox<Integer> numberOfTradesComboBox;
@@ -78,6 +82,9 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
     
     @FXML
     private Button searchButton;
+    
+    @FXML
+    private Button cancelButton;
     
     @FXML
     private ProgressIndicator searchProgress;
@@ -94,14 +101,14 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
     @Autowired
     private StationService stationService;
     
-    @Autowired
-    private CommodityService commodityService;
+    //@Autowired
+    //private CommodityService commodityService;
     
    
     
     private ObservableList<String> allSystems = FXCollections.observableArrayList();
     
-//    private ObservableList<String> allCommodities = FXCollections.observableArrayList();
+    //private ObservableList<String> allCommodities = FXCollections.observableArrayList();
     
     private ObservableList<String> fromStation = FXCollections.observableArrayList();
     
@@ -110,11 +117,8 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
     private ObservableList<Integer> numberOfTradesOptions = FXCollections.observableArrayList(0, 1, 2, 3);
     
     private ObservableList<Integer> numberOfJumpsBetweenStationsOptions = FXCollections.observableArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10);
-    
-    /**
-     * Houses the results of an exchange search
-     */
-    private ObservableList<BestExchange> commodities = FXCollections.observableArrayList();       
+
+    //private ObservableList<BestExchange> commodities = FXCollections.observableArrayList();       
     
     private ApplicationEventPublisher eventPublisher;
     
@@ -130,6 +134,7 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
         fromSystemComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 String selectedSystem = FxUtil.getComboBoxValue(fromSystemComboBox);
+                System.out.println("getting stations for " + selectedSystem);
                 List<String> stations = getStationsBasedOnSystemSelection(selectedSystem);
                 fromStation.clear();
                 fromStation.addAll(stations);
@@ -153,20 +158,32 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
         toStationComboBox.setItems(toStation);
         FxUtil.autoCompleteComboBox(toStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
-//        commodityComboBox.setItems(allCommodities);
-//        FxUtil.autoCompleteComboBox(commodityComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        //commodityComboBox.setItems(allCommodities);
+        //FxUtil.autoCompleteComboBox(commodityComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         numberOfTradesComboBox.setItems(numberOfTradesOptions);
         FxUtil.autoCompleteComboBox(numberOfTradesComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        numberOfTradesComboBox.getSelectionModel().select(1);
         
         numberOfJumpsBetweenStationsComboBox.setItems(numberOfJumpsBetweenStationsOptions);
         FxUtil.autoCompleteComboBox(numberOfJumpsBetweenStationsComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        numberOfJumpsBetweenStationsComboBox.getSelectionModel().select(1);
         
         searchProgress.setVisible(false);
         searchButton.setOnAction((event) -> {
             searchProgress.setVisible(true);
             search();
         });
+        
+        cancelButton.setOnAction((event) -> {
+            initilizeExchangeForm();
+        });
+        
+        //ObservableList<String> options = FXCollections.observableArrayList();
+        //options.add("buy");
+        //options.add("sell");
+        //buyOrSellComboBox.setItems(options);
+        //FxUtil.autoCompleteComboBox(buyOrSellComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         populateSystems();
         //populateCommodities();
@@ -188,6 +205,8 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
         String toStation = FxUtil.getComboBoxValue(toStationComboBox);
         Integer numberOfTrades = FxUtil.getComboBoxValue(numberOfTradesComboBox);
         Integer numberOfJumpsBetweenStations = FxUtil.getComboBoxValue(numberOfJumpsBetweenStationsComboBox);
+        //String buyOrSell = FxUtil.getComboBoxValue(buyOrSellComboBox);
+        //String commodity = FxUtil.getComboBoxValue(commodityComboBox);
         
         // crazy state machine to determine type of search. 
         
@@ -250,7 +269,7 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             TableView<BestExchange> exchangeTable = new TableView<>();
             exchangeTable.setMaxWidth(800);
             exchangeTable.setPrefWidth(800);
-            exchangeTable.setPrefHeight(800);
+            exchangeTable.setPrefHeight(725);
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
@@ -311,7 +330,7 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             TableView<BestExchange> exchangeTable = new TableView<>();
             exchangeTable.setMaxWidth(800);
             exchangeTable.setPrefWidth(800);
-            exchangeTable.setPrefHeight(800);
+            exchangeTable.setPrefHeight(725);
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("Leg");
@@ -376,6 +395,13 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
         
         return stationsAsStrings;
     }
+    
+//  public void populateCommodities() {
+//      List<Commodity> commodities = commodityService.findCommoditiesOrientDb(null);
+//      List<String> commoditiesAsStrings = commodities.parallelStream().map(Commodity::getName).sorted().collect(Collectors.toList());
+//      allCommodities.clear();
+//      allCommodities.addAll(commoditiesAsStrings);
+//  }
 
     @Override
     public void onApplicationEvent(ExchangeCompletedEvent event) {
