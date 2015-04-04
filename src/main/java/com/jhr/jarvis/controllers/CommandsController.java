@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
@@ -18,7 +19,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 
+import com.jhr.jarvis.event.ConsoleEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
+import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.ShipModifiedEvent;
 import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.Settings;
@@ -32,7 +35,7 @@ import com.jhr.jarvis.service.ShipService;
  * @author jrosocha
  *
  */
-public class CommandsController implements ApplicationEventPublisherAware {
+public class CommandsController implements ApplicationListener<OcrCompletedEvent> {
     
     @FXML
     private Node view;
@@ -40,13 +43,15 @@ public class CommandsController implements ApplicationEventPublisherAware {
     @FXML
     private Button ocrButton;
     
+    @FXML
+    private ProgressIndicator ocrProgress;
+    
+    
     @Autowired
     private EliteOcrService eliteOcrService;
     
     @Autowired 
     private Settings settings;
-    
-    private ApplicationEventPublisher eventPublisher;
     
     public Node getView() {
         return view;
@@ -54,7 +59,10 @@ public class CommandsController implements ApplicationEventPublisherAware {
     
     @PostConstruct
     public void initController() {
+        ocrProgress.setVisible(false);
+        
         ocrButton.setOnAction((event) -> {
+            ocrProgress.setVisible(true);
             runOcrImport();
         });
     }
@@ -71,10 +79,11 @@ public class CommandsController implements ApplicationEventPublisherAware {
         new Thread(task).start();
         
     }
-    
+
     @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.eventPublisher = applicationEventPublisher;
+    public void onApplicationEvent(OcrCompletedEvent event) {
+        Platform.runLater(()->ocrProgress.setVisible(false));
     }
+    
 
 }

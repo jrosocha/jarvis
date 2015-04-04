@@ -5,7 +5,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
 <VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ExchangeController">
    <children>
       <Pane maxHeight="75.0" maxWidth="800.0" minHeight="75.0" minWidth="800.0" prefHeight="75.0" prefWidth="800.0">

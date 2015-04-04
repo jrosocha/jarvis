@@ -6,31 +6,46 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 
 import com.google.common.collect.Lists;
+import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
+import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
+import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.StarSystem;
@@ -48,7 +63,7 @@ import com.jhr.jarvis.util.FxUtil;
  * @author jrosocha
  *
  */
-public class ExchangeController implements ApplicationListener<ExchangeCompletedEvent>, ApplicationEventPublisherAware {
+public class ExchangeController implements ApplicationListener<ApplicationEvent>, ApplicationEventPublisherAware {
 
     @FXML
     private Node view;
@@ -266,11 +281,38 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             ObservableList<BestExchange> exchanges = FXCollections.observableArrayList();            
             exchanges.addAll(sortedBestExchangeList);
             
-            TableView<BestExchange> exchangeTable = new TableView<>();
-            exchangeTable.setMaxWidth(800);
-            exchangeTable.setPrefWidth(800);
-            exchangeTable.setPrefHeight(725);
+            Pane paddingPane = new Pane();           
+            TableView<BestExchange> exchangeTable = new TableView<>();           
+            exchangeTable.setLayoutX(5);
+            exchangeTable.setLayoutY(5);
+            exchangeTable.setMaxWidth(790);
+            exchangeTable.setPrefWidth(790);
+            exchangeTable.setPrefHeight(715);
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
+            paddingPane.getChildren().add(exchangeTable);
+            
+//            exchangeTable.setRowFactory(new Callback<TableView<BestExchange>, TableRow<BestExchange>>() {  
+//                @Override  
+//                public TableRow<BestExchange> call(TableView<BestExchange> tableView) {  
+//                    final TableRow<BestExchange> row = new TableRow<>();  
+//                    final ContextMenu contextMenu = new ContextMenu();  
+//                    final MenuItem menuItem = new MenuItem("Test");  
+//                    menuItem.setOnAction(new EventHandler<ActionEvent>() {  
+//                        @Override  
+//                        public void handle(ActionEvent event) {  
+//                            System.out.println("row something something " + row.getItem());
+//                        }  
+//                    });  
+//                    contextMenu.getItems().add(menuItem);  
+//                   // Set context menu on row, but use a binding to make it only show for non-empty rows:  
+//                    row.contextMenuProperty().bind(  
+//                            Bindings.when(row.emptyProperty())  
+//                            .then((ContextMenu)null)  
+//                            .otherwise(contextMenu)  
+//                    );  
+//                    return row ;  
+//                }  
+//            });  
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
             stopNumber.setPrefWidth(25);
@@ -281,7 +323,55 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
             from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
-            
+            from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem currentSystemMenuItem = new MenuItem("Make Current System");
+                                final MenuItem stationDetailsMenuItem = new MenuItem("Station Details");
+                                currentSystemMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
+                                            starSystem.setStations(stations);
+                                            eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                                        } catch (SystemNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                stationDetailsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            Station station = stationService.findExactStationOrientDb(bestExchange.getBuyStationName());
+                                            eventPublisher.publishEvent(new StationOverviewChangedEvent(station));     
+                                        } catch (StationNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(currentSystemMenuItem);
+                                cellMenu.getItems().add(stationDetailsMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
             
             TableColumn<BestExchange,String> to = new TableColumn<>("To");
             from.setPrefWidth(200);
@@ -310,7 +400,7 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             
             exchangeTable.setItems(exchanges);
             
-            exchangesVbox.getChildren().add(exchangeTable);
+            exchangesVbox.getChildren().add(paddingPane);
             searchProgress.setVisible(false);
 
     }  
@@ -327,11 +417,15 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             ObservableList<BestExchange> exchanges = FXCollections.observableArrayList();
             exchanges.addAll(path);
             
-            TableView<BestExchange> exchangeTable = new TableView<>();
-            exchangeTable.setMaxWidth(800);
-            exchangeTable.setPrefWidth(800);
-            exchangeTable.setPrefHeight(725);
+            Pane paddingPane = new Pane();           
+            TableView<BestExchange> exchangeTable = new TableView<>();           
+            exchangeTable.setLayoutX(5);
+            exchangeTable.setLayoutY(5);
+            exchangeTable.setMaxWidth(790);
+            exchangeTable.setPrefWidth(790);
+            exchangeTable.setPrefHeight(715);
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
+            paddingPane.getChildren().add(exchangeTable);
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("Leg");
             stopNumber.setPrefWidth(25);
@@ -342,6 +436,35 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
             from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem emailMenuItem = new MenuItem("Email");
+                                emailMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        String emailAdd = cell.getItem();
+                                        BestExchange person = (BestExchange) cell.getTableRow().getItem();
+                                        System.out.println("Email " + person + " at " + emailAdd);
+                                    }
+                                });
+                                cellMenu.getItems().add(emailMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
             
             
             TableColumn<BestExchange,String> to = new TableColumn<>("To");
@@ -371,7 +494,7 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
             
             exchangeTable.setItems(exchanges);
             
-            exchangesVbox.getChildren().add(exchangeTable);
+            exchangesVbox.getChildren().add(paddingPane);
             searchProgress.setVisible(false);
         }
     }    
@@ -404,12 +527,19 @@ public class ExchangeController implements ApplicationListener<ExchangeCompleted
 //  }
 
     @Override
-    public void onApplicationEvent(ExchangeCompletedEvent event) {
+    public void onApplicationEvent(ApplicationEvent event) {
         // TODO Auto-generated method stub
-        if (event.getSingleStop()) {
-           Platform.runLater(()->singleStopTrade(event.getExchanges()));
-        } else {
-           Platform.runLater(()->multistopTrade(event.getExchanges()));
+        if (event instanceof ExchangeCompletedEvent) {
+            ExchangeCompletedEvent exchangeCompletedEvent = (ExchangeCompletedEvent) event;
+            if (exchangeCompletedEvent.getSingleStop()) {
+               Platform.runLater(()->singleStopTrade(exchangeCompletedEvent.getExchanges()));
+            } else {
+               Platform.runLater(()->multistopTrade(exchangeCompletedEvent.getExchanges()));
+            }
+        }
+        
+        if (event instanceof ExchangeCompletedEvent) {
+            Platform.runLater(()->initilizeExchangeForm());
         }
     }
 

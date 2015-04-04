@@ -15,11 +15,14 @@ import javafx.scene.control.TableView;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
+import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.Station;
+import com.jhr.jarvis.service.StationService;
 
 /**
  * Not annotated as @Component because we want to use the springFxmlLoader so the @FXML annotations get populated.
@@ -59,6 +62,9 @@ public class StationOverviewController implements ApplicationListener<StationOve
     
     private ObservableList<Commodity> commodities = FXCollections.observableArrayList();
     
+    @Autowired
+    private StationService stationService;
+    
     
     @Override
     public void onApplicationEvent(StationOverviewChangedEvent event) {
@@ -93,7 +99,7 @@ public class StationOverviewController implements ApplicationListener<StationOve
     }
     
     @PostConstruct
-    private void initTableCells() {
+    private void initController() {
         
         commodityTypeColumn.setCellValueFactory(column ->column.getValue().getGroupProperty());
         commodityNameColumn.setCellValueFactory(column -> column.getValue().getNameProperty());
@@ -102,6 +108,23 @@ public class StationOverviewController implements ApplicationListener<StationOve
         commoditySellColumn.setCellValueFactory(column -> column.getValue().getSellPriceProperty().asObject());
         commodityDemandColumn.setCellValueFactory(column -> column.getValue().getDemandProperty().asObject());
         commodityTable.setItems(commodities);   
+        
+        blackMarketCheckBox.setOnAction((event) -> {
+            updateBlackMarketStatus(blackMarketCheckBox.isSelected());
+        });
+    }
+    
+    public void updateBlackMarketStatus(Boolean blackMarketAvailable) {
+        Station station = null;
+        try {
+            station = stationService.findExactStationOrientDb(stationNameLabel.getText());
+            stationService.addPropertyToStationOrientDb(station, "blackMarket", blackMarketAvailable);
+            station = stationService.findExactStationOrientDb(stationNameLabel.getText());
+            Platform.runLater(new UpdateStationOverview(station));
+        } catch (StationNotFoundException e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }

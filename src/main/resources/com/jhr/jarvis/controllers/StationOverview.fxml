@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
-
 
 <VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.StationOverviewController">
    <children>
@@ -20,15 +20,19 @@
             <CheckBox fx:id="blackMarketCheckBox" layoutX="99.0" layoutY="27.0" mnemonicParsing="false" />
          </children>
       </AnchorPane>
-      <TableView fx:id="commodityTable" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="725.0" minWidth="800.0" prefHeight="725.0" prefWidth="800.0" style="-fx-font-size: 10;">
-        <columns>
-          <TableColumn fx:id="commodityTypeColumn" prefWidth="150.0" text="Type" />
-          <TableColumn fx:id="commodityNameColumn" prefWidth="150.0" text="Commodity" />
-            <TableColumn fx:id="commodityBuyColumn" prefWidth="40.0" text="Buy @" />
-            <TableColumn fx:id="commoditySupplyColumn" prefWidth="55.0" text="Supply" />
-            <TableColumn fx:id="commoditySellColumn" prefWidth="40.0" text="Sell @" />
-            <TableColumn fx:id="commodityDemandColumn" prefWidth="56.0" text="Demand" />
-        </columns>
-      </TableView>
+      <Pane>
+         <children>
+            <TableView fx:id="commodityTable" layoutX="5.0" layoutY="5.0" maxHeight="1.7976931348623157E308" maxWidth="790.0" minHeight="715.0" minWidth="790.0" prefHeight="715.0" prefWidth="790.0" style="-fx-font-size: 10;">
+              <columns>
+                <TableColumn fx:id="commodityTypeColumn" prefWidth="150.0" text="Type" />
+                <TableColumn fx:id="commodityNameColumn" prefWidth="150.0" text="Commodity" />
+                  <TableColumn fx:id="commodityBuyColumn" prefWidth="40.0" text="Buy @" />
+                  <TableColumn fx:id="commoditySupplyColumn" prefWidth="55.0" text="Supply" />
+                  <TableColumn fx:id="commoditySellColumn" prefWidth="40.0" text="Sell @" />
+                  <TableColumn fx:id="commodityDemandColumn" prefWidth="56.0" text="Demand" />
+              </columns>
+            </TableView>
+         </children>
+      </Pane>
    </children>
 </VBox>

@@ -7,7 +7,7 @@
 
 <VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CurrentSystemController">
    <children>
-    <AnchorPane minHeight="50.0" minWidth="0.0" prefHeight="50.0" prefWidth="200.0">
+    <AnchorPane minHeight="55.0" minWidth="0.0" prefHeight="55.0" prefWidth="200.0">
          <children>
             <Label fx:id="systemNameLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="22.0" prefHeight="30.0" prefWidth="200.0" text="Unknown System" textAlignment="CENTER" />
             <Label alignment="CENTER" layoutX="-4.0" layoutY="13.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
@@ -17,12 +17,16 @@
             </Label>
          </children>
       </AnchorPane>
-      <TableView fx:id="stationTable" prefHeight="300.0" prefWidth="200.0" style="-fx-font-size: 10;">
-        <columns>
-          <TableColumn fx:id="stationNameColumn" prefWidth="120.0" text="Station" />
-          <TableColumn fx:id="stationBlackMarketFlagColumn" prefWidth="39.0" text="BM" />
-            <TableColumn fx:id="stationDataAgeColumn" prefWidth="38.0" text="Age" />
-        </columns>
-      </TableView>
+      <Pane maxWidth="200.0" minWidth="200.0" prefWidth="200.0">
+         <children>
+            <TableView fx:id="stationTable" layoutX="5.0" prefHeight="295.0" prefWidth="195.0" style="-fx-font-size: 10;">
+              <columns>
+                <TableColumn fx:id="stationNameColumn" prefWidth="115.0" text="Station" />
+                <TableColumn fx:id="stationBlackMarketFlagColumn" prefWidth="40.0" text="BM" />
+                  <TableColumn fx:id="stationDataAgeColumn" prefWidth="40.0" text="Age" />
+              </columns>
+            </TableView>
+         </children>
+      </Pane>
    </children>
 </VBox>

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 import com.jhr.jarvis.event.ConsoleEvent;
+import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
@@ -77,6 +78,7 @@ public class EliteOcrService implements ApplicationEventPublisherAware {
         }
         
         eventPublisher.publishEvent(new ConsoleEvent("executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds"));
+        eventPublisher.publishEvent(new OcrCompletedEvent(Boolean.TRUE));
     }
         
     private void processEliteOcrCSVFileOrientDb(File in) throws IOException {
