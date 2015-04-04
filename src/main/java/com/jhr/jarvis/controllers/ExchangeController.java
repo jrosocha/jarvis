@@ -377,6 +377,56 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
             to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem currentSystemMenuItem = new MenuItem("Make Current System");
+                                final MenuItem stationDetailsMenuItem = new MenuItem("Station Details");
+                                currentSystemMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
+                                            starSystem.setStations(stations);
+                                            eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                                        } catch (SystemNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                stationDetailsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            Station station = stationService.findExactStationOrientDb(bestExchange.getSellStationName());
+                                            eventPublisher.publishEvent(new StationOverviewChangedEvent(station));     
+                                        } catch (StationNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(currentSystemMenuItem);
+                                cellMenu.getItems().add(stationDetailsMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
+            
             
             TableColumn<BestExchange,String> commodity = new TableColumn<>("Commodity");
             commodity.setPrefWidth(125);
@@ -446,16 +496,36 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                         public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
                             if (newValue != null) {
                                 final ContextMenu cellMenu = new ContextMenu();
-                                final MenuItem emailMenuItem = new MenuItem("Email");
-                                emailMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                final MenuItem currentSystemMenuItem = new MenuItem("Make Current System");
+                                final MenuItem stationDetailsMenuItem = new MenuItem("Station Details");
+                                currentSystemMenuItem.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
                                     public void handle(ActionEvent event) {
-                                        String emailAdd = cell.getItem();
-                                        BestExchange person = (BestExchange) cell.getTableRow().getItem();
-                                        System.out.println("Email " + person + " at " + emailAdd);
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
+                                            starSystem.setStations(stations);
+                                            eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                                        } catch (SystemNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 });
-                                cellMenu.getItems().add(emailMenuItem);
+                                stationDetailsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            Station station = stationService.findExactStationOrientDb(bestExchange.getBuyStationName());
+                                            eventPublisher.publishEvent(new StationOverviewChangedEvent(station));     
+                                        } catch (StationNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(currentSystemMenuItem);
+                                cellMenu.getItems().add(stationDetailsMenuItem);
                                 cell.setContextMenu(cellMenu);
                             } else {
                                 cell.setContextMenu(null);
@@ -471,6 +541,56 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
             to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem currentSystemMenuItem = new MenuItem("Make Current System");
+                                final MenuItem stationDetailsMenuItem = new MenuItem("Station Details");
+                                currentSystemMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
+                                            starSystem.setStations(stations);
+                                            eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                                        } catch (SystemNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                stationDetailsMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            Station station = stationService.findExactStationOrientDb(bestExchange.getSellStationName());
+                                            eventPublisher.publishEvent(new StationOverviewChangedEvent(station));     
+                                        } catch (StationNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(currentSystemMenuItem);
+                                cellMenu.getItems().add(stationDetailsMenuItem);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
+            
             
             TableColumn<BestExchange,String> commodity = new TableColumn<>("Commodity");
             commodity.setPrefWidth(125);
