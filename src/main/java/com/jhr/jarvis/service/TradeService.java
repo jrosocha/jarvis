@@ -378,45 +378,48 @@ public class TradeService {
         OrientGraph graph = null;
         Map<String, Commodity> buyCommodities = new HashMap<>();
         Map<String, Commodity> sellCommodities = new HashMap<>();
+        List<BestExchange> exchanges = new ArrayList<>();
         
         try {
             graph = orientDbService.getFactory().getTx();
             
             //starting station
             OrientVertex stationFromVertex = (OrientVertex) graph.getVertexByKey("Station.name", fromStation.getName());
-            
+            Vertex originSystem = stationService.getSystemVertexForStationVertex(stationFromVertex);
             OrientVertex stationToVertex = (OrientVertex) graph.getVertexByKey("Station.name", toStation.getName());
+            Vertex destinationSystem = stationService.getSystemVertexForStationVertex(stationToVertex);
             
             // populate worthwile buy commodities
             buyCommodities = stationService.getStationBuyCommodities(stationFromVertex, ship);
             sellCommodities = stationService.getReleventStationSellCommodities(stationToVertex, buyCommodities, ship);
             graph.commit();
+        
+            
+            for (String key: sellCommodities.keySet()){
+                
+                BestExchange e = new BestExchange();
+                e.setBuyPrice(buyCommodities.get(key).getBuyPrice());
+                e.setBuyStationName(fromStation.getName());
+                e.setBuySystemName(fromStation.getSystem());
+                e.setSupply(buyCommodities.get(key).getSupply());
+                e.setCommodity(key);
+                
+                int unitProfit = sellCommodities.get(key).getSellPrice() - buyCommodities.get(key).getBuyPrice(); 
+                e.setPerUnitProfit(unitProfit);
+                e.setQuantity(ship.getCargoSpace());
+                e.setRoutePerProfitUnit(unitProfit);
+                e.setSellPrice(sellCommodities.get(key).getSellPrice());
+                e.setSellStationName(toStation.getName());
+                e.setSellSystemName(toStation.getSystem());
+                e.setDemand(sellCommodities.get(key).getDemand());
+                
+                e.setDistanceFromOrigin(starSystemService.distanceCalc(originSystem, destinationSystem));
+                exchanges.add(e);
+                
+            }        
         } catch (Exception e) {
             e.printStackTrace();
             graph.rollback();
-        }
-        
-        List<BestExchange> exchanges = new ArrayList<>();
-        for (String key: sellCommodities.keySet()){
-            
-            BestExchange e = new BestExchange();
-            e.setBuyPrice(buyCommodities.get(key).getBuyPrice());
-            e.setBuyStationName(fromStation.getName());
-            e.setBuySystemName(fromStation.getSystem());
-            e.setSupply(buyCommodities.get(key).getSupply());
-            e.setCommodity(key);
-            
-            int unitProfit = sellCommodities.get(key).getSellPrice() - buyCommodities.get(key).getBuyPrice(); 
-            e.setPerUnitProfit(unitProfit);
-            e.setQuantity(ship.getCargoSpace());
-            e.setRoutePerProfitUnit(unitProfit);
-            e.setSellPrice(sellCommodities.get(key).getSellPrice());
-            e.setSellStationName(toStation.getName());
-            e.setSellSystemName(toStation.getSystem());
-            e.setDemand(sellCommodities.get(key).getDemand());
-            
-            exchanges.add(e);
-            
         }
         
         return exchanges;

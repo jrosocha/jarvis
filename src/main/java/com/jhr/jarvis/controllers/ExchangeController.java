@@ -230,7 +230,6 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         
         // crazy state machine to determine type of search. 
         if ( (numberOfJumpsBetweenStations == null || numberOfJumpsBetweenStations == 0 || StringUtils.isBlank(fromStation)) 
-                && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)
                 && StringUtils.isNotBlank(commodity)
                 && StringUtils.isNotBlank(buyOrSell)) {
@@ -253,7 +252,6 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             
         } else if (StringUtils.isNotBlank(fromStation)
                 && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
-                && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)
                 && StringUtils.isNotBlank(commodity)
                 && StringUtils.isNotBlank(buyOrSell)) {
@@ -275,9 +273,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         } else if (StringUtils.isNotBlank(fromStation)
                 && numberOfTrades != null && numberOfTrades > 1
                 && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
-                && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)
-                && StringUtils.isBlank(commodity)) {
+                && (StringUtils.isBlank(buyOrSell) || StringUtils.isBlank(commodity))) {
             /*
              * Multiple stop trade
              */
@@ -291,9 +288,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         } else if (StringUtils.isNotBlank(fromStation)
                 && numberOfTrades != null && numberOfTrades == 1
                 && numberOfJumpsBetweenStations != null && numberOfJumpsBetweenStations > 0
-                && StringUtils.isBlank(toSystem)
                 && StringUtils.isBlank(toStation)
-                && StringUtils.isBlank(commodity)) {
+                && (StringUtils.isBlank(buyOrSell) || StringUtils.isBlank(commodity))) {
             /*
              * Single stop trade
              */
@@ -503,6 +499,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.getColumns().add(haulCost);
             haulCost.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getBuyPrice() * column.getValue().getQuantity()).asObject());
             
+            TableColumn<BestExchange,Double> distanceFromOrigin = new TableColumn<>("Distance");
+            distanceFromOrigin.setPrefWidth(50);
+            exchangeTable.getColumns().add(distanceFromOrigin);
+            distanceFromOrigin.setCellValueFactory(column -> column.getValue().getDistanceFromOriginProperty().asObject());
+            
             exchangeTable.setItems(exchanges);
             
             exchangesVbox.getChildren().add(paddingPane);
@@ -666,6 +667,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             haulCost.setPrefWidth(50);
             exchangeTable.getColumns().add(haulCost);
             haulCost.setCellValueFactory(column -> new SimpleIntegerProperty(column.getValue().getBuyPrice() * column.getValue().getQuantity()).asObject());
+            
+            TableColumn<BestExchange,Double> distanceFromOrigin = new TableColumn<>("Distance");
+            distanceFromOrigin.setPrefWidth(50);
+            exchangeTable.getColumns().add(distanceFromOrigin);
+            distanceFromOrigin.setCellValueFactory(column -> column.getValue().getDistanceFromOriginProperty().asObject());
             
             exchangeTable.setItems(exchanges);
             
@@ -958,7 +964,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.getColumns().add(sellDemand);
             sellDemand.setCellValueFactory(column ->column.getValue().getDemandProperty().asObject());
             
-            TableColumn<BestExchange,Long> sellStationDataAge = new TableColumn<>("Sell Data Age");
+            TableColumn<BestExchange,Long> sellStationDataAge = new TableColumn<>("Age");
             sellStationDataAge.setPrefWidth(50);
             exchangeTable.getColumns().add(sellStationDataAge);
             sellStationDataAge.setCellValueFactory(column -> new SimpleLongProperty(ChronoUnit.DAYS.between(column.getValue().getSellStationDataAge(), LocalDateTime.now())).asObject());            
@@ -975,7 +981,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.getColumns().add(buySupply);
             buySupply.setCellValueFactory(column ->column.getValue().getSupplyProperty().asObject());
             
-            TableColumn<BestExchange,Long> buyStationDataAge = new TableColumn<>("Buy Data Age");
+            TableColumn<BestExchange,Long> buyStationDataAge = new TableColumn<>("Age");
             buyStationDataAge.setPrefWidth(50);
             exchangeTable.getColumns().add(buyStationDataAge);
             buyStationDataAge.setCellValueFactory(column -> new SimpleLongProperty(ChronoUnit.DAYS.between(column.getValue().getBuyStationDataAge(), LocalDateTime.now())).asObject()); 
@@ -992,8 +998,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         exchangesVbox.getChildren().add(paddingPane);
         searchProgress.setVisible(false);
 
-}  
-
+    }  
     
     public void populateSystems() {
         
