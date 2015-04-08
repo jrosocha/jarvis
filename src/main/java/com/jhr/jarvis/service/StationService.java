@@ -164,45 +164,6 @@ public class StationService {
         return foundStation;
     }
     
-    public String stationDetailsOrientDb(Station station) {
-        
-        OrientGraph graph = null;
-        List<Commodity> stationCommodities = new ArrayList<>();
-        try {   
-            graph = orientDbService.getFactory().getTx();
-            
-            OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
-            stationCommodities = getStationCommodities(stationVertex);
-            
-            graph.commit();
-        } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
-        }
-
-        // build the map so that you can create a table
-        List<Map<String, Object>> tableData = stationCommodities.stream().map(Commodity::toMap).sorted((row1,row2)->{
-            String group1 = (String) row1.get("GROUP");
-            String group2 = (String) row2.get("GROUP");
-            String comm1 = (String) row1.get("COMMODITY");
-            String comm2 = (String) row2.get("COMMODITY");
-            if (group1.equals(group2)) {
-                return comm1.compareTo(comm2);
-            }
-            return group1.compareTo(group2);
-        }).collect(Collectors.toList());
-
-        String out = "";
-//        out += "System: " +station.getSystem() + OsUtils.LINE_SEPARATOR;
-//        out += "Station: " +station.getName() + OsUtils.LINE_SEPARATOR;
-//        out += "Black Market: " +station.getBlackMarket() + OsUtils.LINE_SEPARATOR;
-//        out += "Data Age in Days: " + tableData.get(0).get("DAYS OLD") + OsUtils.LINE_SEPARATOR + OsUtils.LINE_SEPARATOR;
-//        out += TableRenderer.renderMapDataAsTable(tableData, ImmutableList.of("GROUP", "COMMODITY", "BUY @", "SUPPLY", "SELL @", "DEMAND"));
-        return out;
-
-    }
-    
     
     /**
      * Gives an exact match on the station passed in, the unique station found matching what was passed in, the in memory store of a station of nothing was passed in, or an exception.
@@ -432,7 +393,6 @@ public class StationService {
      */
     public void setUserLastStoredStation(Station station) {
         this.userLastStoredStation = station;
-        starSystemService.setUserLastStoredSystem(station.getSystem());
     }
     
 }

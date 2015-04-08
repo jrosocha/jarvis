@@ -53,12 +53,8 @@ public class StarSystemService {
 
     @Autowired
     private Settings settings;
-
-    /**
-     * Populates when a user uses the station or find command. Used for --from
-     * in the path commands
-     */
-    private String userLastStoredSystem = null;
+    
+    private StarSystem currentStarSystem = null;
 
     public Set<Vertex> findStationsInSystemOrientDb(Vertex system, Set<String> avoidStations) {
 
@@ -373,6 +369,10 @@ public class StarSystemService {
     private double distanceCalc(float x1, float x2, float y1, float y2, float z1, float z2) {
         return Math.sqrt((Math.pow((x1 - x2), 2.0) + Math.pow((y1 - y2), 2.0) + Math.pow((z1 - z2), 2.0)));
     }
+    
+    public double distanceCalc(Vertex systemA, Vertex systemB) {
+        return distanceCalc(systemA.getProperty("x"), systemB.getProperty("x"), systemA.getProperty("y"), systemB.getProperty("y"), systemA.getProperty("z"), systemB.getProperty("z"));    
+    }
 
     public String calculateShortestPathBetweenSystems(Ship ship, String startSystemName, String finishSystemName) {
         OrientGraph graph = null;
@@ -424,40 +424,12 @@ public class StarSystemService {
         return out;
     }
 
-    public String printStarSystemTable(StarSystem starSystem) {
-
-        String out = "";
-        Date start = new Date();
-        List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-        List<Map<String, Object>> tableData = stations.stream().map(station -> {
-            Map<String, Object> tableRow = new HashMap<>();
-            tableRow.put("STATION", station.getName());
-            tableRow.put("BLACK MARKET", station.getBlackMarket());
-            tableRow.put("DAYS OLD", (new Date().getTime() - station.getDate().toEpochSecond(ZoneOffset.UTC)) / 1000 / 60 / 60 / 24);
-            return tableRow;
-        }).collect(Collectors.toList());
-//
-//        out += OsUtils.LINE_SEPARATOR;
-//        out += "SYSTEM: " + starSystem.getName() + " @ " + starSystem.getX() + ", " + starSystem.getY() + ", " + starSystem.getZ() + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, ImmutableList.of("STATION", "BLACK MARKET", "DAYS OLD"));
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime()) / 1000.0 + " seconds.";
-
-        return out;
+    public StarSystem getCurrentStarSystem() {
+        return currentStarSystem;
     }
 
-    /**
-     * @return the userLastStoredSystem
-     */
-    public String getUserLastStoredSystem() {
-        return userLastStoredSystem;
-    }
-
-    /**
-     * @param userLastStoredSystem
-     *            the userLastStoredSystem to set
-     */
-    public void setUserLastStoredSystem(String userLastStoredSystem) {
-        this.userLastStoredSystem = userLastStoredSystem;
+    public void setCurrentStarSystem(StarSystem currentStarSystem) {
+        this.currentStarSystem = currentStarSystem;
     }
 
 }

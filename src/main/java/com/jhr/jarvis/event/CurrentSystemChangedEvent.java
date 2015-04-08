@@ -13,4 +13,8 @@ public class CurrentSystemChangedEvent extends ApplicationEvent {
         this.starSystem = system;
         System.out.println(String.format("Local system changed to %s.", system));
     }
+
+    public StarSystem getStarSystem() {
+        return starSystem;
+    }
 }

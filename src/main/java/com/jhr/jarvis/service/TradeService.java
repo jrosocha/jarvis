@@ -1,5 +1,6 @@
 package com.jhr.jarvis.service;
 
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -127,6 +128,9 @@ public class TradeService {
                         BestExchange bestExchange = new BestExchange(fromStation, toStation, buyCommodity, sellCommodity, ship.getCargoSpace());
                         bestExchange.setRoutePerProfitUnit(bestExchange.getPerUnitProfit());
                         bestExchange.setParent(parent);
+                        bestExchange.setDistanceFromOrigin(starSystemService.distanceCalc(originSystem, destinationSystem));
+                        bestExchange.setSellStationDataAge(sellCommodity.getDate().toInstant(ZoneOffset.UTC).toEpochMilli());
+                        bestExchange.setBuyStationDataAge(buyCommodity.getDate().toInstant(ZoneOffset.UTC).toEpochMilli());
                         int parentRouteProfit = parent != null ? parent.getRoutePerProfitUnit() : 0;
                         bestExchange.setRoutePerProfitUnit(parentRouteProfit + bestExchange.getPerUnitProfit());
                         // add the exchange to the master list.
@@ -146,14 +150,14 @@ public class TradeService {
         return sortedBestExchangeList;
     }
     
-    public String sellOrientDb(Station fromStation, Ship ship, int maxJumps, String commodity) {
+    public List<BestExchange> sellOrientDb(String fromStationName, Ship ship, int maxJumps, String commodity) {
         Date start = new Date();
-        List<Map<String, Object>> tableData = new ArrayList<>();
+        List<BestExchange> out = new ArrayList<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
             
-            Vertex stationVertex = graph.getVertexByKey("Station.name", fromStation.getName());
+            Vertex stationVertex = graph.getVertexByKey("Station.name", fromStationName);
             Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
             
             Set<Vertex> systemsWithinNShipJumps = starSystemService.findSystemsWithinNFrameshiftJumpsOfDistance(graph, systemVertex, ship.getJumpDistance(), maxJumps);
@@ -173,19 +177,22 @@ public class TradeService {
                         if (demand > ship.getCargoSpace() && sellPrice > 0) {
                             Vertex commodityVertex = exchange.getVertex(Direction.IN);
                             if (commodityVertex.getProperty("name").equals(commodity)) {
-                                Commodity sellCommodity = new Commodity(commodityVertex.getProperty("name"), buyPrice, supply, sellPrice, demand);
-                                Map<String, Object> row = new HashMap<>();
-                                row.put("COMMODITY", sellCommodity.getName());
-                                row.put("TO SYSTEM", destinationSystem.getProperty("name"));
-                                row.put("TO STATION", station.getProperty("name"));
-                                row.put("UNIT PRICE", sellPrice);
-                                row.put("DEMAND", demand);
-                                row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
-                                tableData.add(row);
+                                BestExchange bestExchange = new BestExchange();
+                                bestExchange.setBuyStationName(fromStationName);
+                                bestExchange.setBuySystemName(systemVertex.getProperty("name"));
+                                bestExchange.setSupply(0);
+                                bestExchange.setSellStationName(station.getProperty("name"));
+                                bestExchange.setSellSystemName(destinationSystem.getProperty("name"));
+                                bestExchange.setCommodity(commodity);
+                                bestExchange.setSellPrice(sellPrice);
+                                bestExchange.setDemand(demand);
+                                bestExchange.setSellStationDataAge(date);
+                                bestExchange.setDistanceFromOrigin(starSystemService.distanceCalc(systemVertex, destinationSystem));
+                                out.add(bestExchange);
+                                
                             }
                         }
                     }
-                    
                 }
             }           
             graph.commit();
@@ -194,41 +201,23 @@ public class TradeService {
                 graph.rollback();
             }
         }
-            
-        if (tableData.size() == 0) {
-            return "No sale available in provided range";
-        }
         
-        tableData = tableData.parallelStream().sorted((row1,row2)->{
-            int p1 = (int) row1.get("UNIT PRICE");
-            int p2 = (int) row2.get("UNIT PRICE");
-            return Integer.compare(p1, p2);
-        }).collect(Collectors.toList());
-        
-        Collections.reverse(tableData);
-        String out = "";
-        
-        
-//        String out = OsUtils.LINE_SEPARATOR;
-//        out += "From System: " + fromStation.getSystem() + OsUtils.LINE_SEPARATOR;
-//        out += "From Station: " + fromStation.getName() + OsUtils.LINE_SEPARATOR;
-//        out += "Cargo Capacity: " + ship.getCargoSpace() + OsUtils.LINE_SEPARATOR;
-//        out += tableData.size() + " Best stations to sell " + tableData.get(0).get("COMMODITY") + " within " + maxJumps + " jump(s) @ " + ship.getJumpDistance() + " ly or less." + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, 
-//                ImmutableList.of("TO SYSTEM", "TO STATION", "UNIT PRICE", "DEMAND",  "DAYS OLD"));
-//        
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds.";
+        out = out.parallelStream().sorted((row1,row2)->{
+            return Integer.compare(row1.getSellPrice(), row2.getSellPrice());
+        }).collect(Collectors.toList());       
+
+        Collections.reverse(out);        
         return out;
     }
     
-    public String buyOrientDb(Station fromStation, Ship ship, int maxJumps, String commodity) {
-        Date start = new Date();
-        List<Map<String, Object>> tableData = new ArrayList<>();
+    public List<BestExchange> buyOrientDb(String fromStation, Ship ship, int maxJumps, String commodity) {
+
+        List<BestExchange> out = new ArrayList<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
             
-            Vertex stationVertex = graph.getVertexByKey("Station.name", fromStation.getName());
+            Vertex stationVertex = graph.getVertexByKey("Station.name", fromStation);
             Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
             
             Set<Vertex> systemsWithinNShipJumps = starSystemService.findSystemsWithinNFrameshiftJumpsOfDistance(graph, systemVertex, ship.getJumpDistance(), maxJumps);
@@ -245,18 +234,22 @@ public class TradeService {
                         int demand = exchange.getProperty("demand");
                         long date = exchange.getProperty("date");
                         
-                        if (supply > ship.getCargoSpace() && buyPrice > 0) {
+                        if (supply >= ship.getCargoSpace() && buyPrice > 0) {
                             Vertex commodityVertex = exchange.getVertex(Direction.IN);
                             if (commodityVertex.getProperty("name").equals(commodity)) {
-                                Commodity buyCommodity = new Commodity(commodityVertex.getProperty("name"), buyPrice, supply, sellPrice, demand);
-                                Map<String, Object> row = new HashMap<>();
-                                row.put("COMMODITY", buyCommodity.getName());
-                                row.put("TO SYSTEM", destinationSystem.getProperty("name"));
-                                row.put("TO STATION", station.getProperty("name"));
-                                row.put("UNIT PRICE", buyPrice);
-                                row.put("SUPPLY", supply);
-                                row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
-                                tableData.add(row);
+                                BestExchange bestExchange = new BestExchange();
+                                bestExchange.setCommodity(commodity);
+                                bestExchange.setBuyStationName(station.getProperty("name"));
+                                bestExchange.setBuySystemName(destinationSystem.getProperty("name"));
+                                bestExchange.setBuyStationDataAge(date);
+                                bestExchange.setBuyPrice(buyPrice);
+                                bestExchange.setSupply(supply);
+                                bestExchange.setSellStationName(stationVertex.getProperty("name"));
+                                bestExchange.setSellSystemName(systemVertex.getProperty("name"));
+                                bestExchange.setSellPrice(sellPrice);
+                                bestExchange.setDemand(demand);
+                                bestExchange.setDistanceFromOrigin(starSystemService.distanceCalc(systemVertex, destinationSystem));
+                                out.add(bestExchange);
                             }
                         }
                     }
@@ -270,36 +263,22 @@ public class TradeService {
             }
         }
             
-        if (tableData.size() == 0) {
-            return "No purchase available in provided range";
-        }
+        out = out.parallelStream().sorted((row1,row2)->{
+            return Integer.compare(row1.getBuyPrice(), row2.getBuyPrice());
+        }).collect(Collectors.toList());   
         
-        tableData = tableData.parallelStream().sorted((row1,row2)->{
-            int p1 = (int) row1.get("UNIT PRICE");
-            int p2 = (int) row2.get("UNIT PRICE");
-            return Integer.compare(p1, p2);
-        }).collect(Collectors.toList());
-        
-        String out = "";
-        
-//        String out = OsUtils.LINE_SEPARATOR;
-//        out += "From System: " + fromStation.getSystem() + OsUtils.LINE_SEPARATOR;
-//        out += "From Station: " + fromStation.getName() + OsUtils.LINE_SEPARATOR;
-//        out += "Cargo Capacity: " + ship.getCargoSpace() + OsUtils.LINE_SEPARATOR;
-//        out += tableData.size() + " Best stations to buy " + tableData.get(0).get("COMMODITY") + " within " + maxJumps + " jump(s) @ " + ship.getJumpDistance() + " ly or less." + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, 
-//                ImmutableList.of("TO SYSTEM", "TO STATION", "UNIT PRICE", "SUPPLY", "DAYS OLD"));
-//        
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds.";
         return out;
     }
     
-    public List<BestExchange> bestBuyPriceOrientDb(String commodityName) {
+    public List<BestExchange> bestBuyPriceOrientDb(String originSystem, String commodityName) {
         
         List<BestExchange> out = new ArrayList<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
+            
+            OrientVertex startSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", originSystem);
+            
             //starting commodity
             OrientVertex commodityVertex = (OrientVertex) graph.getVertexByKey("Commodity.name", commodityName);
             
@@ -313,15 +292,16 @@ public class TradeService {
                     Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
                     
                     BestExchange exchange = new BestExchange();
+                    exchange.setSellStationName("?");
+                    exchange.setSellSystemName(startSystemVertex.getProperty("name"));
                     exchange.setBuyStationName(stationVertex.getProperty("name"));
                     exchange.setBuySystemName(systemVertex.getProperty("name"));
                     exchange.setCommodity(commodityName);
                     exchange.setSupply(supply);
                     exchange.setBuyPrice(buyPrice);
-                    
+                    exchange.setBuyStationDataAge(date);
+                    exchange.setDistanceFromOrigin(starSystemService.distanceCalc(startSystemVertex, systemVertex));
                     out.add(exchange);
-                    
-                   // row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
                 }
             }
             graph.commit();
@@ -339,16 +319,17 @@ public class TradeService {
     }
 
     
-    public String bestSellPriceOrientDb(String commodityName) {
-        Date start = new Date();
+    public List<BestExchange> bestSellPriceOrientDb(String originSystem, String commodityName) {
         
-        List<Map<String, Object>> tableData = new ArrayList<>();
+        List<BestExchange> out = new ArrayList<>();
         
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
             //starting commodity
             OrientVertex commodityVertex = (OrientVertex) graph.getVertexByKey("Commodity.name", commodityName);
+            
+            OrientVertex startSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", originSystem);
             
             for (Edge hasExchange: commodityVertex.getEdges(Direction.IN, "Exchange")) {
                 
@@ -364,7 +345,18 @@ public class TradeService {
                     row.put("UNIT PRICE", sellPrice);
                     row.put("DEMAND", demand);
                     row.put("DAYS OLD", (((new Date().getTime() - date)/1000/60/60/24) * 100)/100);
-                    tableData.add(row);
+                    
+                    BestExchange exchange = new BestExchange();
+                    exchange.setBuyStationName("?");
+                    exchange.setBuySystemName(startSystemVertex.getProperty("name"));
+                    exchange.setSellStationName(stationVertex.getProperty("name"));
+                    exchange.setSellSystemName(systemVertex.getProperty("name"));
+                    exchange.setCommodity(commodityName);
+                    exchange.setDemand(demand);
+                    exchange.setSellPrice(sellPrice);
+                    exchange.setSellStationDataAge(date);
+                    exchange.setDistanceFromOrigin(starSystemService.distanceCalc(startSystemVertex, systemVertex));
+                    out.add(exchange);
                 }
             }
             graph.commit();
@@ -374,25 +366,10 @@ public class TradeService {
             }
         }
         
-        if (tableData.size() == 0) {
-            return "No sale available in data";
-        }
-        
-        tableData = tableData.parallelStream().sorted((row1,row2)->{
-            int p1 = (int) row1.get("UNIT PRICE");
-            int p2 = (int) row2.get("UNIT PRICE");
-            return Integer.compare(p1, p2);
-        }).collect(Collectors.toList());
-        
-        Collections.reverse(tableData);
-        
-        String out = "";
-        
-//        String out = OsUtils.LINE_SEPARATOR;
-//        out += tableData.size() + " Best stations to sell " + commodityName + OsUtils.LINE_SEPARATOR;
-//        out += OsUtils.LINE_SEPARATOR + TableRenderer.renderMapDataAsTable(tableData, 
-//                ImmutableList.of("TO SYSTEM", "TO STATION", "UNIT PRICE", "DEMAND", "DAYS OLD"));
-//        out += OsUtils.LINE_SEPARATOR + "executed in " + (new Date().getTime() - start.getTime())/1000.0 + " seconds.";
+        out = out.parallelStream().sorted((row1,row2)->{
+            return Integer.compare(row1.getSellPrice(), row2.getSellPrice());
+        }).collect(Collectors.toList());       
+
         return out;
     }
     

@@ -26,6 +26,7 @@ import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
+import com.jhr.jarvis.service.StarSystemService;
 import com.jhr.jarvis.service.StationService;
 
 /**
@@ -38,6 +39,9 @@ public class CurrentSystemController implements ApplicationListener<CurrentSyste
 
     @Autowired
     private StationService stationService;
+    
+    @Autowired
+    private StarSystemService starSystemService;
     
     @FXML
     private Node view;
@@ -60,7 +64,8 @@ public class CurrentSystemController implements ApplicationListener<CurrentSyste
     public void onApplicationEvent(CurrentSystemChangedEvent event) {
         
         if (event.getSource() != null) {
-            Platform.runLater(new UpdateCurrentSystem((StarSystem) event.getSource()));
+            starSystemService.setCurrentStarSystem(event.getStarSystem());
+            Platform.runLater(new UpdateCurrentSystem(event.getStarSystem()));
         }
     }
     
