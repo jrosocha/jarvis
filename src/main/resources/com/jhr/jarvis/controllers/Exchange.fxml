@@ -32,7 +32,7 @@
             <Label layoutX="580.0" layoutY="23.0" text="Buy or Sell" />
             <Label layoutX="580.0" layoutY="48.0" text="Commodity" />
             <Label alignment="CENTER" layoutX="580.0" layoutY="2.0" prefHeight="16.0" prefWidth="201.0" text="Buy/Sell Specific Cargo" />
-            <Label layoutX="6.0" layoutY="80.0" prefHeight="12.0" prefWidth="611.0" text="* The system drop downs dont really do much other than filter the stations. Select a station if you want somehing to happen." />
+            <Label layoutX="6.0" layoutY="66.0" prefHeight="12.0" prefWidth="611.0" text="* The system drop downs dont really do much other than filter the stations. Select a station if you want somehing to happen." />
          </children>
       </Pane>
       <VBox fx:id="exchangesVbox" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="700.0" minWidth="800.0" prefWidth="800.0" />

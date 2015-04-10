@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent.ExchangeType;
+import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
@@ -1058,6 +1059,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             }
             
         }
+        
+        if (event instanceof OcrCompletedEvent) {
+            Platform.runLater(()->initilizeExchangeForm());
+        }
+        
     }
 
     @Override
