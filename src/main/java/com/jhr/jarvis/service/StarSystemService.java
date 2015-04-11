@@ -241,7 +241,7 @@ public class StarSystemService {
         boolean found = false;
 
         try {
-            foundSystem = findExactSystemOrientDb(partial);
+            foundSystem = findExactSystemAndStationsOrientDb(partial);
             found = true;
         } catch (Exception e) {
             // not an exact match. proceed
@@ -263,12 +263,13 @@ public class StarSystemService {
 
     /**
      * Matches if the system exists as typed
+     * also populates stations
      * 
      * @param systemName
      * @return
      * @throws Exception
      */
-    public StarSystem findExactSystemOrientDb(String systemName) throws SystemNotFoundException {
+    public StarSystem findExactSystemAndStationsOrientDb(String systemName) throws SystemNotFoundException {
 
         if (systemName == null) {
             throw new SystemNotFoundException("Exact system '" + systemName + "' could not be identified");
@@ -292,10 +293,12 @@ public class StarSystemService {
                 graph.rollback();
             }
         }
-
+       
         if (foundSystem == null) {
             throw new SystemNotFoundException("Exact system '" + systemName + "' could not be identified");
         }
+        
+        foundSystem.setStations(stationService.getStationsForSystemOrientDb(foundSystem.getName()));
 
         return foundSystem;
     }

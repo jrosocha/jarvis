@@ -392,7 +392,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -446,7 +446,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -560,7 +560,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -615,7 +615,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -750,7 +750,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -804,7 +804,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -860,7 +860,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
@@ -914,7 +914,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));

@@ -308,6 +308,10 @@ public class StationService {
         return stations.stream().map(s->{ return s.getName() + " @ " + s.getSystem();}).collect(Collectors.joining(", "));
     }
     
+    /**
+     * @param system
+     * @return stations or an empty list
+     */
     public List<Station> getStationsForSystemOrientDb(String system) {
         
         List<Station> stations = new ArrayList<>();

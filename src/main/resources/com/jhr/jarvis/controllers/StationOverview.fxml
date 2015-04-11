@@ -10,14 +10,15 @@
    <children>
     <AnchorPane maxHeight="75.0" maxWidth="800.0" minHeight="75.0" minWidth="800.0" prefHeight="75.0" prefWidth="800.0">
          <children>
-            <Label fx:id="stationNameLabel" layoutX="261.0" layoutY="7.0" text="Unknown" />
-            <Label fx:id="systemNameLabel" layoutX="68.0" layoutY="6.0" text="Unknown" />
+            <Label fx:id="systemNameLabel" layoutX="289.0" layoutY="8.0" text="Unknown" />
             <Label layoutX="14.0" layoutY="28.0" text="Black Market:" />
-            <Label fx:id="ageOfDataLabel" layoutX="297.0" layoutY="28.0" text="0" />
-            <Label layoutX="14.0" layoutY="6.0" text="System:" />
-            <Label layoutX="207.0" layoutY="6.0" text="Station:" />
-            <Label layoutX="207.0" layoutY="28.0" text="Age of Data:" />
+            <Label fx:id="ageOfDataLabel" layoutX="308.0" layoutY="28.0" text="0" />
+            <Label layoutX="235.0" layoutY="8.0" text="System:" />
+            <Label layoutX="14.0" layoutY="7.0" text="Station:" />
+            <Label layoutX="235.0" layoutY="28.0" text="Age of Data:" />
             <CheckBox fx:id="blackMarketCheckBox" layoutX="99.0" layoutY="27.0" mnemonicParsing="false" />
+            <ComboBox fx:id="stationComboBox" layoutX="57.0" layoutY="4.0" prefHeight="20.0" prefWidth="142.0" />
+            <Button fx:id="deleteStationButton" layoutX="502.0" layoutY="4.0" mnemonicParsing="false" text="Delete Station" />
          </children>
       </AnchorPane>
       <Pane>

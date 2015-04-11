@@ -9,12 +9,12 @@
    <children>
     <AnchorPane minHeight="55.0" minWidth="0.0" prefHeight="55.0" prefWidth="200.0">
          <children>
-            <Label fx:id="systemNameLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="22.0" prefHeight="30.0" prefWidth="200.0" text="Unknown System" textAlignment="CENTER" />
-            <Label alignment="CENTER" layoutX="-4.0" layoutY="13.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
+            <Label alignment="CENTER" layoutX="-4.0" layoutY="10.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
                <font>
                   <Font name="System Bold" size="10.0" />
                </font>
             </Label>
+            <ComboBox fx:id="currentSystemComboBox" layoutX="21.0" layoutY="26.0" prefWidth="150.0" />
          </children>
       </AnchorPane>
       <Pane maxWidth="200.0" minWidth="200.0" prefWidth="200.0">
