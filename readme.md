@@ -4,12 +4,6 @@ Requires EliteOCR
 
 Powered by OrientDb, Spring, and JavaFx
 
-
-Anyways the DB looks like this:
-```
-(System)-[:Frameshift{ly:float}]-(System)-[](Station)-[Exchange{buyPrice:int, sellPrice:int, supply:int, demand:int, timestamp:long}]->(Commodity)
-```
-
 ## Installation
 * Install Elite:Dangerous .. or all of this will really be boring
 * Install EliteOCR and learn how to use it. This app uses the csv exports. Mind what directory they get written to.
@@ -31,5 +25,7 @@ Anyways the DB looks like this:
 * cd ../bin (or build/install/jarvis/bin for those of you who are lost)
 
 * run jarvis (or jarvis.bat)
+
+![Basic Exchange](jarvis-basic-exchange.png "A basic from station to somewhere close exchange")
 
 
