@@ -6,16 +6,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.util.Callback;
 
 import javax.annotation.PostConstruct;
 
@@ -27,9 +34,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
+import com.jhr.jarvis.event.ExchangeStationChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
+import com.jhr.jarvis.exceptions.SystemNotFoundException;
+import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.StarSystemService;
@@ -146,14 +156,53 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         stationNameColumn.setCellValueFactory(column ->column.getValue().getNameProperty());
         stationBlackMarketFlagColumn.setCellValueFactory(column -> column.getValue().getBlackMarketProperty());
         stationDataAgeColumn.setCellValueFactory(column -> column.getValue().getDateProperty());
-        stationTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        loadNewStation(newValue.getName());
-                    }
-                });
         
-        populateSystems();
+        stationTable.setRowFactory(new Callback<TableView<Station>, TableRow<Station>>() {  
+          @Override  
+          public TableRow<Station> call(TableView<Station> tableView) {  
+              final TableRow<Station> row = new TableRow<>();  
+              final ContextMenu contextMenu = new ContextMenu();  
+              final MenuItem stationDetailsMenuItem = new MenuItem("Station Details");  
+              stationDetailsMenuItem.setOnAction(new EventHandler<ActionEvent>() {  
+                  @Override  
+                  public void handle(ActionEvent event) {  
+                      Station selectedStation = (Station) row.getItem();
+                      loadNewStation(selectedStation.getName());
+                  }  
+              });  
+              contextMenu.getItems().add(stationDetailsMenuItem);
+              
+              final MenuItem exchangeFromMenuItem = new MenuItem("Set As Exchange From");  
+              exchangeFromMenuItem.setOnAction(new EventHandler<ActionEvent>() {  
+                  @Override  
+                  public void handle(ActionEvent event) {  
+                      Station selectedStation = (Station) row.getItem();
+                      eventPublisher.publishEvent(new ExchangeStationChangedEvent(selectedStation.getName(), ExchangeStationChangedEvent.FROM_OR_TO.FROM));
+                  }  
+              });  
+              contextMenu.getItems().add(exchangeFromMenuItem);
+              
+              final MenuItem exchangeToMenuItem = new MenuItem("Set As Exchange To");  
+              exchangeToMenuItem.setOnAction(new EventHandler<ActionEvent>() {  
+                  @Override  
+                  public void handle(ActionEvent event) {  
+                      Station selectedStation = (Station) row.getItem();
+                      eventPublisher.publishEvent(new ExchangeStationChangedEvent(selectedStation.getName(), ExchangeStationChangedEvent.FROM_OR_TO.TO));
+                  }  
+              });  
+              contextMenu.getItems().add(exchangeToMenuItem);
+              
+             // Set context menu on row, but use a binding to make it only show for non-empty rows:  
+              row.contextMenuProperty().bind(  
+                      Bindings.when(row.emptyProperty())  
+                      .then((ContextMenu)null)  
+                      .otherwise(contextMenu)  
+              );  
+              return row ;  
+          }  
+      });
+        
+      populateSystems();
     }
     
     private void loadNewStation(String name) {

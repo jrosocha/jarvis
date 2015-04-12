@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent.ExchangeType;
+import com.jhr.jarvis.event.ExchangeStationChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
@@ -342,29 +343,6 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.setPrefHeight(715);
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             paddingPane.getChildren().add(exchangeTable);
-            
-//            exchangeTable.setRowFactory(new Callback<TableView<BestExchange>, TableRow<BestExchange>>() {  
-//                @Override  
-//                public TableRow<BestExchange> call(TableView<BestExchange> tableView) {  
-//                    final TableRow<BestExchange> row = new TableRow<>();  
-//                    final ContextMenu contextMenu = new ContextMenu();  
-//                    final MenuItem menuItem = new MenuItem("Test");  
-//                    menuItem.setOnAction(new EventHandler<ActionEvent>() {  
-//                        @Override  
-//                        public void handle(ActionEvent event) {  
-//                            System.out.println("row something something " + row.getItem());
-//                        }  
-//                    });  
-//                    contextMenu.getItems().add(menuItem);  
-//                   // Set context menu on row, but use a binding to make it only show for non-empty rows:  
-//                    row.contextMenuProperty().bind(  
-//                            Bindings.when(row.emptyProperty())  
-//                            .then((ContextMenu)null)  
-//                            .otherwise(contextMenu)  
-//                    );  
-//                    return row ;  
-//                }  
-//            });  
             
             TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
             stopNumber.setPrefWidth(25);
@@ -751,8 +729,6 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
                                             StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
-                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-                                            starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
                                         } catch (SystemNotFoundException e) {
                                             e.printStackTrace();
@@ -1062,6 +1038,31 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         
         if (event instanceof OcrCompletedEvent) {
             Platform.runLater(()->initilizeExchangeForm());
+        }
+        
+        if (event instanceof ExchangeStationChangedEvent) {
+            
+            ExchangeStationChangedEvent exchangeStationChangedEvent = (ExchangeStationChangedEvent) event;
+            
+            switch (exchangeStationChangedEvent.getType()) {
+                case FROM: Platform.runLater(()->{
+                    fromStation.clear();
+                    List<String> allStations = getStationsBasedOnSystemSelection(null);
+                    fromStation.addAll(allStations);
+                    fromStationComboBox.getSelectionModel().select(exchangeStationChangedEvent.getStationName());
+                });
+                    break;
+                case TO: Platform.runLater(()->{
+                    toStation.clear();
+                    List<String> allStations = getStationsBasedOnSystemSelection(null);
+                    toStation.addAll(allStations);
+                    toStationComboBox.getSelectionModel().select(exchangeStationChangedEvent.getStationName());
+                });
+                    break;
+            }
+            
+            
+            
         }
         
     }

@@ -95,8 +95,8 @@ public class StationOverviewController implements ApplicationListener<Applicatio
         if (event instanceof OcrCompletedEvent) {        
             if (event.getSource() != null) {
                 Platform.runLater(()->{
-                    populateStations();
                     String selectedStation = FxUtil.getComboBoxValue(stationComboBox);
+                    populateStations();
                     if (StringUtils.isNotBlank(selectedStation)) {
                         try {
                             Station station = stationService.findExactStationOrientDb(selectedStation);                    

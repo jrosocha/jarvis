@@ -1,26 +1,35 @@
-Spring Boot Java FX integration example
-======================================
+# jarvis
+Elite Dangerous Trade Assistant 
+Requires EliteOCR
 
-Prototypic example on how one could use Spring-Boot with JavaFX under Java 8. 
+Powered by OrientDb, Spring, and JavaFx
 
-Run with ```mvn spring-boot:run``` 
-or
-Run with ```java -jar target/spring-boot-javafx-demo.jar```
 
+Anyways the DB looks like this:
 ```
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::        (v1.1.8.RELEASE)
-
-2014-11-12 20:37:21.476  INFO 99717 --- [lication Thread] o.s.boot.SpringApplication               : Starting application on gauss with PID 99717 (started by tom in /Users/tom/Documents/dev/repos/thomasdarimont/spring-labs/spring-boot-javafx)
-2014-11-12 20:37:21.515  INFO 99717 --- [lication Thread] s.c.a.AnnotationConfigApplicationContext : Refreshing org.springframework.context.annotation.AnnotationConfigApplicationContext@7e07bc8e: startup date [Wed Nov 12 20:37:21 CET 2014]; root of context hierarchy
-2014-11-12 20:37:22.493  INFO 99717 --- [lication Thread] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
-2014-11-12 20:37:22.508  INFO 99717 --- [lication Thread] o.s.boot.SpringApplication               : Started application in 1.383 seconds (JVM running for 2.023)
-2014-11-12 20:37:28.092  INFO 99717 --- [       Thread-7] s.c.a.AnnotationConfigApplicationContext : Closing org.springframework.context.annotation.AnnotationConfigApplicationContext@7e07bc8e: startup date [Wed Nov 12 20:37:21 CET 2014]; root of context hierarchy
-2014-11-12 20:37:28.093  INFO 99717 --- [       Thread-7] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+(System)-[:Frameshift{ly:float}]-(System)-[](Station)-[Exchange{buyPrice:int, sellPrice:int, supply:int, demand:int, timestamp:long}]->(Commodity)
 ```
-![UI in Action](example-1.png "UI in Action")
+
+## Installation
+* Install Elite:Dangerous .. or all of this will really be boring
+* Install EliteOCR and learn how to use it. This app uses the csv exports. Mind what directory they get written to.
+
+* Install Java 8 (JDK to do the compile). Its is the language this app uses.
+
+* clone the git project from https://github.com/jrosocha/jarvisFx.git, you can just download the zip from github.
+* cd to the cloned directory
+* run gradlew or gradlew.bat (*nix or windows)
+
+* cd build/install/jarvis/data
+* edit jarvis-config.json. Change the line that reads like below to point to where yourElite OCR created .csv files go.
+```
+"eliteOcrScanDirectory" : "/Users/jrosocha/trade/Elite Dangerous",
+```
+
+(At this point you can copy the build/install/jarvis folder somewhere else. It contains all the artifacts you require to run this app.
+
+* cd ../bin (or build/install/jarvis/bin for those of you who are lost)
+
+* run jarvis (or jarvis.bat)
+
+
