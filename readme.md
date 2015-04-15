@@ -1,10 +1,12 @@
 # jarvis
+
 Elite Dangerous Trade Assistant 
 Requires EliteOCR
 
 Powered by OrientDb, Spring, and JavaFx
 
 ## Installation
+
 * Install Elite:Dangerous .. or all of this will really be boring
 * Install EliteOCR and learn how to use it. This app uses the csv exports. Mind what directory they get written to.
 

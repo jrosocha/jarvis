@@ -3,6 +3,8 @@ package com.jhr.jarvis.controllers;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
@@ -70,8 +72,10 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     private TableColumn<Station, Boolean> stationBlackMarketFlagColumn;
     @FXML
     private TableColumn<Station, LocalDateTime> stationDataAgeColumn;
+    
     @FXML
     private ComboBox<String> currentSystemComboBox;
+    private Timer currentSystemComboBoxTimer = new Timer();
     
     private ObservableList<String> allSystems = FXCollections.observableArrayList();
     
@@ -91,11 +95,17 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         }
         
         if (event instanceof OcrCompletedEvent) {
-            Platform.runLater(()->{  
+            Platform.runLater(()->{
+                String starSystemName = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
                 populateSystems();
-                StarSystem starSystem = starSystemService.getCurrentStarSystem();
-                if (starSystem != null) {
-                    eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                if (starSystemName != null) {
+                    StarSystem reloadedStarSystem;
+                    try {
+                        reloadedStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystemName);
+                        eventPublisher.publishEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
@@ -127,16 +137,11 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         
         currentSystemComboBox.setItems(allSystems);
         FxUtil.autoCompleteComboBox(currentSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
-        currentSystemComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                String selectedSystem = FxUtil.getComboBoxValue(currentSystemComboBox);
-                try {
-                    StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(selectedSystem);
-                    eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        
+        currentSystemComboBox.setOnAction((event) -> {
+            currentSystemComboBoxTimer.cancel();
+            currentSystemComboBoxTimer = new Timer();
+            currentSystemComboBoxTimer.schedule(new CurrentSystemComboBoxAutocompleteTask(), 200);            
         });
         
         stationBlackMarketFlagColumn.setCellFactory( tableCell -> new CheckBoxTableCell<>());
@@ -230,4 +235,20 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         this.eventPublisher = applicationEventPublisher;
     }
 
+    class CurrentSystemComboBoxAutocompleteTask extends TimerTask {
+        public void run() {
+            
+            String selectedSystem = FxUtil.getComboBoxValue(currentSystemComboBox);
+            if (currentSystemComboBox.getItems().contains(selectedSystem)) {
+                try {
+                    StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(selectedSystem);
+                    eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        }
+    }
+    
 }

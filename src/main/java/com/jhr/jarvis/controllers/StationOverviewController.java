@@ -3,6 +3,8 @@ package com.jhr.jarvis.controllers;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
@@ -16,6 +18,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyEvent;
 
 import javax.annotation.PostConstruct;
 
@@ -26,6 +29,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 
+import com.jhr.jarvis.controllers.CurrentSystemController.CurrentSystemComboBoxAutocompleteTask;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
@@ -67,6 +71,8 @@ public class StationOverviewController implements ApplicationListener<Applicatio
     private Label systemNameLabel;
     @FXML
     private ComboBox<String> stationComboBox;
+    private Timer stationComboBoxTimer = new Timer();
+    
     @FXML
     private CheckBox blackMarketCheckBox;
     @FXML
@@ -150,18 +156,12 @@ public class StationOverviewController implements ApplicationListener<Applicatio
         
         stationComboBox.setItems(stations);
         FxUtil.autoCompleteComboBox(stationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
-        stationComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                String selectedStation = FxUtil.getComboBoxValue(stationComboBox);
-                try {
-                    Station station = stationService.findExactStationOrientDb(selectedStation);                    
-                    eventPublisher.publishEvent(new StationOverviewChangedEvent(station));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        stationComboBox.setOnAction((event)->{
+            stationComboBoxTimer.cancel();
+            stationComboBoxTimer = new Timer();
+            stationComboBoxTimer.schedule(new StationComboBoxAutocompleteTask(), 200);   
         });
-        
+ 
         populateStations();
     }
     
@@ -188,6 +188,20 @@ public class StationOverviewController implements ApplicationListener<Applicatio
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
+    }
+    
+    class StationComboBoxAutocompleteTask extends TimerTask {
+        public void run() {            
+            String selectedStation = FxUtil.getComboBoxValue(stationComboBox);
+            if (stationComboBox.getItems().contains(selectedStation)) {
+                try {
+                     Station station = stationService.findExactStationOrientDb(selectedStation);                    
+                     eventPublisher.publishEvent(new StationOverviewChangedEvent(station));
+                 } catch (Exception e) {
+                     e.printStackTrace();
+                 }
+            }
+        }
     }
 
 }
