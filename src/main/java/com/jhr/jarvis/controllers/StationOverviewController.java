@@ -162,6 +162,16 @@ public class StationOverviewController implements ApplicationListener<Applicatio
             stationComboBoxTimer.schedule(new StationComboBoxAutocompleteTask(), 200);   
         });
  
+        deleteStationButton.setOnAction((event)->{
+             String stationName = FxUtil.getComboBoxValue(stationComboBox);
+             try {
+                stationService.deleteStationOrientDb(stationName);
+                eventPublisher.publishEvent(new OcrCompletedEvent(Boolean.TRUE));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        
         populateStations();
     }
     

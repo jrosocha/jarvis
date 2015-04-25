@@ -13,7 +13,7 @@ public class StarSystem {
     
     public StarSystem(String name, float x, float y, float z) {
         super();
-        this.name = name;
+        this.name = name.toUpperCase();
         this.x = x;
         this.y = y;
         this.z = z;
@@ -21,7 +21,7 @@ public class StarSystem {
 
     public StarSystem(String name) {
         super();
-        this.name = name;
+        this.name = name.toUpperCase();
     }
 
     /* (non-Javadoc)
@@ -83,7 +83,7 @@ public class StarSystem {
         return name;
     }
     public void setName(String name) {
-        this.name = name;
+        this.name = name.toUpperCase();
     }
     public float getX() {
         return x;

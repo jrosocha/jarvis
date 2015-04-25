@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.jhr.jarvis.controllers.CommandsController;
 import com.jhr.jarvis.controllers.ConsoleController;
 import com.jhr.jarvis.controllers.CurrentSystemController;
@@ -32,13 +33,14 @@ import com.jhr.jarvis.controllers.StationOverviewController;
 @ComponentScan
 @EnableAutoConfiguration
 @EnableScheduling
-class JarvisConfig {
+public class JarvisConfig {
     
     @Autowired 
     private SpringFxmlLoader springFxmlLoader;
     
     public static final ObjectMapper MAPPER = new ObjectMapper();
     static {
+        MAPPER.registerModule(new JodaModule());
         MAPPER.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         MAPPER.configure(SerializationFeature.INDENT_OUTPUT, true);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

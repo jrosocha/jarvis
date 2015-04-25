@@ -129,6 +129,26 @@ public class StationService {
         return out;
    }
     
+    public Station deleteStationOrientDb(String stationName) throws StationNotFoundException {
+        OrientGraph graph = null;
+        graph = orientDbService.getFactory().getTx();
+        Station out = new Station();
+        try {    
+            OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", stationName);
+            if (stationVertex == null) {
+                throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
+            }
+            stationVertex.remove();
+            graph.commit();
+        } catch (Exception e) {
+            if (graph != null) {
+                graph.rollback();
+            }
+            throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
+        }
+        return out;
+   }
+    
     /**
      * Runs an exact match and a partial match looking to identify a single station.
      * If a single station is found, it is loaded into memory
@@ -246,9 +266,27 @@ public class StationService {
             graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            e.printStackTrace();
             if (graph != null) {
                 graph.rollback();
             }
+        }
+    }
+
+    public void deleteCommodityExchangeRelationshipOrientDb(Station station, Commodity commodity) {
+        
+        OrientGraph graph = null;
+        try {
+            graph = orientDbService.getFactory().getTx();
+            OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
+            OrientVertex vertexCommodity = (OrientVertex) graph.getVertexByKey("Commodity.name", commodity.getName());
+            for (Edge exchange: vertexStation.getEdges(vertexCommodity, Direction.BOTH)) {
+                exchange.remove();
+            }
+            graph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            graph.rollback();
         }
     }
     
@@ -267,6 +305,7 @@ public class StationService {
             edgeExchange.setProperty("date", date);
             graph.commit();
         } catch (Exception e) {
+            e.printStackTrace();
             graph.rollback();
         }
     }
@@ -283,6 +322,7 @@ public class StationService {
             }
             graph.commit();
         } catch (Exception e) {
+            e.printStackTrace();
             graph.rollback();
         }
     }

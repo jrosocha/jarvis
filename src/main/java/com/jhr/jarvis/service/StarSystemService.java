@@ -187,11 +187,11 @@ public class StarSystemService {
         try {
             graph = orientDbService.getFactory().getTx();
 
-            OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", system.getName());
+            OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", system.getName().toUpperCase());
             if (vertexSystem == null) {
 
                 vertexSystem = graph.addVertex("class:System");
-                vertexSystem.setProperty("name", system.getName());
+                vertexSystem.setProperty("name", system.getName().toUpperCase());
                 vertexSystem.setProperty("x", system.getX());
                 vertexSystem.setProperty("y", system.getY());
                 vertexSystem.setProperty("z", system.getZ());

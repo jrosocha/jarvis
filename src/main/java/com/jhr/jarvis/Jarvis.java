@@ -17,6 +17,7 @@ import com.jhr.jarvis.controllers.RootLayoutController;
 import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
+import com.jhr.jarvis.service.EddnService;
 
 @Import(JarvisConfig.class)
 public class Jarvis extends AbstractJavaFxApplicationSupport {
@@ -25,6 +26,9 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     
     @Autowired
     private SpringFxmlLoader loader;
+    
+    @Autowired
+    private EddnService eddnService;
     
     RootLayoutController rootLayoutController;
     
@@ -61,6 +65,8 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         showExchange();
         showConsole();
         showSettings();
+        
+        eddnService.scanForEddnMessages();
     }
 	
     public void showCurrentSystem() {
