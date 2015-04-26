@@ -1,6 +1,7 @@
 package com.jhr.jarvis.controllers;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -9,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -54,6 +56,12 @@ public class CommandsController implements ApplicationListener<ApplicationEvent>
     private Button eddnButton;
     
     @FXML
+    private Button eddnReset;
+    
+    @FXML
+    private Label eddnLastModified;
+    
+    @FXML
     private ProgressIndicator eddnProgress;
     
     @FXML
@@ -85,6 +93,10 @@ public class CommandsController implements ApplicationListener<ApplicationEvent>
         eddnButton.setOnAction((event) -> {
             eddnProgress.setVisible(true);
             runEddnImport();
+        });
+        
+        eddnReset.setOnAction((event) -> {
+            eddnService.scanForEddnMessages();
         });
         
         eddnAuto.setSelected(eddnService.isAutoProcess());
@@ -134,6 +146,7 @@ public class CommandsController implements ApplicationListener<ApplicationEvent>
                     eddnButton.setStyle(null);
                 }
                 eddnProgress.setVisible(false);
+                eddnLastModified.setText(eddnService.getLastMessageReceived().format(DateTimeFormatter.ISO_LOCAL_TIME));
             });
             
         }

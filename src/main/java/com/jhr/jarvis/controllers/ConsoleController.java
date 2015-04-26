@@ -39,7 +39,10 @@ public class ConsoleController implements ApplicationListener<ConsoleEvent> {
                 try {
                     synchronized(console) {
                         System.out.println("console " + console.lengthProperty());
-                        System.out.println("trying to append " +event.getMessage());               
+                        System.out.println("trying to append " +event.getMessage());
+                        if (console.getText().length() > 50000) {
+                            console.setText(console.getText(25000, console.getText().length()));
+                        }
                         console.appendText(event.getMessage() + "\n");
                     }
                 } catch (Exception e) {

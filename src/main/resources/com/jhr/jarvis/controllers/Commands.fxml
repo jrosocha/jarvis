@@ -6,10 +6,13 @@
 
 <Pane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="200.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="200.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CommandsController">
    <children>
-      <Button fx:id="ocrButton" layoutX="21.0" layoutY="14.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="139.0" text="Import From Elite OCR " />
-      <ProgressIndicator fx:id="ocrProgress" layoutX="171.0" layoutY="14.0" prefHeight="20.0" prefWidth="15.0" />
-      <Button fx:id="eddnButton" layoutX="71.0" layoutY="50.0" mnemonicParsing="false" text="EDDN Import (0)" />
-      <ProgressIndicator fx:id="eddnProgress" layoutX="171.0" layoutY="50.0" prefHeight="20.0" prefWidth="15.0" />
-      <CheckBox fx:id="eddnAuto" layoutX="21.0" layoutY="53.0" mnemonicParsing="false" text="Auto" />
+      <Button fx:id="ocrButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="154.0" text="Import From Elite OCR " />
+      <ProgressIndicator fx:id="ocrProgress" layoutX="174.0" layoutY="10.0" prefHeight="20.0" prefWidth="15.0" />
+      <Button fx:id="eddnButton" layoutX="56.0" layoutY="36.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="108.0" text="EDDN Import (0)" />
+      <ProgressIndicator fx:id="eddnProgress" layoutX="175.0" layoutY="36.0" prefHeight="20.0" prefWidth="15.0" />
+      <CheckBox fx:id="eddnAuto" layoutX="10.0" layoutY="39.0" mnemonicParsing="false" text="Auto" />
+      <Label layoutX="10.0" layoutY="56.0" text="Last Message @" />
+      <Label fx:id="eddnLastModified" layoutX="89.0" layoutY="57.0" prefHeight="12.0" prefWidth="88.0" text="Unknown" />
+      <Button fx:id="eddnReset" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" text="Restart EDDN Thread" />
    </children>
 </Pane>

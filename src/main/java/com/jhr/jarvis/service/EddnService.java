@@ -2,6 +2,7 @@ package com.jhr.jarvis.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +42,8 @@ public class EddnService implements ApplicationEventPublisherAware {
     @Autowired
     private StationService stationService;
 
+    private LocalDateTime lastMessageReceived = null;
+    
     private ApplicationEventPublisher eventPublisher;
 
     private Thread eddnScanningThread = null;
@@ -84,6 +87,7 @@ public class EddnService implements ApplicationEventPublisherAware {
                         String outputString = new String(output, 0, output.length, "UTF-8");
                         EddnMessage message = JarvisConfig.MAPPER.readValue(outputString, EddnMessage.class);
                         eddnMessageQueue.add(message);
+                        lastMessageReceived = LocalDateTime.now();
                         eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
                         eventPublisher.publishEvent(new EddnMessageQueueModifiedEvent(eddnMessageQueue.size()));
                         if (autoProcess) {
@@ -186,6 +190,14 @@ public class EddnService implements ApplicationEventPublisherAware {
 
     public void setAutoProcess(boolean autoProcess) {
         this.autoProcess = autoProcess;
+    }
+
+    public LocalDateTime getLastMessageReceived() {
+        return lastMessageReceived;
+    }
+
+    public void setLastMessageReceived(LocalDateTime lastMessageReceived) {
+        this.lastMessageReceived = lastMessageReceived;
     }
 
 }
