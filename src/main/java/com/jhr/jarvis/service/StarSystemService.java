@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
+import com.jhr.jarvis.model.MapData;
+import com.jhr.jarvis.model.Node;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.Ship;
 import com.jhr.jarvis.model.StarSystem;
@@ -56,6 +58,34 @@ public class StarSystemService {
     
     private StarSystem currentStarSystem = null;
 
+    
+    public MapData getMapDataForSystem(StarSystem starSystem, float jumpDistance) {
+
+        MapData out = new MapData();
+
+        List<StarSystem> closeSystems = new ArrayList<>(this.closeStarSystems(starSystem, jumpDistance));
+        closeSystems.remove(starSystem);
+        closeSystems.add(0, starSystem);
+        
+        int nodeIndex = 0;
+        for (StarSystem system: closeSystems) {
+            Node systemNode = new Node(system.getName());
+            systemNode.getAdditionalProperties().put("starSystem", system);
+            systemNode.getAdditionalProperties().put("idx", nodeIndex);
+            if (nodeIndex > 0) {
+                // connect every new node to node 0
+                double distance = this.distanceCalc(system.getX(), starSystem.getX(), system.getY(), starSystem.getY(), system.getZ(), starSystem.getZ());
+                com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge(0, nodeIndex, Math.round(distance*100.0)/100.0);
+                out.getEdges().add(edge);
+            }
+            out.getNodes().add(systemNode);
+            nodeIndex++;
+        }
+        
+        return out;
+        
+    }
+    
     public Set<Vertex> findStationsInSystemOrientDb(Vertex system, Set<String> avoidStations) {
 
         if (avoidStations == null) {
