@@ -32,8 +32,6 @@ public class Settings {
     
     private String eliteOcrScanDirectory = null;
     
-    private String mapDataDirectory = null;
-    
     private boolean eliteOcrScanArchiveEnabed = false;
     
     private int longestDistanceEdge = 25;
@@ -235,14 +233,6 @@ public class Settings {
      */
     public void setEliteDangerousAppDirectory(String eliteDangerousAppDirectory) {
         this.eliteDangerousAppDirectory = eliteDangerousAppDirectory;
-    }
-
-    public String getMapDataDirectory() {
-        return mapDataDirectory;
-    }
-
-    public void setMapDataDirectory(String mapDataDirectory) {
-        this.mapDataDirectory = mapDataDirectory;
     }
 
 }

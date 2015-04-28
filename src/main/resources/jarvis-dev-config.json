@@ -8,6 +8,5 @@
   "eliteOcrScanArchiveEnabed" : false,
   "longestDistanceEdge" : 25,
   "closeSystemDistance" : 10,
-  "eliteDangerousAppDirectory" : "/Users/jrosocha/trade",
-  "mapDataDirectory" : "data/map"
+  "eliteDangerousAppDirectory" : "/Users/jrosocha/trade"
 }

@@ -2,10 +2,14 @@ package com.jhr.jarvis.controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import javax.annotation.PostConstruct;
+
+
 
 
 
@@ -37,10 +41,14 @@ import javafx.scene.web.WebView;
 
 
 
+
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+
+
 
 
 
@@ -93,10 +101,9 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
     @PostConstruct
     public void initMap() {
 
-        File mapTemplate = new File(settings.getMapDataDirectory() + File.separatorChar + "mapTemplate.html");
         try {
-            mapHtml = new String(Files.readAllBytes(mapTemplate.toPath()));
-        } catch (IOException e) {
+            mapHtml = new String(Files.readAllBytes(Paths.get(this.getClass().getResource("/mapTemplate.html").toURI())));
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
         
