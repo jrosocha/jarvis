@@ -26,6 +26,7 @@ import com.jhr.jarvis.controllers.CurrentSystemController;
 import com.jhr.jarvis.controllers.ExchangeController;
 import com.jhr.jarvis.controllers.MapController;
 import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.RouteController;
 import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
@@ -149,6 +150,17 @@ public class JarvisConfig {
 
         try {
             return (MapController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Map.fxml");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Bean
+    public RouteController getRouteController() {
+
+        try {
+            return (RouteController) springFxmlLoader.loadController("/com/jhr/jarvis/controllers/Route.fxml");
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;

@@ -15,6 +15,7 @@ import com.jhr.jarvis.controllers.CurrentSystemController;
 import com.jhr.jarvis.controllers.ExchangeController;
 import com.jhr.jarvis.controllers.MapController;
 import com.jhr.jarvis.controllers.RootLayoutController;
+import com.jhr.jarvis.controllers.RouteController;
 import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
@@ -67,6 +68,7 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         showConsole();
         showSettings();
         showMap();
+        showRoute();
         
         eddnService.scanForEddnMessages();
     }
@@ -139,5 +141,16 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         mapTab.setContent(controller.getView());
         center.getTabs().add(mapTab);
     }
+    
+    public void showRoute() {
+
+        RouteController controller = this.getApplicationContext().getBean(RouteController.class);
+        
+        Tab routeTab = new Tab();
+        routeTab.setText("Route");
+        routeTab.setContent(controller.getView());
+        center.getTabs().add(routeTab);
+    }
+    
     
 }

@@ -11,7 +11,7 @@
 <script type="text/javascript">
 
     var w = 700;
-    var h = 700;
+    var h = 650;
 
     var colors = d3.scale.category10();
     
@@ -23,9 +23,9 @@
         .links(dataset.edges)
         .size([w,h])
         .linkDistance(function(d) { return 20 * d.value; }) 
-        .charge([-100])
+        .charge([-1000])
         .theta(0.1)
-        .gravity(0.05)
+        .gravity(0.333)
         .start();
 
     var edges = svg.selectAll("line")

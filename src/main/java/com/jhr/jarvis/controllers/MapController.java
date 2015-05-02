@@ -99,53 +99,6 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
                 Platform.runLater(()->{mapLoading.setVisible(false);});
             }
         }
-        
-        if (event instanceof DrawMapEvent) {
-
-            Runnable task=() -> {
-            
-                MapData mapData = null;
-                
-                if (event instanceof DrawRouteMapEvent) {
-                    Platform.runLater(()->{
-                        mapLoading.setVisible(true);
-                    });  
-                    DrawRouteMapEvent drawRouteMapEvent = (DrawRouteMapEvent) event;
-                    Platform.runLater(()->{
-                        mapInformation.setText(String.format("Exchange Route from system %s with a %f ly jump range", drawRouteMapEvent.getSystemsInRoute().get(0), shipService.getActiveShip().getJumpDistance()));
-                    });            
-                    mapData = starSystemService.calculateShortestPathBetweenSystems(shipService.getActiveShip(), drawRouteMapEvent.getSystemsInRoute());
-                } else if (event instanceof UpdateMapEvent){
-                    UpdateMapEvent updateMapEvent = (UpdateMapEvent) event;
-                    mapData = updateMapEvent.getMessage();
-                } else {
-                    return;
-                }
-                
-                try {
-                    String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
-                    final String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
-                    
-                    Platform.runLater(()->{            
-                        try {
-                            map.getEngine().loadContent(newMapHtml);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            mapLoading.setVisible(false);  
-                        }
-                    });
-                    
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            
-          };
-          Thread thread = new Thread(task);
-          thread.setDaemon(true);
-          thread.start();
-        }
-
     }
     
     public Node getView() {
