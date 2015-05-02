@@ -34,6 +34,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.converter.NumberStringConverter;
 
 import javax.annotation.PostConstruct;
 
@@ -46,15 +47,18 @@ import org.springframework.context.ApplicationListener;
 
 import com.google.common.collect.Lists;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
+import com.jhr.jarvis.event.DrawRouteMapEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent;
 import com.jhr.jarvis.event.ExchangeCompletedEvent.ExchangeType;
 import com.jhr.jarvis.event.ExchangeStationChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
+import com.jhr.jarvis.event.UpdateMapEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.Commodity;
+import com.jhr.jarvis.model.MapData;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.CommodityService;
@@ -138,9 +142,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
     
     private ObservableList<Integer> numberOfTradesOptions = FXCollections.observableArrayList(0, 1, 2, 3);
     
-    private ObservableList<Integer> numberOfJumpsBetweenStationsOptions = FXCollections.observableArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10);
-
-    private ObservableList<BestExchange> commodities = FXCollections.observableArrayList();       
+    private ObservableList<Integer> numberOfJumpsBetweenStationsOptions = FXCollections.observableArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10);    
     
     private ApplicationEventPublisher eventPublisher;
     
@@ -345,10 +347,49 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             paddingPane.getChildren().add(exchangeTable);
             
-            TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
+            TableColumn<BestExchange,String> stopNumber = new TableColumn<>("#");
             stopNumber.setPrefWidth(25);
             exchangeTable.getColumns().add(stopNumber);
-            stopNumber.setCellValueFactory(column -> new SimpleIntegerProperty(column.getTableView().getItems().indexOf(column.getValue()) + 1).asObject());
+            stopNumber.setCellValueFactory(column -> new SimpleStringProperty((column.getTableView().getItems().indexOf(column.getValue()) + 1) + ""));
+            stopNumber.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem plotRoute = new MenuItem("Plot Route");
+                                plotRoute.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                            List<String> systemsPath = new ArrayList<>();
+                                            systemsPath.add(bestExchange.getBuySystemName());
+                                            systemsPath.add(bestExchange.getSellSystemName());
+                                            System.out.println("plotting route for " + systemsPath);
+                                            eventPublisher.publishEvent(new DrawRouteMapEvent(systemsPath));
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(plotRoute);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
+
+            
             
             TableColumn<BestExchange,String> from = new TableColumn<>("From");
             from.setPrefWidth(200);
@@ -499,7 +540,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         
         for (int tradeIndex = 0; tradeIndex < stopIdx; tradeIndex++) {
             
-            List<BestExchange> path = tradeService.pathToExchange(endOfRunTradesSorted, tradeIndex);
+            final List<BestExchange> path = tradeService.pathToExchange(endOfRunTradesSorted, tradeIndex);
             ObservableList<BestExchange> exchanges = FXCollections.observableArrayList();
             exchanges.addAll(path);
             
@@ -513,10 +554,60 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             paddingPane.getChildren().add(exchangeTable);
             
-            TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("Leg");
+            TableColumn<BestExchange, String> stopNumber = new TableColumn<>("Leg");
             stopNumber.setPrefWidth(25);
             exchangeTable.getColumns().add(stopNumber);
-            stopNumber.setCellValueFactory(column -> new SimpleIntegerProperty(column.getTableView().getItems().indexOf(column.getValue()) + 1).asObject());
+            stopNumber.setCellValueFactory(column -> new SimpleStringProperty((column.getTableView().getItems().indexOf(column.getValue()) + 1) + ""));
+
+            stopNumber.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+                @Override
+                public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                    final TableCell<BestExchange, String> cell = new TableCell<>();
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.itemProperty().addListener(new ChangeListener<String>() {
+                        @Override
+                        public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                            if (newValue != null) {
+                                final ContextMenu cellMenu = new ContextMenu();
+                                final MenuItem plotRoute = new MenuItem("Plot Route");
+                                plotRoute.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        try {
+                                            if (path.size() > 0) {
+                                                List<String> systemsPath = new ArrayList<>();
+                                                String previousEntry = null;
+                                                for (BestExchange exchange : path) {
+                                                    previousEntry = systemsPath.size() > 0 ? systemsPath.get(systemsPath.size() - 1) : null;
+                                                    if (previousEntry == null || !previousEntry.equals(exchange.getBuySystemName())) {
+                                                        systemsPath.add(exchange.getBuySystemName());
+                                                    }
+                                                    if (!exchange.getBuySystemName().equals(exchange.getSellSystemName())) {
+                                                        systemsPath.add(exchange.getSellSystemName());
+                                                    }
+
+                                                }
+                                                System.out.println("plotting route for " + systemsPath);
+                                                eventPublisher.publishEvent(new DrawRouteMapEvent(systemsPath));
+
+                                            }
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                cellMenu.getItems().add(plotRoute);
+                                cell.setContextMenu(cellMenu);
+                            } else {
+                                cell.setContextMenu(null);
+                            }
+                        }
+                    });
+                    return cell;
+                }
+            });
+            
             
             TableColumn<BestExchange,String> from = new TableColumn<>("From");
             from.setPrefWidth(200);

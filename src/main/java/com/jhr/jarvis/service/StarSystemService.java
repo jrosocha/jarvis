@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -407,10 +408,88 @@ public class StarSystemService {
         return distanceCalc(systemA.getProperty("x"), systemB.getProperty("x"), systemA.getProperty("y"), systemB.getProperty("y"), systemA.getProperty("z"), systemB.getProperty("z"));    
     }
 
-    public String calculateShortestPathBetweenSystems(Ship ship, String startSystemName, String finishSystemName) {
+    public MapData calculateShortestPathBetweenSystems(Ship ship, List<String> systemsInRoute) {
         OrientGraph graph = null;
         
-        String out = "";
+        MapData out = new MapData();
+
+        LinkedList<OrientVertex> path = null;
+        try {
+            graph = orientDbService.getFactory().getTx();
+            
+            // handle a 1 system solution 
+            if (systemsInRoute.size() == 1) {
+                OrientVertex nextSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", systemsInRoute.get(0));
+                Node systemNode = new Node(nextSystemVertex.getProperty("name"));
+                out.getNodes().add(systemNode);
+                return out;
+            }
+            
+            OrientVertex lastSystemVertex = null;
+            OrientVertex lastSystemInPathBetweenVertex = null;
+            int systemIdx = 0;
+            for (String nextSystem: systemsInRoute) {
+                OrientVertex nextSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", nextSystem);
+                if (lastSystemVertex != null) {
+                    
+                    double lyLimit = ship.getJumpDistance();
+                    Map<String,Object> params = new HashMap<String,Object>();
+                    params.put("sourceVertex", lastSystemVertex);
+                    params.put("destinationVertex", nextSystemVertex);
+                    params.put("weightEdgeFieldName", "ly");
+                    params.put("weightLimit", lyLimit);
+                    
+                    String sql = String.format("select dijkstra2(%s, %s, '%s', %f, 'BOTH')", lastSystemVertex.getId().toString(), nextSystemVertex.getId().toString(), "ly", ship.getJumpDistance());
+                    OrientDynaElementIterable result = graph.command(new OCommandSQL(sql)).execute();
+                    for (Object obj : result) {
+                        OrientVertex thing = (OrientVertex) obj; 
+                        path = thing.getRecord().field("dijkstra2");
+                        break;
+                    }
+
+                    if (path == null) {
+                        System.out.println(String.format("No path could be found between %s and %s with a %.2f jump distance", lastSystemVertex.getProperty("name"), nextSystem, ship.getJumpDistance()));
+                        return out;
+                    }
+                    
+                    for (OrientVertex pathBetweenVertex: path) {
+
+                        if (out.getNodes().size()  == 0 || 
+                                (out.getNodes().size() > 0 && !out.getNodes().get(out.getNodes().size() -1).getName().equals(pathBetweenVertex.getProperty("name")))) {
+                        
+                            if (lastSystemInPathBetweenVertex != null) {
+                                Edge frameshift = lastSystemInPathBetweenVertex.getEdges(pathBetweenVertex, Direction.BOTH, "Frameshift").iterator().next();                    
+                                com.jhr.jarvis.model.Edge mapEdge = new com.jhr.jarvis.model.Edge(systemIdx - 1, systemIdx,  Math.round(((double) frameshift.getProperty("ly"))*100.0)/100.0);
+                                out.getEdges().add(mapEdge);
+                            }
+                            Node systemNode = new Node(pathBetweenVertex.getProperty("name"));
+                            systemNode.getAdditionalProperties().put("idx", systemIdx);
+                            out.getNodes().add(systemNode);
+                            lastSystemInPathBetweenVertex = pathBetweenVertex;
+                            systemIdx ++;
+                        }
+                    }
+                }
+                
+                lastSystemVertex = nextSystemVertex;
+            }
+ 
+            graph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (graph != null) {
+                graph.rollback();
+            }
+        }
+        return out;
+    }
+
+    
+    public MapData calculateShortestPathBetweenSystems(Ship ship, String startSystemName, String finishSystemName) {
+        OrientGraph graph = null;
+        
+        MapData out = new MapData();
+        
         LinkedList<OrientVertex> path = null;
         try {
             graph = orientDbService.getFactory().getTx();
@@ -434,18 +513,23 @@ public class StarSystemService {
             }
 
             if (path == null) {
-                return String.format("No path could be found between %s and %s with a %.2f jump distance", startSystemName, finishSystemName, ship.getJumpDistance());
+                System.out.println(String.format("No path could be found between %s and %s with a %.2f jump distance", startSystemName, finishSystemName, ship.getJumpDistance()));
+                return out;
             }
             
             OrientVertex lastSystem = null;
+            int nodeIndex = 0;
             for (OrientVertex vertex: path) {
                 if (lastSystem != null) {
-                    
-                    Edge frameshift = lastSystem.getEdges(vertex, Direction.BOTH, "Frameshift").iterator().next();
-                    out += "--[" + String.format("%.2f", (double) frameshift.getProperty("ly")) + "]-->";
+                    Edge frameshift = lastSystem.getEdges(vertex, Direction.BOTH, "Frameshift").iterator().next();                    
+                    com.jhr.jarvis.model.Edge mapEdge = new com.jhr.jarvis.model.Edge(nodeIndex - 1, nodeIndex,  Math.round(((double) frameshift.getProperty("ly"))*100.0)/100.0);
+                    out.getEdges().add(mapEdge);
                 }
-                out += "(" + vertex.getProperty("name") + ")";
+                Node systemNode = new Node(vertex.getProperty("name"));
+                systemNode.getAdditionalProperties().put("idx", nodeIndex);
+                out.getNodes().add(systemNode);
                 lastSystem = vertex;
+                nodeIndex ++;
             }
             graph.commit();
         } catch (Exception e) {

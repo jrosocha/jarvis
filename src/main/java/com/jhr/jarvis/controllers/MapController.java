@@ -1,72 +1,28 @@
 package com.jhr.jarvis.controllers;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-
-import javax.annotation.PostConstruct;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.web.WebView;
 
+import javax.annotation.PostConstruct;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.jhr.jarvis.Jarvis;
 import com.jhr.jarvis.JarvisConfig;
-import com.jhr.jarvis.event.ConsoleEvent;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
+import com.jhr.jarvis.event.DrawMapEvent;
+import com.jhr.jarvis.event.DrawRouteMapEvent;
+import com.jhr.jarvis.event.UpdateMapEvent;
 import com.jhr.jarvis.model.MapData;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
@@ -87,6 +43,12 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
     @FXML
     private WebView map;
     
+    @FXML
+    private Label mapInformation;
+    
+    @FXML
+    private ProgressIndicator mapLoading;
+    
     @Autowired
     private Settings settings;
 
@@ -100,7 +62,7 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
     
     @PostConstruct
     public void initMap() {
-
+        Platform.runLater(()->{mapLoading.setVisible(false);});
         try {
             mapHtml = new String(Files.readAllBytes(Paths.get(this.getClass().getResource("/mapTemplate.html").toURI())));
         } catch (IOException | URISyntaxException e) {
@@ -112,9 +74,11 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof CurrentSystemChangedEvent) {
+
+            Platform.runLater(()->{mapLoading.setVisible(true);});          
             CurrentSystemChangedEvent currentSystemChangedEvent = (CurrentSystemChangedEvent) event;
-            
             StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
+            Platform.runLater(()->{mapInformation.setText(String.format("Routes from system %s with a %f ly jump range", starSystem.getName(), shipService.getActiveShip().getJumpDistance()));});            
             MapData mapData = starSystemService.getMapDataForSystem(starSystem, shipService.getActiveShip().getJumpDistance());
             
             try {
@@ -122,7 +86,7 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
                 final String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
                 
                 Platform.runLater(()->{            
-                    try {
+                    try {                     
                         map.getEngine().loadContent(newMapHtml);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -131,7 +95,55 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
                 
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                Platform.runLater(()->{mapLoading.setVisible(false);});
             }
+        }
+        
+        if (event instanceof DrawMapEvent) {
+
+            Runnable task=() -> {
+            
+                MapData mapData = null;
+                
+                if (event instanceof DrawRouteMapEvent) {
+                    Platform.runLater(()->{
+                        mapLoading.setVisible(true);
+                    });  
+                    DrawRouteMapEvent drawRouteMapEvent = (DrawRouteMapEvent) event;
+                    Platform.runLater(()->{
+                        mapInformation.setText(String.format("Exchange Route from system %s with a %f ly jump range", drawRouteMapEvent.getSystemsInRoute().get(0), shipService.getActiveShip().getJumpDistance()));
+                    });            
+                    mapData = starSystemService.calculateShortestPathBetweenSystems(shipService.getActiveShip(), drawRouteMapEvent.getSystemsInRoute());
+                } else if (event instanceof UpdateMapEvent){
+                    UpdateMapEvent updateMapEvent = (UpdateMapEvent) event;
+                    mapData = updateMapEvent.getMessage();
+                } else {
+                    return;
+                }
+                
+                try {
+                    String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
+                    final String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
+                    
+                    Platform.runLater(()->{            
+                        try {
+                            map.getEngine().loadContent(newMapHtml);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            mapLoading.setVisible(false);  
+                        }
+                    });
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            
+          };
+          Thread thread = new Thread(task);
+          thread.setDaemon(true);
+          thread.start();
         }
 
     }
