@@ -19,7 +19,6 @@ public class Node {
 
     @JsonProperty("name")
     private String name;
-    @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     public Node(String name) {

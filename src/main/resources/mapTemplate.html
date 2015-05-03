@@ -41,7 +41,7 @@
       .data(dataset.nodes)
       .enter()
       .append("circle")
-      .attr({"r":15})
+      .attr({"r":10})
       .style("fill",function(d,i){return colors(i);})
       .call(force.drag)
 
@@ -53,7 +53,7 @@
        .attr({"x":function(d){return d.x;},
               "y":function(d){return d.y;},
               "class":"nodelabel",
-              "font-size":12
+              "font-size":10
               })
        .text(function(d){return d.name;});
 

@@ -792,10 +792,49 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
 //            }  
 //        });  
         
-        TableColumn<BestExchange,Integer> stopNumber = new TableColumn<>("#");
+        TableColumn<BestExchange,String> stopNumber = new TableColumn<>("#");
         stopNumber.setPrefWidth(25);
         exchangeTable.getColumns().add(stopNumber);
-        stopNumber.setCellValueFactory(column -> new SimpleIntegerProperty(column.getTableView().getItems().indexOf(column.getValue()) + 1).asObject());
+        stopNumber.setCellValueFactory(column -> new SimpleStringProperty((column.getTableView().getItems().indexOf(column.getValue()) + 1) + ""));
+        stopNumber.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
+            @Override
+            public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
+                final TableCell<BestExchange, String> cell = new TableCell<>();
+                cell.textProperty().bind(cell.itemProperty());
+                cell.itemProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> obs, String oldValue, String newValue) {
+                        if (newValue != null) {
+                            final ContextMenu cellMenu = new ContextMenu();
+                            final MenuItem plotRoute = new MenuItem("Plot Route");
+                            plotRoute.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    try {
+                                        BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
+                                        List<String> systemsPath = new ArrayList<>();
+                                        systemsPath.add(bestExchange.getBuySystemName());
+                                        systemsPath.add(bestExchange.getSellSystemName());
+                                        System.out.println("plotting route for " + systemsPath);
+                                        eventPublisher.publishEvent(new DrawRouteMapEvent(systemsPath));
+
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            cellMenu.getItems().add(plotRoute);
+                            cell.setContextMenu(cellMenu);
+                        } else {
+                            cell.setContextMenu(null);
+                        }
+                    }
+                });
+                return cell;
+            }
+        });
+
+        
         
         if (isSell) { 
         
