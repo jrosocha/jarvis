@@ -1,6 +1,8 @@
 package com.jhr.jarvis.controllers;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
+import com.google.common.io.CharStreams;
 import com.jhr.jarvis.JarvisConfig;
 import com.jhr.jarvis.event.DrawMapEvent;
 import com.jhr.jarvis.event.DrawRouteMapEvent;
@@ -61,9 +64,10 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
     @PostConstruct
     public void initMap() {
         Platform.runLater(()->{mapLoading.setVisible(false);});
-        try {
-            mapHtml = new String(Files.readAllBytes(Paths.get(this.getClass().getResource("/mapTemplate.html").toURI())));
-        } catch (IOException | URISyntaxException e) {
+        try ( InputStream in = getClass().getResourceAsStream("/mapTemplate.html");
+                final InputStreamReader inr = new InputStreamReader(in)) {
+            mapHtml = CharStreams.toString(inr);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         
