@@ -110,7 +110,7 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
                     newMapHtml = newMapHtml.replace("__X__", x.toString());
                     newMapHtml = newMapHtml.replace("__Y__", y.toString());
                     final String newMapHtmlFinal = newMapHtml;
-                    Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
+                    //Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                     
                     Platform.runLater(()->{            
                         try {
