@@ -116,7 +116,7 @@ public class MapData {
             }
         }
         
-        Double yWindowSize = out.get(1) <= 700? 700 : out.get(1);
+        Double yWindowSize = out.get(1) <= 700.0? 700.0 : out.get(1);
         if (minY < 0) {
             double adjust = 0 - minY;
             for (Node n: this.getNodes()) {

@@ -105,8 +105,8 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
                     String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
                     String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
                     
-                    Double x = windowSize.get(0) > 700 ? windowSize.get(0) : 700;
-                    Double y = windowSize.get(1) > 700 ? windowSize.get(1) : 700;
+                    Double x = windowSize.get(0) > 700.0 ? windowSize.get(0) : 700.0;
+                    Double y = windowSize.get(1) > 700.0 ? windowSize.get(1) : 700.0;
                     newMapHtml = newMapHtml.replace("__X__", x.toString());
                     newMapHtml = newMapHtml.replace("__Y__", y.toString());
                     final String newMapHtmlFinal = newMapHtml;
