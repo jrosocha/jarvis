@@ -7,8 +7,8 @@
 
 <Pane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.RouteController">
    <children>
-      <WebView fx:id="map" layoutX="14.0" layoutY="35.0" prefHeight="700.0" prefWidth="750.0" />
+      <WebView fx:id="map" layoutX="12.0" layoutY="24.0" prefHeight="775.0" prefWidth="775.0" />
       <Label fx:id="mapInformation" layoutX="52.0" layoutY="9.0" prefHeight="12.0" prefWidth="714.0" text="Map Information" />
-      <ProgressIndicator fx:id="mapLoading" layoutX="15.0" layoutY="3.0" prefHeight="25.0" prefWidth="25.0" />
+      <ProgressIndicator fx:id="mapLoading" layoutX="33.0" layoutY="8.0" prefHeight="15.0" prefWidth="15.0" />
    </children>
 </Pane>

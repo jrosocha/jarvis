@@ -108,17 +108,28 @@ public class MapData {
         out.add(maxX - minX);
         out.add(maxY - minY);
         
+        final int radiusOfSystemCircle = 10;
         if (minX < 0) {
             double adjust = 0 - minX;
             for (Node n: this.getNodes()) {
-                n.setX(n.getX() + adjust);
+                n.setX(n.getX() + adjust + radiusOfSystemCircle);
             }
         }
         
+        Double yWindowSize = out.get(1) <= 700? 700 : out.get(1);
         if (minY < 0) {
             double adjust = 0 - minY;
             for (Node n: this.getNodes()) {
-                n.setY(n.getY() + adjust);
+                n.setY(n.getY() + adjust + radiusOfSystemCircle);
+            }
+        } else if (yWindowSize <= maxY) {
+            /*
+             * So a few months form now i wont forget:
+             * in the case where the y distance is like 500, but the y range is like 300-800, we need to push everything up 
+             */
+            double adjust = maxY - yWindowSize;
+            for (Node n: this.getNodes()) {
+                n.setY(n.getY() - adjust - radiusOfSystemCircle);
             }
         }
         

@@ -28,7 +28,13 @@ Set up your app via the settings tab. The 2 most important settings are the dire
 You'll also need verbose logging enabled in Elite:Dangerous for both EliteOCR and Jarvis.
 ![Jarvis Settings](jarvis-settings.png "Jarvis Settings")
 
-Critical to Jarvis doing anything useful is EliteOCR. You'll need to import station you visit so that Jarvis has data to work with. Share them with your friends.
+Jarvis supports the EDDN market feed. This will import market data as it becomes available. 
+![EDDN](jarvis-eddn.png "EDDN")
+
+Once you are set up, Jarvis will tell you where you are and what is in a 1 jump range from you. 
+![Map](jarvis-map.png "Map")
+
+Critical to Jarvis doing anything useful is EliteOCR. You'll need to import station you visit so that Jarvis has data to work with. Share them with your friends. Relying on EEDN will make for a small local database.
 ![Elite Ocr Import](jarvis-import-from-eliteocr.png "Elite Ocr Import")
 
 This is an example of a basic trade. Pick where you are, and how far you are willing to go, and Jarvis will brute force a solution for you.
@@ -39,6 +45,9 @@ This is a station's exchange data from the last time you imorted the data.
 
 This is an example of a multistop trade solution. The profit is incremental for each stop.
 ![Multistop Exchange](jarvis-3-trades-1-jump-distance-exchange.png "Multistop Exchange")
+
+Jarvis can (slowly right now) give you the fastest route to your destination based on your jump drive. 
+![Route Planning](jarvis-route-planning.png "Route Planning")
 
 This is an example of specific commodity trade solutions.
 ![Buy Anywhere](jarvis-buy-anywhere-exchange.png "Buy Anywhere")
