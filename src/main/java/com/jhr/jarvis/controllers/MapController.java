@@ -1,10 +1,12 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javafx.application.Platform;
@@ -86,12 +88,17 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
             MapData mapData = starSystemService.getMapDataForSystem(starSystem, shipService.getActiveShip().getJumpDistance());
             
             try {
+                mapData.getOptimalWindowSizeAndAdjustEverythingPositive();
                 String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
-                final String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
+                String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
+                newMapHtml = newMapHtml.replace("__X__", "700");
+                newMapHtml = newMapHtml.replace("__Y__", "700");
+                final String newMapHtmlFinal = newMapHtml;
+                Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                 
                 Platform.runLater(()->{            
                     try {                     
-                        map.getEngine().loadContent(newMapHtml);
+                        map.getEngine().loadContent(newMapHtmlFinal);
                     } catch (Exception e) {
                         e.printStackTrace();
                     } 

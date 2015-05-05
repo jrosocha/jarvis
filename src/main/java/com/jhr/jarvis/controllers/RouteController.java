@@ -1,11 +1,13 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -99,12 +101,20 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
                 }
                 
                 try {
+                    List<Double> windowSize = mapData.getOptimalWindowSizeAndAdjustEverythingPositive();
                     String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
-                    final String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
+                    String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
+                    
+                    Double x = windowSize.get(0) > 700 ? windowSize.get(0) : 700;
+                    Double y = windowSize.get(1) > 700 ? windowSize.get(1) : 700;
+                    newMapHtml = newMapHtml.replace("__X__", x.toString());
+                    newMapHtml = newMapHtml.replace("__Y__", y.toString());
+                    final String newMapHtmlFinal = newMapHtml;
+                    Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                     
                     Platform.runLater(()->{            
                         try {
-                            map.getEngine().loadContent(newMapHtml);
+                            map.getEngine().loadContent(newMapHtmlFinal);
                         } catch (Exception e) {
                             e.printStackTrace();
                         } finally {

@@ -19,11 +19,18 @@ public class Node {
 
     @JsonProperty("name")
     private String name;
+    private double x;
+    private double y;
+    private double z;
+    private boolean fixed = true;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    public Node(String name) {
+    public Node(String name, double x, double y, double z) {
         super();
         this.name = name;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
     
     public Node() {}
@@ -81,6 +88,38 @@ public class Node {
         } else if (!name.equals(other.name))
             return false;
         return true;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    public void setZ(double z) {
+        this.z = z;
+    }
+
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
     }
 
 }

@@ -77,5 +77,52 @@ public class MapData {
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
+    
+    @JsonIgnore
+    public List<Double> getOptimalWindowSizeAndAdjustEverythingPositive() {
+        double minX = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxY = Double.MIN_VALUE;
+        List<Double> out = new ArrayList<>();
+        
+        for (Node n: this.getNodes()) {
+            
+            if (n.getX() < minX) {
+                minX = n.getX();
+            }
+            
+            if (n.getX() > maxX) {
+                maxX = n.getX();
+            }
+            
+            if (n.getY() < minY) {
+                minY = n.getY();
+            }
+            
+            if (n.getY() > maxY) {
+                maxY = n.getY();
+            }
+        }
+        
+        out.add(maxX - minX);
+        out.add(maxY - minY);
+        
+        if (minX < 0) {
+            double adjust = 0 - minX;
+            for (Node n: this.getNodes()) {
+                n.setX(n.getX() + adjust);
+            }
+        }
+        
+        if (minY < 0) {
+            double adjust = 0 - minY;
+            for (Node n: this.getNodes()) {
+                n.setY(n.getY() + adjust);
+            }
+        }
+        
+        return out;
+    }
 
 }

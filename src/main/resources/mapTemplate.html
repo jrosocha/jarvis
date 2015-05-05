@@ -10,10 +10,10 @@
 
 <script type="text/javascript">
 
-    var w = 700;
-    var h = 650;
+    var w = __X__;
+    var h = __Y__;
 
-    var colors = d3.scale.category10();
+    var colors = d3.scale.category20();
     
     var dataset = __DATA__;
     var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
@@ -22,7 +22,7 @@
         .nodes(dataset.nodes)
         .links(dataset.edges)
         .size([w,h])
-        .linkDistance(function(d) { return 20 * d.value; }) 
+        //.linkDistance(function(d) { return 20 * d.value; }) 
         .charge([-1000])
         .theta(0.1)
         .gravity(0.333)
@@ -41,7 +41,7 @@
       .data(dataset.nodes)
       .enter()
       .append("circle")
-      .attr({"r":10})
+      .attr({"r":8})
       .style("fill",function(d,i){return colors(i);})
       .call(force.drag)
 
