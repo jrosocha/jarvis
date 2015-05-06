@@ -16,14 +16,16 @@
     var colors = d3.scale.category20();
     
     var dataset = __DATA__;
+
+    
     var svg = d3.select("body").append("svg").attr({"width":w,"height":h});
 
     var force = d3.layout.force()
         .nodes(dataset.nodes)
         .links(dataset.edges)
         .size([w,h])
-        //.linkDistance(function(d) { return 20 * d.value; }) 
-        .charge([-1000])
+        .linkDistance(function(d) { return 5; }) 
+        .charge([-500])
         .theta(0.1)
         .gravity(0.333)
         .start();
@@ -41,8 +43,20 @@
       .data(dataset.nodes)
       .enter()
       .append("circle")
-      .attr({"r":8})
-      .style("fill",function(d,i){return colors(i);})
+      .attr("r", function(d) {
+        if (d.station) {
+          return 3;
+        }
+        return 8;
+      })
+      .style("fill",function(d,i){
+        if (d.station && d.station.blackMarket) {
+          return "#000"
+        } else if (d.station) {
+          return "#ccc";
+        }
+        return colors(i);
+      })
       .call(force.drag)
 
 
@@ -53,9 +67,19 @@
        .attr({"x":function(d){return d.x;},
               "y":function(d){return d.y;},
               "class":"nodelabel",
-              "font-size":10
-              })
-       .text(function(d){return d.name;});
+              "font-size": function(d){
+                if (d.station) {
+                  return 7;
+                }
+                return 10;
+              }
+            })
+       .text(function(d){
+        if (d.station) {
+          return d.name.toLowerCase();
+        }
+        return d.name;
+      });
 
     var edgepaths = svg.selectAll(".edgepath")
         .data(dataset.edges)
@@ -79,13 +103,17 @@
                'id':function(d,i){return 'edgelabel'+i},
                'dx':40,
                'dy':0,
-               'font-size':10,
+               'font-size':6,
                'fill':'#aaa'});
 
     edgelabels.append('textPath')
         .attr('xlink:href',function(d,i) {return '#edgepath'+i})
         .style("pointer-events", "none")
-        .text(function(d,i){return  d.value + ' ly'});
+        .text(function(d,i){
+          if (d.station) {
+            return "";
+          }
+          return  d.value + ' ly'});
 
     force.on("tick", function(){
 

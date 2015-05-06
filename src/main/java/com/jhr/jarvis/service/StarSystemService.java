@@ -73,9 +73,12 @@ public class StarSystemService {
         double xOffset = 350 - (starSystem.getX() * lyDistanceMultiplier);
         double yOffset = 350 - (starSystem.getY() * lyDistanceMultiplier);
         
+        /* 
+         * add all the neighbor systems first
+         */
         int nodeIndex = 0;
         for (StarSystem system: closeSystems) {
-            Node systemNode = new Node(system.getName(), xOffset + (system.getX() * lyDistanceMultiplier), yOffset + (system.getY() * lyDistanceMultiplier), system.getZ());
+            Node systemNode = new Node(system.getName(), xOffset + (system.getX() * lyDistanceMultiplier), yOffset + (system.getY() * lyDistanceMultiplier), true);
             systemNode.getAdditionalProperties().put("starSystem", system);
             systemNode.getAdditionalProperties().put("idx", nodeIndex);
             if (nodeIndex > 0) {
@@ -88,6 +91,29 @@ public class StarSystemService {
             out.getNodes().add(systemNode);
             nodeIndex++;
         }
+        
+        /*
+         * Add stations
+         */
+        for (Node systemNode: out.getNodes()) {
+            try {
+                StarSystem starSystemWithStations = this.findExactSystemAndStationsOrientDb(systemNode.getName());
+                for (Station station: starSystemWithStations.getStations()) {
+                    Node stationNode = new Node(station.getName(), 0, 0, false);
+                    stationNode.getAdditionalProperties().put("station", station);
+                    stationNode.getAdditionalProperties().put("idx", nodeIndex);
+                    out.getNodes().add(stationNode);
+                    com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge((Integer) systemNode.getAdditionalProperties().get("idx"), nodeIndex, 1.0);
+                    edge.getAdditionalProperties().put("station", station);
+                    out.getEdges().add(edge);
+                    nodeIndex++;
+                }                
+            } catch (SystemNotFoundException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
+        
         
         return out;
         
@@ -427,7 +453,7 @@ public class StarSystemService {
             // handle a 1 system solution 
             if (systemsInRoute.size() == 1) {
                 OrientVertex nextSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", systemsInRoute.get(0));
-                Node systemNode = new Node(nextSystemVertex.getProperty("name"), 350.0, 350.0, 0);
+                Node systemNode = new Node(nextSystemVertex.getProperty("name"), 350.0, 350.0, true);
                 out.getNodes().add(systemNode);
                 return out;
             }
@@ -466,8 +492,7 @@ public class StarSystemService {
 
                         Node systemInPath = new Node(pathBetweenVertex.getProperty("name"), 
                                 xOffset + ((float)pathBetweenVertex.getProperty("x") * lyDistanceMultiplier), 
-                                yOffset + ((float)pathBetweenVertex.getProperty("y") * lyDistanceMultiplier), 
-                                (float)pathBetweenVertex.getProperty("z"));
+                                yOffset + ((float)pathBetweenVertex.getProperty("y") * lyDistanceMultiplier), true);
                         
                         if (out.getNodes().size() == 0 || !out.getNodes().contains(systemInPath)) {
                             if (lastSystemInPathBetweenVertex != null) {
@@ -482,23 +507,7 @@ public class StarSystemService {
                         }
                         
                         lastSystemInPathBetweenVertex = pathBetweenVertex;
-                        
-                        
-//                        if (out.getNodes().size()  == 0 || 
-//                                (out.getNodes().size() > 0 && !out.getNodes().get(out.getNodes().size() -1).getName().equals(pathBetweenVertex.getProperty("name")))) {
-//                        
-//                            
-//                            Node systemNode = new Node(pathBetweenVertex.getProperty("name"), 
-//                                    xOffset + ((float)pathBetweenVertex.getProperty("x") * lyDistanceMultiplier), 
-//                                    yOffset + ((float)pathBetweenVertex.getProperty("y") * lyDistanceMultiplier), 
-//                                    (float)pathBetweenVertex.getProperty("z"));
-//                            //Node systemNode = new Node(system.getName(), xOffset + (system.getX() * lyDistanceMultiplier), yOffset + (system.getY() * lyDistanceMultiplier), system.getZ());
-//                            
-//                            systemNode.getAdditionalProperties().put("idx", systemIdx);
-//                            out.getNodes().add(systemNode);
-//                            lastSystemInPathBetweenVertex = pathBetweenVertex;
-//                            systemIdx ++;
-//                        }
+
                     }
                 }
                 
@@ -558,7 +567,7 @@ public class StarSystemService {
                     com.jhr.jarvis.model.Edge mapEdge = new com.jhr.jarvis.model.Edge(nodeIndex - 1, nodeIndex,  Math.round(((double) frameshift.getProperty("ly"))*100.0)/100.0);
                     out.getEdges().add(mapEdge);
                 }
-                Node systemNode = new Node(vertex.getProperty("name"), vertex.getProperty("x"), vertex.getProperty("y"), vertex.getProperty("z"));
+                Node systemNode = new Node(vertex.getProperty("name"), vertex.getProperty("x"), vertex.getProperty("y"), true);
                 systemNode.getAdditionalProperties().put("idx", nodeIndex);
                 out.getNodes().add(systemNode);
                 lastSystem = vertex;

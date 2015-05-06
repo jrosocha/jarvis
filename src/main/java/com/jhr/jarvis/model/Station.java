@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,10 +21,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class Station {
-
+    
+    @JsonIgnore
     private StringProperty system = new SimpleStringProperty("");
+    @JsonIgnore
     private StringProperty name = new SimpleStringProperty("");
+    @JsonIgnore
     private BooleanProperty blackMarket = new SimpleBooleanProperty(false);
+    @JsonIgnore
     private final ObjectProperty<LocalDateTime> date = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
 
     private List<Commodity> availableCommodityExchanges = new ArrayList<>();
@@ -89,10 +96,12 @@ public class Station {
     /**
      * @return the name
      */
+    @JsonProperty("name")
     public String getName() {
         return name.get();
     }
     
+    @JsonIgnore
     public StringProperty getNameProperty() {
         return name;
     }
@@ -107,10 +116,12 @@ public class Station {
     /**
      * @return the system
      */
+    @JsonProperty("system")
     public String getSystem() {
         return system.get();
     }
     
+    @JsonIgnore
     public StringProperty getSystemProperty() {
         return system;
     }
@@ -125,11 +136,13 @@ public class Station {
     /**
      * @return the date
      */
+    @JsonProperty("date")
     public LocalDateTime getDate() {
         return date.get();
         //return date.get().toEpochSecond(ZoneOffset.UTC);
     }
 
+    @JsonIgnore
     public ObjectProperty<LocalDateTime> getDateProperty() {
         return date;
     }
@@ -142,10 +155,12 @@ public class Station {
         this.date.set(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
     }
     
+    @JsonProperty("blackMarket")
     public Boolean getBlackMarket() {
 		return blackMarket.getValue();
 	}
     
+    @JsonIgnore
     public BooleanProperty getBlackMarketProperty() {
         return blackMarket;
     }

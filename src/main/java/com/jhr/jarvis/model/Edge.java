@@ -100,12 +100,12 @@ public class Edge {
         this.value = value;
     }
 
-    @JsonIgnore
+    @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
-    @JsonIgnore
+    @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
     }

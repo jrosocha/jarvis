@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.annotation.Generated;
 
@@ -22,11 +24,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class MapData {
 
     @JsonProperty("nodes")
-    private List<Node> nodes = new ArrayList<Node>();
+    private List<Node> nodes = new CopyOnWriteArrayList<Node>();
     @JsonProperty("edges")
-    private List<Edge> edges = new ArrayList<Edge>();
+    private List<Edge> edges = new CopyOnWriteArrayList<Edge>();
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new ConcurrentHashMap<String, Object>();
 
     /**
      * 
