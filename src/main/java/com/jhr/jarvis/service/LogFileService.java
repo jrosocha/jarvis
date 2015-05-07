@@ -130,7 +130,7 @@ public class LogFileService implements ApplicationEventPublisherAware {
                             starSystem.setStations(stations);
                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
                         } else {
-                            eventPublisher.publishEvent(null);
+                            System.out.println("Cant find system: " + lastFoundSystemInNetLog.toUpperCase());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
