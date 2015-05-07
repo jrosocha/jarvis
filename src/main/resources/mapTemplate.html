@@ -24,10 +24,10 @@
         .nodes(dataset.nodes)
         .links(dataset.edges)
         .size([w,h])
-        .linkDistance(function(d) { return 5; }) 
-        .charge([-500])
-        .theta(0.1)
-        .gravity(0.333)
+        .linkDistance(function(d) { return 1; }) 
+        .charge([-100])
+        .theta(0.8)
+        .gravity(0.1)
         .start();
 
     var edges = svg.selectAll("line")
@@ -45,18 +45,24 @@
       .append("circle")
       .attr("r", function(d) {
         if (d.station) {
-          return 3;
+          return 5;
         }
-        return 8;
+        if (d.idx === 0) {
+        	return 20
+        }
+        return 10;
       })
       .style("fill",function(d,i){
         if (d.station && d.station.blackMarket) {
           return "#000"
         } else if (d.station) {
           return "#ccc";
+        } else if (d.idx === 0) {
+        	return "#FFFF00";
         }
-        return colors(i);
+        return "#FFD700";//colors(i);
       })
+      .style("stroke","#ccc")
       .call(force.drag)
 
 
@@ -69,7 +75,7 @@
               "class":"nodelabel",
               "font-size": function(d){
                 if (d.station) {
-                  return 7;
+                  return 8;
                 }
                 return 10;
               }
@@ -103,7 +109,7 @@
                'id':function(d,i){return 'edgelabel'+i},
                'dx':40,
                'dy':0,
-               'font-size':6,
+               'font-size':7,
                'fill':'#aaa'});
 
     edgelabels.append('textPath')
