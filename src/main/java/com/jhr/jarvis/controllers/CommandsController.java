@@ -56,9 +56,6 @@ public class CommandsController implements ApplicationListener<ApplicationEvent>
     private Button eddnButton;
     
     @FXML
-    private Button eddnReset;
-    
-    @FXML
     private Label eddnLastModified;
     
     @FXML
@@ -93,10 +90,6 @@ public class CommandsController implements ApplicationListener<ApplicationEvent>
         eddnButton.setOnAction((event) -> {
             eddnProgress.setVisible(true);
             runEddnImport();
-        });
-        
-        eddnReset.setOnAction((event) -> {
-            eddnService.scanForEddnMessages();
         });
         
         eddnAuto.setSelected(eddnService.isAutoProcess());

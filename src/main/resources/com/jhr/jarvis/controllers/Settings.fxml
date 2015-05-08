@@ -6,26 +6,27 @@
 
 <Pane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="800.0" minWidth="-Infinity" prefHeight="280.0" prefWidth="800.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.SettingsController">
    <children>
-      <TextField fx:id="orientGraphDb" layoutX="158.0" layoutY="10.0" prefHeight="20.0" prefWidth="615.0" />
-      <Label layoutX="24.0" layoutY="14.0" prefHeight="12.0" prefWidth="109.0" text="Database Directory" />
-      <Label layoutX="24.0" layoutY="36.0" prefHeight="12.0" prefWidth="109.0" text="Systems File" />
-      <TextField fx:id="systemsFile" layoutX="158.0" layoutY="32.0" prefHeight="20.0" prefWidth="615.0" />
-      <TextField fx:id="commodityFile" layoutX="158.0" layoutY="54.0" prefHeight="20.0" prefWidth="615.0" />
-      <Label layoutX="24.0" layoutY="58.0" prefHeight="12.0" prefWidth="109.0" text="Commodities FIle" />
-      <Label layoutX="24.0" layoutY="80.0" prefHeight="12.0" prefWidth="109.0" text="Ship File" />
-      <TextField fx:id="shipFile" layoutX="158.0" layoutY="76.0" prefHeight="20.0" prefWidth="615.0" />
-      <TextField fx:id="avoidStationsFile" layoutX="158.0" layoutY="98.0" prefHeight="20.0" prefWidth="615.0" />
-      <Label layoutX="24.0" layoutY="102.0" prefHeight="12.0" prefWidth="109.0" text="Avoid Stations File" />
-      <Label layoutX="24.0" layoutY="124.0" prefHeight="12.0" prefWidth="122.0" text="Elite OCR Scan Directory" />
-      <TextField fx:id="eliteOcrScanDirectory" layoutX="158.0" layoutY="120.0" prefHeight="20.0" prefWidth="615.0" />
-      <TextField fx:id="longestDistanceEdge" layoutX="158.0" layoutY="142.0" prefHeight="20.0" prefWidth="49.0" />
-      <Label layoutX="24.0" layoutY="146.0" prefHeight="12.0" prefWidth="122.0" text="Longest Distance Edge" />
-      <Label layoutX="24.0" layoutY="168.0" prefHeight="12.0" prefWidth="122.0" text="Close System Distance" />
-      <TextField fx:id="closeSystemDistance" layoutX="158.0" layoutY="164.0" prefHeight="20.0" prefWidth="49.0" />
-      <Label layoutX="24.0" layoutY="190.0" prefHeight="12.0" prefWidth="122.0" text="Elite:Dangerous App Dir" />
-      <TextField fx:id="eliteDangerousAppDirectory" layoutX="158.0" layoutY="186.0" prefHeight="20.0" prefWidth="615.0" />
-      <Button fx:id="saveConfigButton" layoutX="672.0" layoutY="246.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Save Configuration" />
-      <Label layoutX="24.0" layoutY="214.0" prefHeight="12.0" prefWidth="122.0" text="OCR Archive Enabled" />
-      <CheckBox fx:id="eliteOcrScanArchiveEnabed" layoutX="158.0" layoutY="213.0" mnemonicParsing="false" />
+      <TextField fx:id="orientGraphDb" layoutX="140.0" layoutY="28.0" prefHeight="20.0" prefWidth="615.0" />
+      <Label layoutX="10.0" layoutY="32.0" prefHeight="12.0" prefWidth="109.0" text="Database Directory" />
+      <Label layoutX="10.0" layoutY="54.0" prefHeight="12.0" prefWidth="109.0" text="Systems File" />
+      <TextField fx:id="systemsFile" layoutX="140.0" layoutY="50.0" prefHeight="20.0" prefWidth="615.0" />
+      <TextField fx:id="commodityFile" layoutX="140.0" layoutY="72.0" prefHeight="20.0" prefWidth="615.0" />
+      <Label layoutX="10.0" layoutY="76.0" prefHeight="12.0" prefWidth="109.0" text="Commodities FIle" />
+      <Label layoutX="10.0" layoutY="98.0" prefHeight="12.0" prefWidth="109.0" text="Ship File" />
+      <TextField fx:id="shipFile" layoutX="140.0" layoutY="94.0" prefHeight="20.0" prefWidth="615.0" />
+      <TextField fx:id="avoidStationsFile" layoutX="140.0" layoutY="116.0" prefHeight="20.0" prefWidth="615.0" />
+      <Label layoutX="10.0" layoutY="120.0" prefHeight="12.0" prefWidth="109.0" text="Avoid Stations File" />
+      <Label layoutX="10.0" layoutY="142.0" prefHeight="12.0" prefWidth="122.0" text="Elite OCR Scan Directory" />
+      <TextField fx:id="eliteOcrScanDirectory" layoutX="140.0" layoutY="138.0" prefHeight="20.0" prefWidth="615.0" />
+      <TextField fx:id="longestDistanceEdge" layoutX="140.0" layoutY="160.0" prefHeight="20.0" prefWidth="49.0" />
+      <Label layoutX="10.0" layoutY="164.0" prefHeight="12.0" prefWidth="122.0" text="Longest Distance Edge" />
+      <Label layoutX="10.0" layoutY="186.0" prefHeight="12.0" prefWidth="122.0" text="Close System Distance" />
+      <TextField fx:id="closeSystemDistance" layoutX="140.0" layoutY="182.0" prefHeight="20.0" prefWidth="49.0" />
+      <Label layoutX="10.0" layoutY="208.0" prefHeight="12.0" prefWidth="122.0" text="Elite:Dangerous App Dir" />
+      <TextField fx:id="eliteDangerousAppDirectory" layoutX="140.0" layoutY="204.0" prefHeight="20.0" prefWidth="615.0" />
+      <Button fx:id="saveConfigButton" layoutX="689.0" layoutY="251.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Save Configuration" />
+      <Label layoutX="10.0" layoutY="232.0" prefHeight="12.0" prefWidth="122.0" text="OCR Archive Enabled" />
+      <CheckBox fx:id="eliteOcrScanArchiveEnabed" layoutX="140.0" layoutY="230.0" mnemonicParsing="false" />
+      <Label layoutX="10.0" layoutY="10.0" text="Settings File" />
    </children>
 </Pane>

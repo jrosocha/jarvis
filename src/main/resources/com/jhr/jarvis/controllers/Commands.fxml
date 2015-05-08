@@ -13,6 +13,5 @@
       <CheckBox fx:id="eddnAuto" layoutX="10.0" layoutY="39.0" mnemonicParsing="false" text="Auto" />
       <Label layoutX="10.0" layoutY="56.0" text="Last Message @" />
       <Label fx:id="eddnLastModified" layoutX="89.0" layoutY="57.0" prefHeight="12.0" prefWidth="88.0" text="Unknown" />
-      <Button fx:id="eddnReset" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" text="Restart EDDN Thread" />
    </children>
 </Pane>

@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         
         showCurrentSystem();
         showStationOverview();
-        showShip();
+        //showShip();
         showCommands();
         showExchange();
         showConsole();
@@ -87,12 +88,6 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
         stationOverviewTab.setText("Station Overview");
         stationOverviewTab.setContent(controller.getView());
         center.getTabs().add(stationOverviewTab);
-    }
-    
-    public void showShip() {
-
-        ShipController controller = this.getApplicationContext().getBean(ShipController.class);
-        rootLayoutController.getShipPane().getChildren().add(controller.getView());
     }
     
     public void showCommands() {
@@ -124,11 +119,16 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     
     public void showSettings() {
 
-        SettingsController controller = this.getApplicationContext().getBean(SettingsController.class);
+        SettingsController settingsController = this.getApplicationContext().getBean(SettingsController.class);
+        ShipController shipController = this.getApplicationContext().getBean(ShipController.class);
         
         Tab settingsTab = new Tab();
         settingsTab.setText("Settings");
-        settingsTab.setContent(controller.getView());
+        VBox settingsVbox = new VBox();
+        settingsVbox.setMinSize(700, 700);
+        settingsVbox.getChildren().add(settingsController.getView());
+        settingsVbox.getChildren().add(shipController.getView());
+        settingsTab.setContent(settingsVbox);
         center.getTabs().add(settingsTab);
     }
 

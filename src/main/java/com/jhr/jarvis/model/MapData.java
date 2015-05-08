@@ -110,11 +110,18 @@ public class MapData {
         out.add(maxX - minX);
         out.add(maxY - minY);
         
-        final int radiusOfSystemCircle = 10;
+        final int radiusOfSystemCircle = 20;
+        
+        Double xWindowSize = out.get(0) <= 700.0? 700.0 : out.get(0);
         if (minX < 0) {
             double adjust = 0 - minX;
             for (Node n: this.getNodes()) {
                 n.setX(n.getX() + adjust + radiusOfSystemCircle);
+            }
+        } else if (xWindowSize <= maxX) {
+            double adjust = maxX - xWindowSize;
+            for (Node n: this.getNodes()) {
+                n.setX(n.getX() - adjust - radiusOfSystemCircle);
             }
         }
         

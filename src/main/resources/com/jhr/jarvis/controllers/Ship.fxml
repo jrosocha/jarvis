@@ -5,17 +5,17 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane fx:id="view" prefHeight="150.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ShipController">
+<Pane fx:id="view" prefHeight="150.0" prefWidth="800.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ShipController">
    <children>
-      <Label layoutX="42.0" layoutY="33.0" text="Cargo:" />
-      <Label layoutX="3.0" layoutY="64.0" text="Jump Range:" />
-      <Label layoutX="35.0" layoutY="94.0" text="Credits:" />
-      <TextField fx:id="shipCargo" layoutX="90.0" layoutY="28.0" prefHeight="26.0" prefWidth="47.0" />
-      <TextField fx:id="shipRange" layoutX="90.0" layoutY="59.0" prefHeight="26.0" prefWidth="47.0" />
-      <TextField fx:id="shipCredits" layoutX="90.0" layoutY="89.0" prefHeight="26.0" prefWidth="103.0" />
-      <Label layoutX="14.0" layoutY="6.0" prefHeight="16.0" prefWidth="177.0" text="Ship Variables">
+      <Label layoutX="10.0" layoutY="35.0" text="Cargo:" />
+      <Label layoutX="10.0" layoutY="58.0" text="Jump Range:" />
+      <Label layoutX="10.0" layoutY="82.0" text="Credits:" />
+      <TextField fx:id="shipCargo" layoutX="140.0" layoutY="31.0" prefHeight="20.0" prefWidth="47.0" />
+      <TextField fx:id="shipRange" layoutX="140.0" layoutY="54.0" prefHeight="20.0" prefWidth="47.0" />
+      <TextField fx:id="shipCredits" layoutX="140.0" layoutY="77.0" prefHeight="20.0" prefWidth="104.0" />
+      <Label layoutX="10.0" layoutY="10.0" prefHeight="16.0" prefWidth="177.0" text="Ship Variables">
          <font>
-            <Font name="System Bold" size="10.0" />
+            <Font size="10.0" />
          </font>
       </Label>
    </children>
