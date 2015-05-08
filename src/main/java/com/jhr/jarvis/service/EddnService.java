@@ -110,7 +110,7 @@ public class EddnService implements ApplicationEventPublisherAware {
 
     }
     
-    public void processMessageQueue() {
+    public synchronized void processMessageQueue() {
         
         while (!this.eddnMessageQueue.isEmpty() ) {            
             EddnMessage message = this.eddnMessageQueue.poll();
@@ -122,7 +122,6 @@ public class EddnService implements ApplicationEventPublisherAware {
             }
         }
         eventPublisher.publishEvent(new OcrCompletedEvent(Boolean.TRUE));
-        
     }
 
     private void processEddnMessageOrientDb(EddnMessage msg) throws IOException {

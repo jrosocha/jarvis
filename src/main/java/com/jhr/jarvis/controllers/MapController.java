@@ -94,7 +94,7 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
                 newMapHtml = newMapHtml.replace("__X__", "700");
                 newMapHtml = newMapHtml.replace("__Y__", "700");
                 final String newMapHtmlFinal = newMapHtml;
-                //Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
+                Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                 
                 Platform.runLater(()->{            
                     try {                     
