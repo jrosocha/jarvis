@@ -3,8 +3,12 @@ package com.jhr.jarvis.controllers;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
@@ -244,12 +248,14 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             Runnable task = () -> {
                 
                 String originSystem = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
+                
                 if (buyOrSell.equals("sell")) {
-                    List<BestExchange> exchanges = tradeService.bestSellPriceOrientDb(originSystem, commodity);
+                    Set<BestExchange> exchanges = tradeService.bestSellPriceOrientDb(originSystem, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.SELL_COMMODITY_ANYWHERE));
                 }
+                
                 if (buyOrSell.equals("buy")) {
-                    List<BestExchange> exchanges = tradeService.bestBuyPriceOrientDb(originSystem, commodity);
+                    Set<BestExchange> exchanges = tradeService.bestBuyPriceOrientDb(originSystem, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.BUY_COMMODITY_ANYWHERE));
                 }
             };
@@ -265,11 +271,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              */
             Runnable task = () -> {
                 if (buyOrSell.equals("sell")) {
-                    List<BestExchange> exchanges = tradeService.sellOrientDb(fromStation, shipService.getActiveShip(), numberOfJumpsBetweenStations, commodity);
+                    Set<BestExchange> exchanges = tradeService.sellOrientDb(fromStation, shipService.getActiveShip(), numberOfJumpsBetweenStations, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.SELL_COMMODITY_WITHIN_SHIP_JUMPS));
                 }
                 if (buyOrSell.equals("buy")) {
-                    List<BestExchange> exchanges = tradeService.buyOrientDb(fromStation, shipService.getActiveShip(), numberOfJumpsBetweenStations, commodity);
+                    Set<BestExchange> exchanges = tradeService.buyOrientDb(fromStation, shipService.getActiveShip(), numberOfJumpsBetweenStations, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.BUY_COMMODITY_WITHIN_SHIP_JUMPS));
                 }
             };
@@ -284,7 +290,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              * Multiple stop trade
              */
             Runnable task = () -> { 
-                List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
+                Set<BestExchange> endOfRunTrades = new ConcurrentSkipListSet<>();
                 tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
                 eventPublisher.publishEvent(new ExchangeCompletedEvent(endOfRunTrades, ExchangeType.MULTI_TRADE));
             };
@@ -299,8 +305,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              * Single stop trade
              */
             Runnable task = () -> { 
-                List<BestExchange> endOfRunTrades = new CopyOnWriteArrayList<>();
-                List<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
+                Set<BestExchange> endOfRunTrades = new ConcurrentSkipListSet<>();
+                Set<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
                 eventPublisher.publishEvent(new ExchangeCompletedEvent(sortedBestExchangeList, ExchangeType.SINGLE_TRADE));
             };
             new Thread(task).start();
@@ -311,15 +317,24 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              * Station to Station Trade 
              */
             Runnable task = () -> { 
-                List<BestExchange> bestExchangeList = new ArrayList<>();
+                Set<BestExchange> bestExchanges = new ConcurrentSkipListSet<>();
                 try {
-                    bestExchangeList = tradeService.stationToStation(stationService.findExactStationOrientDb(fromStation), stationService.findExactStationOrientDb(toStation), shipService.getActiveShip());
+                    bestExchanges = tradeService.stationToStation(stationService.findExactStationOrientDb(fromStation), stationService.findExactStationOrientDb(toStation), shipService.getActiveShip());
                 } catch (StationNotFoundException e) {
                     e.printStackTrace();
                 }
-                List<BestExchange> sortedBestExchangeList =  bestExchangeList.parallelStream().sorted((a,b)->{ return Integer.compare(a.getPerUnitProfit(), b.getPerUnitProfit()); }).collect(Collectors.toList());
-                sortedBestExchangeList = Lists.reverse(sortedBestExchangeList);
-                eventPublisher.publishEvent(new ExchangeCompletedEvent(sortedBestExchangeList, ExchangeType.SINGLE_TRADE));
+                
+                Comparator<BestExchange> byPerUnitProfit =
+                        Comparator.comparingInt(BestExchange::getPerUnitProfit);
+
+                Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                        () -> new ConcurrentSkipListSet<BestExchange>(byPerUnitProfit.reversed());
+
+                Set<BestExchange> sortedBestExchanges = bestExchanges
+                                    .parallelStream()
+                                    .collect(Collectors.toCollection(supplier));
+
+                eventPublisher.publishEvent(new ExchangeCompletedEvent(sortedBestExchanges, ExchangeType.SINGLE_TRADE));
             };
             new Thread(task).start();
         } else {
@@ -332,7 +347,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
 
     }
     
-    public void singleStopTrade(List<BestExchange> sortedBestExchangeList) {
+    public void singleStopTrade(Set<BestExchange> sortedBestExchangeList) {
  
             ObservableList<BestExchange> exchanges = FXCollections.observableArrayList();            
             exchanges.addAll(sortedBestExchangeList);
@@ -532,10 +547,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
 
     }  
     
-    public void multistopTrade(List<BestExchange> endOfRunTrades) {
+    public void multistopTrade(Set<BestExchange> endOfRunTrades) {
         
         List<BestExchange> endOfRunTradesSorted = endOfRunTrades.parallelStream().sorted((a,b)->{ return Integer.compare(a.getRoutePerProfitUnit(), b.getRoutePerProfitUnit()); }).collect(Collectors.toList());
         endOfRunTradesSorted = Lists.reverse(endOfRunTradesSorted);
+        
         int stopIdx = endOfRunTradesSorted.size() > 5 ? 5 : endOfRunTradesSorted.size();
         
         for (int tradeIndex = 0; tradeIndex < stopIdx; tradeIndex++) {
@@ -751,7 +767,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         }
     }
     
-    public void sellOrBuySpecificCommodityTrade(List<BestExchange> sortedBestExchangeList, String sellOrBuy) {
+    public void sellOrBuySpecificCommodityTrade(Set<BestExchange> sortedBestExchangeList, String sellOrBuy) {
         
         boolean isSell = sellOrBuy.equals("sell");
         boolean isBuy = sellOrBuy.equals("buy");
@@ -768,29 +784,6 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         exchangeTable.setPrefHeight(715);
         exchangeTable.setMaxHeight(Integer.MAX_VALUE);
         paddingPane.getChildren().add(exchangeTable);
-        
-//        exchangeTable.setRowFactory(new Callback<TableView<BestExchange>, TableRow<BestExchange>>() {  
-//            @Override  
-//            public TableRow<BestExchange> call(TableView<BestExchange> tableView) {  
-//                final TableRow<BestExchange> row = new TableRow<>();  
-//                final ContextMenu contextMenu = new ContextMenu();  
-//                final MenuItem menuItem = new MenuItem("Test");  
-//                menuItem.setOnAction(new EventHandler<ActionEvent>() {  
-//                    @Override  
-//                    public void handle(ActionEvent event) {  
-//                        System.out.println("row something something " + row.getItem());
-//                    }  
-//                });  
-//                contextMenu.getItems().add(menuItem);  
-//               // Set context menu on row, but use a binding to make it only show for non-empty rows:  
-//                row.contextMenuProperty().bind(  
-//                        Bindings.when(row.emptyProperty())  
-//                        .then((ContextMenu)null)  
-//                        .otherwise(contextMenu)  
-//                );  
-//                return row ;  
-//            }  
-//        });  
         
         TableColumn<BestExchange,String> stopNumber = new TableColumn<>("#");
         stopNumber.setPrefWidth(25);

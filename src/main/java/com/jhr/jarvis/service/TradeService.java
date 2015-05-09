@@ -3,13 +3,16 @@ package com.jhr.jarvis.service;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,21 +69,21 @@ public class TradeService {
           
     }
     
-    public List<BestExchange> tradeNOrientDb(String fromStationName, BestExchange parent, Ship ship, int maxJumps, int tradeStops, List<BestExchange> endList) {
+    public Set<BestExchange> tradeNOrientDb(String fromStationName, BestExchange parent, Ship ship, int maxJumps, int tradeStops, Set<BestExchange> endExchanges) {
         
         try {
             tradeStops--;
             
-            List<BestExchange> exchangesForInputStation = tradeOrientDb(fromStationName, parent, ship, maxJumps);
+            Set<BestExchange> exchangesForInputStation = tradeOrientDb(fromStationName, parent, ship, maxJumps);
             
             if (tradeStops > 0) {
                 int tradeStopsLocal = tradeStops;
                 exchangesForInputStation.parallelStream().forEach(exchangeForInputStation-> {                   
-                    List<BestExchange> thisTrip = tradeNOrientDb(exchangeForInputStation.getSellStationName(), exchangeForInputStation, ship, maxJumps, tradeStopsLocal, endList);                    
+                    Set<BestExchange> thisTrip = tradeNOrientDb(exchangeForInputStation.getSellStationName(), exchangeForInputStation, ship, maxJumps, tradeStopsLocal, endExchanges);                    
                     exchangeForInputStation.setNextTrip(thisTrip);
                 });
             } else {
-                endList.addAll(exchangesForInputStation);
+                endExchanges.addAll(exchangesForInputStation);
             }
             
             return exchangesForInputStation;
@@ -91,10 +94,19 @@ public class TradeService {
     }
 
     
-    public List<BestExchange> tradeOrientDb(String fromStationName, BestExchange parent, Ship ship, int maxJumps) {
+    /**
+     * All the trades for neighboring systems (within ship ly of input station)
+     * 
+     * @param fromStationName
+     * @param parent
+     * @param ship
+     * @param maxJumps
+     * @return
+     */
+    public Set<BestExchange> tradeOrientDb(String fromStationName, BestExchange parent, Ship ship, int maxJumps) {
         Station fromStation = new Station();
         OrientGraph graph = null;
-        List<BestExchange> bestExchangeList = new CopyOnWriteArrayList<>();
+        SortedSet<BestExchange> bestExchangeSet = new ConcurrentSkipListSet<>();
         
         try {
             graph = orientDbService.getFactory().getTx();
@@ -134,7 +146,7 @@ public class TradeService {
                         int parentRouteProfit = parent != null ? parent.getRoutePerProfitUnit() : 0;
                         bestExchange.setRoutePerProfitUnit(parentRouteProfit + bestExchange.getPerUnitProfit());
                         // add the exchange to the master list.
-                        bestExchangeList.add(bestExchange);
+                        bestExchangeSet.add(bestExchange);
                     }
                 }
             }
@@ -145,14 +157,22 @@ public class TradeService {
             e.printStackTrace();
         }
         
-        List<BestExchange> sortedBestExchangeList =  bestExchangeList.parallelStream().sorted((a,b)->{ return Integer.compare(a.getPerUnitProfit(), b.getPerUnitProfit()); }).collect(Collectors.toList());
-        sortedBestExchangeList = Lists.reverse(sortedBestExchangeList);
-        return sortedBestExchangeList;
+        Comparator<BestExchange> byProfit =
+                Comparator.comparingInt(BestExchange::getPerUnitProfit);
+
+        Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                () -> new ConcurrentSkipListSet<BestExchange>(byProfit.reversed());
+
+        Set<BestExchange> sortedBestExchanges = bestExchangeSet
+                            .parallelStream()
+                            .collect(Collectors.toCollection(supplier));
+        
+        return sortedBestExchanges;
     }
     
-    public List<BestExchange> sellOrientDb(String fromStationName, Ship ship, int maxJumps, String commodity) {
+    public Set<BestExchange> sellOrientDb(String fromStationName, Ship ship, int maxJumps, String commodity) {
         Date start = new Date();
-        List<BestExchange> out = new ArrayList<>();
+        Set<BestExchange> out = new ConcurrentSkipListSet<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
@@ -202,17 +222,22 @@ public class TradeService {
             }
         }
         
-        out = out.parallelStream().sorted((row1,row2)->{
-            return Integer.compare(row1.getSellPrice(), row2.getSellPrice());
-        }).collect(Collectors.toList());       
+        Comparator<BestExchange> bySellPrice =
+                Comparator.comparingInt(BestExchange::getSellPrice);
 
-        Collections.reverse(out);        
-        return out;
+        Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                () -> new ConcurrentSkipListSet<BestExchange>(bySellPrice.reversed());
+
+        Set<BestExchange> sortedBestExchanges = out
+                            .parallelStream()
+                            .collect(Collectors.toCollection(supplier));
+     
+        return sortedBestExchanges;
     }
     
-    public List<BestExchange> buyOrientDb(String fromStation, Ship ship, int maxJumps, String commodity) {
+    public Set<BestExchange> buyOrientDb(String fromStation, Ship ship, int maxJumps, String commodity) {
 
-        List<BestExchange> out = new ArrayList<>();
+        Set<BestExchange> out = new ConcurrentSkipListSet<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
@@ -262,17 +287,23 @@ public class TradeService {
                 graph.rollback();
             }
         }
-            
-        out = out.parallelStream().sorted((row1,row2)->{
-            return Integer.compare(row1.getBuyPrice(), row2.getBuyPrice());
-        }).collect(Collectors.toList());   
         
-        return out;
+        Comparator<BestExchange> byBuyPrice =
+                Comparator.comparingInt(BestExchange::getBuyPrice);
+
+        Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                () -> new ConcurrentSkipListSet<BestExchange>(byBuyPrice);
+
+        Set<BestExchange> sortedBestExchanges = out
+                            .parallelStream()
+                            .collect(Collectors.toCollection(supplier));
+            
+        return sortedBestExchanges;
     }
     
-    public List<BestExchange> bestBuyPriceOrientDb(String originSystem, String commodityName) {
+    public Set<BestExchange> bestBuyPriceOrientDb(String originSystem, String commodityName) {
         
-        List<BestExchange> out = new ArrayList<>();
+        Set<BestExchange> out = new ConcurrentSkipListSet<>();
         OrientGraph graph = null;
         try {
             graph = orientDbService.getFactory().getTx();
@@ -311,15 +342,22 @@ public class TradeService {
             }
         }
         
-        out = out.parallelStream().sorted((row1,row2)->{
-            return Integer.compare(row1.getBuyPrice(), row2.getBuyPrice());
-        }).collect(Collectors.toList());       
+        Comparator<BestExchange> byBuyPrice =
+                Comparator.comparingInt(BestExchange::getBuyPrice);
 
-        return out;
+        Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                () -> new ConcurrentSkipListSet<BestExchange>(byBuyPrice);
+
+        Set<BestExchange> sortedBestExchanges = out
+                            .parallelStream()
+                            .collect(Collectors.toCollection(supplier));
+        
+        return sortedBestExchanges;
+
     }
 
     
-    public List<BestExchange> bestSellPriceOrientDb(String originSystem, String commodityName) {
+    public Set<BestExchange> bestSellPriceOrientDb(String originSystem, String commodityName) {
         
         List<BestExchange> out = new ArrayList<>();
         
@@ -366,19 +404,27 @@ public class TradeService {
             }
         }
         
-        out = out.parallelStream().sorted((row1,row2)->{
-            return Integer.compare(row1.getSellPrice(), row2.getSellPrice());
-        }).collect(Collectors.toList());       
+        
+        Comparator<BestExchange> bySellPrice =
+                Comparator.comparingInt(BestExchange::getSellPrice);
 
-        return out;
+        Supplier<ConcurrentSkipListSet<BestExchange>> supplier =
+                () -> new ConcurrentSkipListSet<BestExchange>(bySellPrice);
+
+        Set<BestExchange> sortedBestExchanges = out
+                            .parallelStream()
+                            .collect(Collectors.toCollection(supplier));
+        
+        return sortedBestExchanges;
+
     }
     
-    public List<BestExchange> stationToStation(Station fromStation, Station toStation, Ship ship) {
+    public Set<BestExchange> stationToStation(Station fromStation, Station toStation, Ship ship) {
 
         OrientGraph graph = null;
         Map<String, Commodity> buyCommodities = new HashMap<>();
         Map<String, Commodity> sellCommodities = new HashMap<>();
-        List<BestExchange> exchanges = new ArrayList<>();
+        Set<BestExchange> exchanges = new ConcurrentSkipListSet<>();
         
         try {
             graph = orientDbService.getFactory().getTx();
