@@ -5,7 +5,7 @@ apply plugin:'application'
 
 group = 'jhr.jarvis'
 version = '0.0.1-SNAPSHOT'
-description = 'JarvisFx'
+description = 'Jarvis'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 mainClassName = "com.jhr.jarvis.Jarvis"

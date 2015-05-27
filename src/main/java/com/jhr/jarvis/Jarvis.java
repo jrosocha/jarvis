@@ -1,5 +1,7 @@
 package com.jhr.jarvis;
 
+import java.io.File;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -20,7 +22,9 @@ import com.jhr.jarvis.controllers.RouteController;
 import com.jhr.jarvis.controllers.SettingsController;
 import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
+import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.service.EddnService;
+import com.jhr.jarvis.service.StarSystemService;
 
 @Import(JarvisConfig.class)
 public class Jarvis extends AbstractJavaFxApplicationSupport {
@@ -33,17 +37,25 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     @Autowired
     private EddnService eddnService;
     
+    @Autowired 
+    private StarSystemService starSystemService;
+    
+    @Autowired
+    private Settings settings;
+    
     RootLayoutController rootLayoutController;
     
     private BorderPane rootLayout;    
     private TabPane center;
-    
+
 	@Override
 	public void start(Stage stage) throws Exception {
 
         this.primaryStage = stage;
         this.primaryStage.setTitle("Jarvis");
 
+        
+        
         initRootLayout();
 	}
 

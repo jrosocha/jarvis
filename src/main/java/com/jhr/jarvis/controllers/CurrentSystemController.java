@@ -1,5 +1,7 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -42,6 +44,7 @@ import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
+import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.StarSystemService;
@@ -62,6 +65,9 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     @Autowired
     private StarSystemService starSystemService;
     
+    @Autowired
+    private Settings settings;
+    
     @FXML
     private Node view;
     @FXML
@@ -80,6 +86,23 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     private ObservableList<String> allSystems = FXCollections.observableArrayList();
     
     private ObservableList<Station> stations = FXCollections.observableArrayList();
+    
+    @FXML
+    private ComboBox<String> allegianceComboBox;
+    private ObservableList<String> allegiance = FXCollections.observableArrayList();
+    
+    @FXML
+    private ComboBox<String> governmentComboBox;
+    private ObservableList<String> government = FXCollections.observableArrayList();
+    
+    @FXML
+    private ComboBox<String> factionComboBox;
+    private ObservableList<String> faction = FXCollections.observableArrayList();
+    
+    @FXML
+    private ComboBox<String> primaryEconomyComboBox;
+    private ObservableList<String> primaryEconomy = FXCollections.observableArrayList();
+
     
     private ApplicationEventPublisher eventPublisher;
     
@@ -101,7 +124,7 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
                 if (starSystemName != null) {
                     StarSystem reloadedStarSystem;
                     try {
-                        reloadedStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystemName);
+                        reloadedStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystemName, false);
                         eventPublisher.publishEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -129,14 +152,37 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
             stations.addAll(starSystem.getStations());
             stationTable.setItems(stations);
             currentSystemComboBox.getSelectionModel().select(starSystem.getName());
+            allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
+            governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
+            factionComboBox.getSelectionModel().select(starSystem.getFaction());
+            primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
         }
     }
     
     @PostConstruct
     private void initController() {
         
+        try {
+            starSystemService.loadSystemsV2(new File(settings.getSystemsFile()));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         currentSystemComboBox.setItems(allSystems);
         FxUtil.autoCompleteComboBox(currentSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        this.allegianceComboBox.setItems(this.allegiance);
+        FxUtil.autoCompleteComboBox(allegianceComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        this.governmentComboBox.setItems(this.government);
+        FxUtil.autoCompleteComboBox(governmentComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        this.factionComboBox.setItems(this.faction);
+        FxUtil.autoCompleteComboBox(factionComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        this.primaryEconomyComboBox.setItems(this.primaryEconomy);
+        FxUtil.autoCompleteComboBox(primaryEconomyComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         currentSystemComboBox.setOnAction((event) -> {
             currentSystemComboBoxTimer.cancel();
@@ -208,6 +254,7 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
       });
         
       populateSystems();
+      populateSystemMetadata();
     }
     
     private void loadNewStation(String name) {
@@ -230,6 +277,19 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         allSystems.addAll(systems);      
     }
     
+    public void populateSystemMetadata() {
+        
+        this.allegiance.clear();
+        this.allegiance.addAll(starSystemService.getAllegiances());
+        this.faction.clear();
+        this.faction.addAll(starSystemService.getFactions());
+        this.government.clear();
+        this.government.addAll(starSystemService.getGovernments());
+        this.primaryEconomy.clear();
+        this.primaryEconomy.addAll(starSystemService.getEconomies());
+           
+    }
+    
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
@@ -241,7 +301,7 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
             String selectedSystem = FxUtil.getComboBoxValue(currentSystemComboBox);
             if (currentSystemComboBox.getItems().contains(selectedSystem)) {
                 try {
-                    StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(selectedSystem);
+                    StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(selectedSystem, true);
                     eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
                 } catch (Exception e) {
                     e.printStackTrace();

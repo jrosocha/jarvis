@@ -2,24 +2,29 @@ package com.jhr.jarvis.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
-import com.google.common.collect.ImmutableList;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.jhr.jarvis.JarvisConfig;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.MapData;
 import com.jhr.jarvis.model.Node;
@@ -34,7 +39,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientDynaElementIterable;
-import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientElement;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
@@ -59,7 +63,13 @@ public class StarSystemService {
     
     private StarSystem currentStarSystem = null;
 
-    
+    /**
+     * produces the d3 map data for the system you are in and the systems you can reach with 1 jump.
+     * 
+     * @param starSystem
+     * @param jumpDistance
+     * @return
+     */
     public MapData getMapDataForSystem(StarSystem starSystem, float jumpDistance) {
 
         double lyDistanceMultiplier = 20;
@@ -97,7 +107,7 @@ public class StarSystemService {
          */
         for (Node systemNode: out.getNodes()) {
             try {
-                StarSystem starSystemWithStations = this.findExactSystemAndStationsOrientDb(systemNode.getName());
+                StarSystem starSystemWithStations = this.findExactSystemAndStationsOrientDb(systemNode.getName(), false);
                 for (Station station: starSystemWithStations.getStations()) {
                     Node stationNode = new Node(station.getName(), 0, 0, false);
                     stationNode.getAdditionalProperties().put("station", station);
@@ -108,7 +118,7 @@ public class StarSystemService {
                     out.getEdges().add(edge);
                     nodeIndex++;
                 }                
-            } catch (SystemNotFoundException e) {
+            } catch (SystemNotFoundException | IOException e) {
                 e.printStackTrace();
                 continue;
             }
@@ -119,6 +129,12 @@ public class StarSystemService {
         
     }
     
+    /**
+     * 
+     * @param system
+     * @param avoidStations
+     * @return
+     */
     public Set<Vertex> findStationsInSystemOrientDb(Vertex system, Set<String> avoidStations) {
 
         if (avoidStations == null) {
@@ -208,11 +224,94 @@ public class StarSystemService {
      * @param systemsCsvFile
      * @throws IOException
      */
-    public synchronized void loadSystems(File systemsCsvFile) throws IOException {
-        Set<StarSystem> c = Files.lines(systemsCsvFile.toPath()).parallel().map(parseCSVLineToSystem).collect(Collectors.toSet());
-        starSystemData = c;
+//    public synchronized void loadSystems(File systemsCsvFile) throws IOException {
+//        Set<StarSystem> c = Files.lines(systemsCsvFile.toPath()).parallel().map(parseCSVLineToSystem).collect(Collectors.toSet());
+//        starSystemData = c;
+//    }
+
+    public synchronized void loadSystemsV2(File eddbSystemsJson) throws JsonParseException, IOException {
+        
+        StopWatch sw = new StopWatch();
+        
+        JsonFactory jsonFactory = new JsonFactory();
+        Set<StarSystem> systems = new ConcurrentSkipListSet<>();
+        
+        sw.start("Parse EDDB File @ " + eddbSystemsJson.getAbsolutePath());
+        try (JsonParser parser = jsonFactory.createParser(eddbSystemsJson)) { 
+            
+            if(parser.nextToken() != JsonToken.START_ARRAY) {
+                throw new IllegalStateException("Expected an array");
+              }
+            
+              while(parser.nextToken() == JsonToken.START_OBJECT) {
+                // read everything from this START_OBJECT to the matching END_OBJECT
+                StarSystem node = JarvisConfig.MAPPER.readValue(parser, StarSystem.class);
+                systems.add(node);
+              }
+              System.out.println("setting " + systems.size() + " systems");
+              starSystemData = systems;
+        }
+        sw.stop();
+        System.out.println(sw.prettyPrint());
+
     }
 
+    public List<String> getGovernments() {
+        
+        Set<String> governments = starSystemData.stream().filter(system->{
+            if (StringUtils.isNotBlank(system.getGovernment())) {
+                return true;
+            }
+            return false;
+        }).map(StarSystem::getGovernment).collect(Collectors.toSet());
+        
+        List<String> out = new ArrayList<String>(governments);
+        Collections.sort(out);
+        return out;
+    }
+    
+    public List<String> getAllegiances() {
+        
+        Set<String> allegiances = starSystemData.stream().filter(system->{
+            if (StringUtils.isNotBlank(system.getAllegiance())) {
+                return true;
+            }
+            return false;
+        }).map(StarSystem::getAllegiance).collect(Collectors.toSet());
+        
+        List<String> out = new ArrayList<String>(allegiances);
+        Collections.sort(out);
+        return out;
+    }
+    
+    public List<String> getFactions() {
+        
+        Set<String> factions = starSystemData.stream().filter(system->{
+            if (StringUtils.isNotBlank(system.getFaction())) {
+                return true;
+            }
+            return false;
+        }).map(StarSystem::getFaction).collect(Collectors.toSet());
+        
+        List<String> out = new ArrayList<String>(factions);
+        Collections.sort(out);
+        return out;
+    }
+    
+    public List<String> getEconomies() {
+        
+        Set<String> economies = starSystemData.stream().filter(system->{
+            if (StringUtils.isNotBlank(system.getPrimaryEconomy())) {
+                return true;
+            }
+            return false;
+        }).map(StarSystem::getPrimaryEconomy).collect(Collectors.toSet());
+        
+        List<String> out = new ArrayList<String>(economies);
+        Collections.sort(out);
+        return out;
+    }
+    
     /**
      * When adding a system found via a EliteOCR import, we grab the system's
      * coordinates from the data/System.csv file and add systems that are close
@@ -228,7 +327,7 @@ public class StarSystemService {
     public List<StarSystem> searchSystemFileForStarSystemsByName(String systemName, boolean exactMatch) throws IOException {
 
         if (starSystemData == null) {
-            loadSystems(new File(settings.getSystemsFile()));
+            return new ArrayList<>();
         }
 
         List<StarSystem> systems;
@@ -244,21 +343,51 @@ public class StarSystemService {
         return systems;
     }
 
-    public void saveSystemToOrient(StarSystem system) {
+
+    /**
+     * Adds or updates a system to the graph.
+     * when adding a new system, this also adds edges from this system to all nearby systems (defined in settings.getLongestDistanceEdge())
+     * 
+     * @param system
+     */
+    public synchronized void saveOrUpdateSystemToOrient(StarSystem system, boolean updateEdges) {
 
         OrientGraph graph = null;
+        boolean existingSystem = false;
+
         try {
             graph = orientDbService.getFactory().getTx();
 
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", system.getName().toUpperCase());
-            if (vertexSystem == null) {
-
+            if (vertexSystem != null) {
+                existingSystem = true;                
+            }
+            
+            if (!existingSystem) {
                 vertexSystem = graph.addVertex("class:System");
-                vertexSystem.setProperty("name", system.getName().toUpperCase());
-                vertexSystem.setProperty("x", system.getX());
-                vertexSystem.setProperty("y", system.getY());
-                vertexSystem.setProperty("z", system.getZ());
+            }
+            
+            vertexSystem.setProperty("name", system.getName().toUpperCase());
+            vertexSystem.setProperty("x", system.getX());
+            vertexSystem.setProperty("y", system.getY());
+            vertexSystem.setProperty("z", system.getZ());
+            vertexSystem.setProperty("allegiance", system.getAllegiance() != null ? system.getAllegiance().toUpperCase() : "");
+            vertexSystem.setProperty("faction", system.getFaction() != null ? system.getFaction().toUpperCase() : "");
+            vertexSystem.setProperty("government", system.getGovernment() != null ? system.getGovernment().toUpperCase() : "");
+            vertexSystem.setProperty("needsPermit", system.getNeedsPermit() != null ? system.getNeedsPermit() : false);
+            vertexSystem.setProperty("population", system.getPopulation() != null ? system.getPopulation() : 0);
+            vertexSystem.setProperty("primaryEconomy", system.getPrimaryEconomy() != null ? system.getPrimaryEconomy().toUpperCase() : "");
+            vertexSystem.setProperty("security", system.getSecurity() != null ? system.getSecurity().toUpperCase() : "");
+            vertexSystem.setProperty("state", system.getState() != null ? system.getState().toUpperCase() : "");                
 
+            if (existingSystem && updateEdges) {
+                // delete edges for system
+                for (Edge edge: vertexSystem.getEdges(Direction.BOTH, "Frameshift")) {
+                    edge.remove();
+                }
+            }
+
+            if (updateEdges) {
                 // for each system within the defined distance, add an edge
                 for (Vertex vertexSystem2 : graph.getVerticesOfClass("System")) {
                     // the these 2 are not the save vertex
@@ -271,17 +400,14 @@ public class StarSystemService {
                             continue;
                         }
                         // verify edge does not exist
-                        String edgeId = createFrameshiftEdgeId(vertexSystem.getProperty("name"), vertexSystem2.getProperty("name"));
-                        OrientEdge frameshiftEdge = graph.getEdge(edgeId);
-                        if (frameshiftEdge == null) {
-                            System.out.println("Creating Edge:" + edgeId);
-                            frameshiftEdge = graph.addEdge(edgeId, vertexSystem, vertexSystem2, "Frameshift");
-                            frameshiftEdge.setProperty("ly", distance);
-                        }
+                        Edge frameshiftEdge = vertexSystem.addEdge("Frameshift", vertexSystem2);
+                        frameshiftEdge.setProperty("ly", distance);
                     }
                 }
             }
+        
             graph.commit();
+            System.out.println("Added: " + system);
         } catch (Exception e) {
             e.printStackTrace();
             if (graph != null) {
@@ -304,7 +430,7 @@ public class StarSystemService {
         boolean found = false;
 
         try {
-            foundSystem = findExactSystemAndStationsOrientDb(partial);
+            foundSystem = findExactSystemAndStationsOrientDb(partial, false);
             found = true;
         } catch (Exception e) {
             // not an exact match. proceed
@@ -323,6 +449,69 @@ public class StarSystemService {
 
         return foundSystem;
     }
+    
+    
+    public StarSystem convertVertexToSystem(OrientVertex systemVertex) {
+        StarSystem starSystem = null;
+        if (systemVertex != null) {
+            starSystem = new StarSystem(systemVertex.getProperty("name"));
+            starSystem.setX(systemVertex.getProperty("x"));
+            starSystem.setY(systemVertex.getProperty("y"));
+            starSystem.setZ(systemVertex.getProperty("z"));
+           
+            starSystem.setAllegiance(systemVertex.getProperty("allegiance"));
+            starSystem.setFaction(systemVertex.getProperty("faction"));
+            starSystem.setGovernment(systemVertex.getProperty("government"));
+            starSystem.setNeedsPermit(systemVertex.getProperty("needsPermit"));
+            starSystem.setPopulation(systemVertex.getProperty("population"));
+            starSystem.setPrimaryEconomy(systemVertex.getProperty("primaryEconomy"));
+            starSystem.setSecurity(systemVertex.getProperty("security"));
+            starSystem.setState(systemVertex.getProperty("state"));
+        }
+        return starSystem;
+    }
+    
+    //i left here. i want to compare the current system with eddb and update it if eddb data is less null.
+    public StarSystem updateSystemWithLatestFromEddbData(StarSystem starSystem) throws SystemNotFoundException, IOException {
+        
+            List<StarSystem> latestInEddb = this.searchSystemFileForStarSystemsByName(starSystem.getName(), true);
+            if (latestInEddb.size() > 0) {
+                StarSystem fileStarSystem = latestInEddb.get(0);
+                
+                if (StringUtils.isBlank(starSystem.getAllegiance())) {
+                    starSystem.setAllegiance(fileStarSystem.getAllegiance());
+                }
+                
+                if (StringUtils.isBlank(starSystem.getFaction())) {
+                    starSystem.setFaction(fileStarSystem.getFaction());
+                }
+                
+                if (StringUtils.isBlank(starSystem.getGovernment())) {
+                    starSystem.setGovernment(fileStarSystem.getGovernment());
+                }
+                
+                if (StringUtils.isBlank(starSystem.getPrimaryEconomy())) {
+                    starSystem.setPrimaryEconomy(fileStarSystem.getPrimaryEconomy());
+                }
+                
+                if (StringUtils.isBlank(starSystem.getSecurity())) {
+                    starSystem.setState(fileStarSystem.getSecurity());
+                }
+                
+                if (starSystem.getNeedsPermit() == null) {
+                    starSystem.setNeedsPermit(fileStarSystem.getNeedsPermit());
+                }
+                
+                if (starSystem.getPopulation() == null || starSystem.getPopulation() == 0) {
+                    starSystem.setPopulation(fileStarSystem.getPopulation());
+                }
+                
+                return starSystem;
+                
+            } else {
+                throw new SystemNotFoundException(starSystem.getName());
+            }
+    }
 
     /**
      * Matches if the system exists as typed
@@ -330,9 +519,10 @@ public class StarSystemService {
      * 
      * @param systemName
      * @return
+     * @throws IOException 
      * @throws Exception
      */
-    public StarSystem findExactSystemAndStationsOrientDb(String systemName) throws SystemNotFoundException {
+    public StarSystem findExactSystemAndStationsOrientDb(String systemName, boolean updateAgainstEddb) throws SystemNotFoundException, IOException {
 
         if (systemName == null) {
             throw new SystemNotFoundException("Exact system '" + systemName + "' could not be identified");
@@ -345,10 +535,7 @@ public class StarSystemService {
             graph = orientDbService.getFactory().getTx();
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
             if (vertexSystem != null) {
-                foundSystem = new StarSystem(vertexSystem.getProperty("name"));
-                foundSystem.setX(vertexSystem.getProperty("x"));
-                foundSystem.setY(vertexSystem.getProperty("y"));
-                foundSystem.setZ(vertexSystem.getProperty("z"));
+                foundSystem = convertVertexToSystem(vertexSystem);
             }
             graph.commit();
         } catch (Exception e) {
@@ -359,6 +546,11 @@ public class StarSystemService {
        
         if (foundSystem == null) {
             throw new SystemNotFoundException("Exact system '" + systemName + "' could not be identified");
+        }
+        
+        if (updateAgainstEddb) {
+            updateSystemWithLatestFromEddbData(foundSystem);
+            saveOrUpdateSystemToOrient(foundSystem, false);
         }
         
         foundSystem.setStations(stationService.getStationsForSystemOrientDb(foundSystem.getName()));
@@ -590,5 +782,125 @@ public class StarSystemService {
     public void setCurrentStarSystem(StarSystem currentStarSystem) {
         this.currentStarSystem = currentStarSystem;
     }
+    
+//    public MapData shortestPath(String startSystemVertex, String destinationSystemVertex, double maxJumpRange) {
+//        
+//        OrientGraph graph = null;
+//        MapData out = new MapData();
+//
+//        try {
+//            graph = orientDbService.getFactory().getTx();
+//        
+//            Map<String, VertexWrapper> systems = new HashMap<>();
+//            
+//            for (Vertex system: graph.getVerticesOfClass("System")) {
+//                systems.put(system.getProperty("name"), new VertexWrapper(system));
+//            }
+//            
+//            // we can probably start from a reduced set but for now tool the whole graph for start system.
+//            computePaths(systems.get(startSystemVertex), maxJumpRange, systems);
+//            
+//            List<VertexWrapper> path = new ArrayList<VertexWrapper>();
+//            for (VertexWrapper vertex = systems.get(destinationSystemVertex); vertex != null; vertex = vertex.previous)
+//                path.add(vertex);
+//    
+//            Collections.reverse(path);
+//            return path;
+//            
+//            graph.commit();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            if (graph != null) {
+//                graph.rollback();
+//            }
+//        }
+//    }
+    
+    private void computePaths(VertexWrapper source, double maxJumpRange, Map<String, VertexWrapper> data) {
+        
+        source.minDistance = 0.0;
+        PriorityQueue<VertexWrapper> vertexQueue = new PriorityQueue<>();
+        vertexQueue.add(source);
 
+        while (!vertexQueue.isEmpty()) {
+            
+            VertexWrapper current = vertexQueue.poll();
+            
+            // Visit each edge exiting origin
+            for (Edge edgeFrameshift : current.vertex.getEdges(Direction.BOTH, "Frameshift")) {
+                
+                double distance = (double) edgeFrameshift.getProperty("ly");
+                if (distance > maxJumpRange) {
+                    continue;
+                }
+                
+                VertexWrapper destinationSystem = null;
+                for (Vertex possibleDestination :current.vertex.getVertices(Direction.BOTH, "System")) {
+                    if (!possibleDestination.getProperty("name").equals(current.vertex.getProperty("name")) && data.containsKey(possibleDestination.getProperty("name"))) {
+                        destinationSystem = data.get(possibleDestination.getProperty("name"));
+                        break;
+                    }
+                }
+                
+                if (destinationSystem == null) {
+                    continue;
+                }
+
+                double distanceThroughCurrent = current.minDistance + distance;
+                if (distanceThroughCurrent < destinationSystem.minDistance) {
+                    vertexQueue.remove(destinationSystem);
+                    destinationSystem.minDistance = distanceThroughCurrent ;
+                    destinationSystem.previous = current;
+                    vertexQueue.add(destinationSystem);
+                }
+            }
+        }
+    }
+    
+    private class VertexWrapper implements Comparable<VertexWrapper> {
+         public final Vertex vertex;
+         public double minDistance = Double.POSITIVE_INFINITY;
+         public VertexWrapper previous;
+         public VertexWrapper(Vertex vertex) { this.vertex = vertex; }
+         
+         public int compareTo(VertexWrapper other)
+         {
+             return Double.compare(minDistance, other.minDistance);
+         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result + ((vertex == null) ? 0 : vertex.getProperty("name").hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            VertexWrapper other = (VertexWrapper) obj;
+            if (!getOuterType().equals(other.getOuterType()))
+                return false;
+            if (vertex == null) {
+                if (other.vertex != null)
+                    return false;
+            } else if (!vertex.getProperty("name").equals(other.vertex.getProperty("name")))
+                return false;
+            return true;
+        }
+
+        private StarSystemService getOuterType() {
+            return StarSystemService.this;
+        }
+         
+         
+     
+     }
 }

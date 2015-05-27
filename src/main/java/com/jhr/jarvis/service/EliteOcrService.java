@@ -118,7 +118,7 @@ public class EliteOcrService implements ApplicationEventPublisherAware {
 
                     for (StarSystem system: closeSystems) {
                         systems++;
-                        starSystemService.saveSystemToOrient(system);
+                        starSystemService.saveOrUpdateSystemToOrient(system, true);
                     }                    
                 }
                 

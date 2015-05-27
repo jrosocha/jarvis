@@ -7,14 +7,18 @@
 
 <VBox fx:id="view" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.CurrentSystemController">
    <children>
-    <AnchorPane minHeight="55.0" minWidth="0.0" prefHeight="55.0" prefWidth="200.0">
+    <AnchorPane minHeight="55.0" minWidth="0.0" prefHeight="155.0" prefWidth="200.0">
          <children>
             <Label alignment="CENTER" layoutX="-4.0" layoutY="10.0" prefHeight="16.0" prefWidth="200.0" text="Current System" textAlignment="CENTER">
                <font>
                   <Font name="System Bold" size="10.0" />
                </font>
             </Label>
-            <ComboBox fx:id="currentSystemComboBox" layoutX="21.0" layoutY="26.0" prefWidth="150.0" />
+            <ComboBox fx:id="currentSystemComboBox" layoutX="12.0" layoutY="26.0" prefHeight="20.0" prefWidth="177.0" />
+            <ComboBox fx:id="allegianceComboBox" layoutX="12.0" layoutY="51.0" prefHeight="20.0" prefWidth="177.0" />
+            <ComboBox fx:id="governmentComboBox" layoutX="12.0" layoutY="76.0" prefHeight="20.0" prefWidth="177.0" />
+            <ComboBox fx:id="factionComboBox" layoutX="12.0" layoutY="101.0" prefHeight="20.0" prefWidth="177.0" />
+            <ComboBox fx:id="primaryEconomyComboBox" layoutX="12.0" layoutY="126.0" prefHeight="20.0" prefWidth="177.0" />
          </children>
       </AnchorPane>
       <Pane maxWidth="200.0" minWidth="200.0" prefWidth="200.0">

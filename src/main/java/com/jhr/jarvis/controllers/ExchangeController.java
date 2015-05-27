@@ -1,5 +1,6 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -427,11 +428,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName(), true);
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -481,11 +482,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName(), true);
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -646,11 +647,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName(), true);
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -701,11 +702,11 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName(), true);
                                             List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
                                             starSystem.setStations(stations);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -852,9 +853,9 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName(), true);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -904,11 +905,9 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
-                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-                                            starSystem.setStations(stations);
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName(), true);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -960,11 +959,9 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName());
-                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-                                            starSystem.setStations(stations);
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getSellSystemName(), true);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -1014,11 +1011,9 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
                                     public void handle(ActionEvent event) {
                                         try {
                                             BestExchange bestExchange = (BestExchange) cell.getTableRow().getItem();
-                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName());
-                                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-                                            starSystem.setStations(stations);
+                                            StarSystem starSystem = starSystemService.findExactSystemAndStationsOrientDb(bestExchange.getBuySystemName(), true);
                                             eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                                        } catch (SystemNotFoundException e) {
+                                        } catch (SystemNotFoundException | IOException e) {
                                             e.printStackTrace();
                                         }
                                     }

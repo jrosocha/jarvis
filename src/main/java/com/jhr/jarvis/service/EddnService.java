@@ -146,7 +146,7 @@ public class EddnService implements ApplicationEventPublisherAware {
         closeSystems.add(currentSystem);
 
         for (StarSystem system : closeSystems) {
-            starSystemService.saveSystemToOrient(system);
+            starSystemService.saveOrUpdateSystemToOrient(system, true);
         }
 
         /*

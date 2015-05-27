@@ -1,7 +1,7 @@
 {
   "shipFile" : "data/Ship.json",
   "orientGraphDb" : "/Users/jrosocha/trade/jarvisDb",
-  "systemsFile" : "data/System.csv",
+  "systemsFile" : "data/systems.json",
   "commodityFile" : "data/Commodity.csv",
   "avoidStationsFile": "data/avoidStations.json",
   "eliteOcrScanDirectory" : "/Users/jrosocha/trade/Elite Dangerous",
