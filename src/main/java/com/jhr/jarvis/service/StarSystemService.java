@@ -350,7 +350,7 @@ public class StarSystemService {
      * 
      * @param system
      */
-    public synchronized void saveOrUpdateSystemToOrient(StarSystem system, boolean updateEdges) {
+    public synchronized void saveOrUpdateSystemToOrient(StarSystem system, boolean updateEdges, boolean replaceAllSystemData) {
 
         OrientGraph graph = null;
         boolean existingSystem = false;
@@ -367,18 +367,55 @@ public class StarSystemService {
                 vertexSystem = graph.addVertex("class:System");
             }
             
-            vertexSystem.setProperty("name", system.getName().toUpperCase());
-            vertexSystem.setProperty("x", system.getX());
-            vertexSystem.setProperty("y", system.getY());
-            vertexSystem.setProperty("z", system.getZ());
-            vertexSystem.setProperty("allegiance", system.getAllegiance() != null ? system.getAllegiance().toUpperCase() : "");
-            vertexSystem.setProperty("faction", system.getFaction() != null ? system.getFaction().toUpperCase() : "");
-            vertexSystem.setProperty("government", system.getGovernment() != null ? system.getGovernment().toUpperCase() : "");
-            vertexSystem.setProperty("needsPermit", system.getNeedsPermit() != null ? system.getNeedsPermit() : false);
-            vertexSystem.setProperty("population", system.getPopulation() != null ? system.getPopulation() : 0);
-            vertexSystem.setProperty("primaryEconomy", system.getPrimaryEconomy() != null ? system.getPrimaryEconomy().toUpperCase() : "");
-            vertexSystem.setProperty("security", system.getSecurity() != null ? system.getSecurity().toUpperCase() : "");
-            vertexSystem.setProperty("state", system.getState() != null ? system.getState().toUpperCase() : "");                
+            /*
+             * perhaps if the system already exists and has data we should not change it?
+             */
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("name")) || replaceAllSystemData) {
+                vertexSystem.setProperty("name", system.getName().toUpperCase());
+            }
+            
+            if (vertexSystem.getProperty("x") == null || replaceAllSystemData) {
+                vertexSystem.setProperty("x", system.getX());
+            }
+            
+            if (vertexSystem.getProperty("y") == null || replaceAllSystemData) {
+                vertexSystem.setProperty("y", system.getY());
+            }
+            
+            if (vertexSystem.getProperty("z") == null || replaceAllSystemData) {
+                vertexSystem.setProperty("z", system.getZ());
+            }
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("allegiance")) || replaceAllSystemData) {
+                vertexSystem.setProperty("allegiance", system.getAllegiance() != null ? system.getAllegiance().toUpperCase() : "");
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("faction")) || replaceAllSystemData) {
+                vertexSystem.setProperty("faction", system.getFaction() != null ? system.getFaction().toUpperCase() : "");
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("government")) || replaceAllSystemData) {
+                vertexSystem.setProperty("government", system.getGovernment() != null ? system.getGovernment().toUpperCase() : "");
+            }
+            
+            if (vertexSystem.getProperty("needsPermit") == null || replaceAllSystemData) {
+                vertexSystem.setProperty("needsPermit", system.getNeedsPermit() != null ? system.getNeedsPermit() : false);
+            }
+            
+            if (vertexSystem.getProperty("population") == null || replaceAllSystemData) {
+                vertexSystem.setProperty("population", system.getPopulation() != null ? system.getPopulation() : 0);
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("primaryEconomy")) || replaceAllSystemData) {
+                vertexSystem.setProperty("primaryEconomy", system.getPrimaryEconomy() != null ? system.getPrimaryEconomy().toUpperCase() : "");
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("security")) || replaceAllSystemData) {
+                vertexSystem.setProperty("security", system.getSecurity() != null ? system.getSecurity().toUpperCase() : "");
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("state")) || replaceAllSystemData) {
+                vertexSystem.setProperty("state", system.getState() != null ? system.getState().toUpperCase() : "");      
+            }
 
             if (existingSystem && updateEdges) {
                 // delete edges for system
@@ -386,8 +423,12 @@ public class StarSystemService {
                     edge.remove();
                 }
             }
+            int edgeCount = 0;
+            for (Edge edge: vertexSystem.getEdges(Direction.BOTH, "Frameshift")) {
+                edgeCount++;
+            }
 
-            if (updateEdges) {
+            if (updateEdges || edgeCount == 0) {
                 // for each system within the defined distance, add an edge
                 for (Vertex vertexSystem2 : graph.getVerticesOfClass("System")) {
                     // the these 2 are not the save vertex
@@ -550,7 +591,7 @@ public class StarSystemService {
         
         if (updateAgainstEddb) {
             updateSystemWithLatestFromEddbData(foundSystem);
-            saveOrUpdateSystemToOrient(foundSystem, false);
+            saveOrUpdateSystemToOrient(foundSystem, false, false);
         }
         
         foundSystem.setStations(stationService.getStationsForSystemOrientDb(foundSystem.getName()));

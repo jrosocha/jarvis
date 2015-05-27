@@ -86,14 +86,18 @@ public class EddnService implements ApplicationEventPublisherAware {
                         byte[] output = outputStream.toByteArray();
                         String outputString = new String(output, 0, output.length, "UTF-8");
                         EddnMessage message = JarvisConfig.MAPPER.readValue(outputString, EddnMessage.class);
-                        eddnMessageQueue.add(message);
-                        lastMessageReceived = LocalDateTime.now();
-                        eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
-                        eventPublisher.publishEvent(new EddnMessageQueueModifiedEvent(eddnMessageQueue.size()));
-                        if (autoProcess) {
-                            processMessageQueue();
-                        }
                         
+                        if (message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR")) {
+                            eddnMessageQueue.add(message);
+                            lastMessageReceived = LocalDateTime.now();
+                            eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
+                            eventPublisher.publishEvent(new EddnMessageQueueModifiedEvent(eddnMessageQueue.size()));
+                            if (autoProcess) {
+                                processMessageQueue();
+                            }
+                        } else {
+                            System.out.println("Not accepting data from applicaion: " + message.getHeader().getSoftwareName());
+                        }
                         
                     } catch (IOException | DataFormatException e) {
                         // TODO Auto-generated catch block
@@ -146,7 +150,7 @@ public class EddnService implements ApplicationEventPublisherAware {
         closeSystems.add(currentSystem);
 
         for (StarSystem system : closeSystems) {
-            starSystemService.saveOrUpdateSystemToOrient(system, true);
+            starSystemService.saveOrUpdateSystemToOrient(system, false, false);
         }
 
         /*
