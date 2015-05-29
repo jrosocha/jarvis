@@ -173,16 +173,44 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         FxUtil.autoCompleteComboBox(currentSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.allegianceComboBox.setItems(this.allegiance);
-        FxUtil.autoCompleteComboBox(allegianceComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        allegianceComboBox.setOnAction((event)->{
+            try {
+                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "allegiance", allegianceComboBox.getSelectionModel().getSelectedItem());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        //FxUtil.autoCompleteComboBox(allegianceComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.governmentComboBox.setItems(this.government);
-        FxUtil.autoCompleteComboBox(governmentComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        governmentComboBox.setOnAction((event)->{
+            try {
+                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "government", governmentComboBox.getSelectionModel().getSelectedItem());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        //FxUtil.autoCompleteComboBox(governmentComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.factionComboBox.setItems(this.faction);
-        FxUtil.autoCompleteComboBox(factionComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        factionComboBox.setOnAction((event)->{
+            try {
+                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "faction", factionComboBox.getSelectionModel().getSelectedItem());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        //FxUtil.autoCompleteComboBox(factionComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.primaryEconomyComboBox.setItems(this.primaryEconomy);
-        FxUtil.autoCompleteComboBox(primaryEconomyComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        primaryEconomyComboBox.setOnAction((event)->{
+            try {
+                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "primaryEconomy", primaryEconomyComboBox.getSelectionModel().getSelectedItem());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        //FxUtil.autoCompleteComboBox(primaryEconomyComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         currentSystemComboBox.setOnAction((event) -> {
             currentSystemComboBoxTimer.cancel();

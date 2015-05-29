@@ -343,6 +343,25 @@ public class StarSystemService {
         return systems;
     }
 
+    public synchronized void addPropertyToSystem(String systemName, String propertyName, Object value) throws SystemNotFoundException {
+        OrientGraph graph = null;
+
+        try {
+            graph = orientDbService.getFactory().getTx();
+            OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
+            if (vertexSystem == null) {
+                throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
+            }
+            vertexSystem.setProperty(propertyName, value);
+            System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
+            graph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (graph != null) {
+                graph.rollback();
+            }
+        }
+    }
 
     /**
      * Adds or updates a system to the graph.
@@ -652,17 +671,6 @@ public class StarSystemService {
             e.printStackTrace();
         }
         return shiftCount;
-    }
-
-    private Function<String, StarSystem> parseCSVLineToSystem = line -> {
-        String[] splitLine = line.split(",");
-        splitLine[0] = (splitLine[0].startsWith("'") || splitLine[0].startsWith("\"")) ? splitLine[0].substring(0, splitLine[0].length() - 1) : splitLine[0];
-        StarSystem s = new StarSystem(splitLine[0].toUpperCase(), Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]), Float.parseFloat(splitLine[3]));
-        return s;
-    };
-
-    private String createFrameshiftEdgeId(String systemName1, String systemName2) {
-        return (systemName1.compareTo(systemName2) < 0) ? (systemName1 + '-' + systemName2) : (systemName2 + '-' + systemName1);
     }
 
     private double distanceCalc(float x1, float x2, float y1, float y2, float z1, float z2) {
