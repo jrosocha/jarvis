@@ -266,7 +266,6 @@ public class StationService {
             graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            e.printStackTrace();
             if (graph != null) {
                 graph.rollback();
             }

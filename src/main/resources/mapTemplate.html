@@ -31,184 +31,169 @@
     var w = __X__;
     var h = __Y__;
 
-    var colors = d3.scale.category20();
-    
     var dataset = __DATA__;
     
-    var svg = d3.select(".canvas")
-    .append("svg")
-    .attr({"width":w,"height":h});
+    var minZ = 999999;
+    for (idx = 0; idx < dataset.nodes.length; idx++) {
+    	  if (dataset.nodes[idx].starSystem && dataset.nodes[idx].starSystem.z) {
+    	    minZ = dataset.nodes[idx].starSystem.z < minZ ? dataset.nodes[idx].starSystem.z : minZ;
+    	  }
+    }
+    var offsetZ = 5 - minZ;
+        
+        var svg = d3.select(".canvas")
+        .append("svg")
+        .attr({"width":w,"height":h});
 
-    var force = d3.layout.force()
-        .nodes(dataset.nodes)
-        .links(dataset.edges)
-        .size([w,h])
-        .linkDistance(function(d) { return 1; }) 
-        .charge([-100])
-        .theta(0.8)
-        .gravity(0.1)
-        .start();
+        var force = d3.layout.force()
+            .nodes(dataset.nodes)
+            .links(dataset.edges)
+            .size([w,h])
+            .linkDistance(function(d) { return 1; }) 
+            .charge([-100])
+            .theta(0.8)
+            .gravity(0.1)
+            .start();
 
-    var edges = svg.selectAll("line")
-      .data(dataset.edges)
-      .enter()
-      .append("line")
-      .attr("id",function(d,i) {return 'edge'+i})
-      .attr('marker-end','url(#arrowhead)')
-      .style("stroke","#ccc")
-      .style("pointer-events", "none");
-    
-    var nodes = svg.selectAll("circle")
-      .data(dataset.nodes)
-      .enter()
-      .append("circle")
-      .attr("class", function(d) {
-        return "contextMenuAvailable"
-       })
-      .attr("r", function(d) {
-        if (d.station) {
-          return 5;
-        }
-        if (d.idx === 0) {
-            return 20
-        }
-        return 8;
-      })
-      .style("fill",function(d,i){
-        if (d.station && d.station.blackMarket) {
-          return "#000"
-        } else if (d.station) {
-          return "#ccc";
-        } else if (d.idx === 0) {
-            return "#FFFF00";
-        }
-        return "#FFD700";//colors(i);
-      })
-      .style("stroke","#ccc")
-      .call(force.drag)
-
-
-    var nodelabels = svg.selectAll(".nodelabel") 
-       .data(dataset.nodes)
-       .enter()
-       .append("text")
-       .attr({"x":function(d){return d.x;},
-              "y":function(d){return d.y;},
-              "class":"nodelabel",
-              "font-size": function(d){
-                if (d.station) {
-                  return 8;
-                }
-                return 8;
-              }
-            })
-       .text(function(d){
-        if (d.station) {
-          return d.name.toLowerCase();
-        }
-        return d.name;
-      });
-
-    var edgepaths = svg.selectAll(".edgepath")
-        .data(dataset.edges)
-        .enter()
-        .append('path')
-        .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
-               'class':'edgepath',
-               'fill-opacity':0,
-               'stroke-opacity':0,
-               'fill':'blue',
-               'stroke':'red',
-               'id':function(d,i) {return 'edgepath'+i}})
-        .style("pointer-events", "none");
-
-    var edgelabels = svg.selectAll(".edgelabel")
-        .data(dataset.edges)
-        .enter()
-        .append('text')
-        .style("pointer-events", "none")
-        .attr({'class':'edgelabel',
-               'id':function(d,i){return 'edgelabel'+i},
-               'dx':40,
-               'dy':0,
-               'font-size':8,
-               'fill':'#aaa'});
-
-    edgelabels.append('textPath')
-        .attr('xlink:href',function(d,i) {return '#edgepath'+i})
-        .style("pointer-events", "none")
-        .text(function(d,i){
-          if (d.station) {
+        var edges = svg.selectAll("line")
+          .data(dataset.edges)
+          .enter()
+          .append("line")
+          .attr("id",function(d,i) {return 'edge'+i})
+          .attr('marker-end','url(#arrowhead)')
+          .style("stroke", function(d,i) {
+            if (d.station) { return "#ccc"; }
             return "";
-          }
-          return  d.value + ' ly'});
+          })
+          .style("pointer-events", "none");
+        
+        var nodes = svg.selectAll("circle")
+          .data(dataset.nodes)
+          .enter()
+          .append("circle")
+          .attr("class", function(d) {
+            return "contextMenuAvailable"
+           })
+          .attr("r", function(d) {
+            if (d.station) {
+              return 5;
+            }
+            return offsetZ + d.starSystem.z;
+          })
+          .style("fill",function(d,i){
+            if (d.station && d.station.blackMarket) {
+              return "#000"
+            } else if (d.station) {
+              return "#ccc";
+            } else if (d.idx === 0) {
+                return "#FFFF00";
+            }
 
-    force.on("tick", function(){
+            if (d.starSystem && d.starSystem.allegiance) {
+              if (d.starSystem.allegiance == 'FEDERATION') {
+                return "#6682b5";
+              }
 
-        edges.attr({"x1": function(d){return d.source.x;},
-                    "y1": function(d){return d.source.y;},
-                    "x2": function(d){return d.target.x;},
-                    "y2": function(d){return d.target.y;}
+              if (d.starSystem.allegiance == 'ALLIANCE') {
+                return "#FF9933";
+              }
+
+              if (d.starSystem.allegiance == 'ANARCHY') {
+                return "#993300";
+              }
+
+              if (d.starSystem.allegiance == 'EMPIRE') {
+                return "#666666";
+              }
+
+              if (d.starSystem.allegiance == 'INDEPENDENT') {
+                return "#CCFF99";
+              }
+
+              if (d.starSystem.allegiance == 'NONE') {
+                return "#FFD700";
+              }
+            }
+            
+            return "#FFD700";//colors(i);
+          })
+          .style("stroke","#ccc")
+          .call(force.drag)
+
+
+        var nodelabels = svg.selectAll(".nodelabel") 
+           .data(dataset.nodes)
+           .enter()
+           .append("text")
+           .attr({"x":function(d){return d.x;},
+                  "y":function(d){return d.y;},
+                  "class":"nodelabel",
+                  "font-size": function(d){
+                    if (d.station) {
+                      return 8;
+                    }
+                    return 8;
+                  }
+                })
+           .text(function(d){
+            if (d.station) {
+              return d.name.toLowerCase();
+            }
+            return d.name;
+          });
+
+        force.on("tick", function(){
+
+            edges.attr({"x1": function(d){return d.source.x;},
+                        "y1": function(d){return d.source.y;},
+                        "x2": function(d){return d.target.x;},
+                        "y2": function(d){return d.target.y;}
+            });
+
+            nodes.attr({"cx":function(d){return d.x;},
+                        "cy":function(d){return d.y;}
+            });
+
+            nodelabels.attr("x", function(d) { return d.x - 20; }) 
+                      .attr("y", function(d) { return d.y - 10; });
+
         });
 
-        nodes.attr({"cx":function(d){return d.x;},
-                    "cy":function(d){return d.y;}
-        });
+    contextMenuShowing = false;
 
-        nodelabels.attr("x", function(d) { return d.x - 20; }) 
-                  .attr("y", function(d) { return d.y - 10; });
 
-        edgepaths.attr('d', function(d) { var path='M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;
-        return path});       
+    d3.select("body").on('contextmenu',function (d,i) {
+        if(contextMenuShowing) {
+            d3.event.preventDefault();
+            d3.select(".popup").remove();
+            contextMenuShowing = false;
+        } else {
+            d3_target = d3.select(d3.event.target);
+            if (d3_target.classed("contextMenuAvailable")) {
+                d3.event.preventDefault();
+                contextMenuShowing = true;
+                d = d3_target.datum();
 
-        edgelabels.attr('transform',function(d,i){
-            if (d.target.x<d.source.x){
-                bbox = this.getBBox();
-                rx = bbox.x+bbox.width/2;
-                ry = bbox.y+bbox.height/2;
-                return 'rotate(180 '+rx+' '+ry+')';
+                // Build the popup            
+                popup = d3.select(".canvas")
+                .append("div")
+                .attr("class", "popup")
+                .style("left", "8px")
+                .style("top", "8px");
+                popup.append("h2").text(d.name);
+                if (d.starSystem && d.starSystem.allegiance) {
+                  popup.append("p").text(
+                    "allegiance: " + d.starSystem.allegiance).attr({"font-size" : '8px'});
                 }
-            else {
-                return 'rotate(0)';
-                }
-        });
+                if (d.station) {
+                  popup.append("p").text(
+                    "black market: " + d.station.blackMarket).attr({"font-size" : '8px'});
+                }      
+            }
+        }
     });
 
-contextMenuShowing = false;
+    </script>
 
-
-d3.select("body").on('contextmenu',function (d,i) {
-    if(contextMenuShowing) {
-        d3.event.preventDefault();
-        d3.select(".popup").remove();
-        contextMenuShowing = false;
-    } else {
-        d3_target = d3.select(d3.event.target);
-        if (d3_target.classed("contextMenuAvailable")) {
-            d3.event.preventDefault();
-            contextMenuShowing = true;
-            d = d3_target.datum();
-
-            // Build the popup            
-            popup = d3.select(".canvas")
-            .append("div")
-            .attr("class", "popup")
-            .style("left", "8px")
-            .style("top", "8px");
-            popup.append("h2").text(d.name);
-            if (d.station) {
-              popup.append("p").text(
-                "black market: " + d.station.blackMarket).attr({"font-size" : '8px'});
-            }
-            popup.append("p")
-            .append("a")
-            .attr("href","some link")
-            .text("some link text").attr({"font-size" : '8px'});            
-        }
-    }
-});
-
-</script>
-
-</body>
-</html>
+    </body>
+    </html>

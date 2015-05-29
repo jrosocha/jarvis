@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.EvictingQueue;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.exceptions.SettingNotFoundException;
+import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
@@ -111,32 +112,37 @@ public class LogFileService implements ApplicationEventPublisherAware {
     }
     
     public class NetLogTailerListener extends TailerListenerAdapter {
-        public void handle(String line) {
-            last10LogLinesRead.add(line);
-            // look for a line containing: System:26(Hyroks)    
-            Pattern pattern = Pattern.compile("System:\\d*\\(([^)]*)\\)");
-            Matcher matcher = pattern.matcher(line);
-            while (matcher.find()) {
-                String foundSystem =  matcher.group(1);
-                if (lastFoundSystemInNetLog == null || !(lastFoundSystemInNetLog.equalsIgnoreCase(foundSystem))){
-                    lastFoundSystemInNetLog = foundSystem;
-                    
-                    StarSystem starSystem = null;
-                    try {
-                        List<StarSystem> found = starSystemService.searchSystemFileForStarSystemsByName(lastFoundSystemInNetLog.toUpperCase(), true);
-                        if (found.size() > 0) {
-                            starSystem = found.get(0);
-                            List<Station> stations = stationService.getStationsForSystemOrientDb(starSystem.getName());
-                            starSystem.setStations(stations);
-                            eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
-                        } else {
-                            System.out.println("Cant find system: " + lastFoundSystemInNetLog.toUpperCase());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+        public void handle(String line) {            
+            try {
+                last10LogLinesRead.add(line);
+                // look for a line containing: System:26(Hyroks)    
+                Pattern pattern = Pattern.compile("System:\\d*\\(([^)]*)\\)");
+                Matcher matcher = pattern.matcher(line);
+                while (matcher.find()) {
+                    String foundSystem =  matcher.group(1);
+                    if (lastFoundSystemInNetLog == null || !(lastFoundSystemInNetLog.equalsIgnoreCase(foundSystem))){
+                        lastFoundSystemInNetLog = foundSystem;
+                        
+                        StarSystem starSystem = null;                      
+                            List<StarSystem> found = starSystemService.searchSystemFileForStarSystemsByName(lastFoundSystemInNetLog.toUpperCase(), true);
+                            if (found.size() > 0) {
+                                starSystem = found.get(0);
+                                try {
+                                    StarSystem existingStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystem.getName(), true);
+                                    starSystem = existingStarSystem;
+                                } catch (SystemNotFoundException e) {
+                                    System.out.println("Cant find system: " + starSystem + "; Creating...");
+                                    starSystemService.saveOrUpdateSystemToOrient(starSystem, true, true);
+                                }
+
+                                eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
+                            } else {
+                                System.out.println("Cant find system: " + lastFoundSystemInNetLog.toUpperCase());
+                            }
                     }
-                    
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

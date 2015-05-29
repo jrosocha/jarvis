@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.jhr.jarvis.event.ConsoleEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
+import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
@@ -113,13 +114,19 @@ public class EliteOcrService implements ApplicationEventPublisherAware {
                     }
                     
                     currentSystem = matchingSystems.get(0);
-                    Set<StarSystem> closeSystems = starSystemService.closeStarSystems(currentSystem, settings.getCloseSystemDistance());
-                    closeSystems.add(currentSystem);
-
-                    for (StarSystem system: closeSystems) {
+                    try {
+                        StarSystem existingSystem = starSystemService.findExactSystemAndStationsOrientDb(currentSystem.getName(), true);
+                        currentSystem = existingSystem;
                         systems++;
-                        starSystemService.saveOrUpdateSystemToOrient(system, false, false);
-                    }                    
+                    } catch (SystemNotFoundException e) {
+                        System.out.println("System not found: " + currentSystem + "; Adding ...");
+                        Set<StarSystem> closeSystems = starSystemService.closeStarSystems(currentSystem, settings.getCloseSystemDistance());
+                        closeSystems.add(currentSystem);
+                        for (StarSystem system: closeSystems) {
+                            systems++;
+                            starSystemService.saveOrUpdateSystemToOrient(system, false, false);
+                        }  
+                    }
                 }
                 
                 if (currentStation == null || !currentStation.getName().equals(splitLine[1].toUpperCase())) {

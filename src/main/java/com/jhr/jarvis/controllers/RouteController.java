@@ -66,7 +66,7 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
     @PostConstruct
     public void initMap() {
         Platform.runLater(()->{mapLoading.setVisible(false);});
-        try ( InputStream in = getClass().getResourceAsStream("/mapTemplate.html");
+        try ( InputStream in = getClass().getResourceAsStream("/pathTemplate.html");
                 final InputStreamReader inr = new InputStreamReader(in)) {
             mapHtml = CharStreams.toString(inr);
         } catch (IOException e) {
@@ -110,7 +110,7 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
                     newMapHtml = newMapHtml.replace("__X__", x.toString());
                     newMapHtml = newMapHtml.replace("__Y__", y.toString());
                     final String newMapHtmlFinal = newMapHtml;
-                    Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
+                    //Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                     
                     Platform.runLater(()->{            
                         try {
