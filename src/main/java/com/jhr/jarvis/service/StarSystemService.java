@@ -103,6 +103,13 @@ public class StarSystemService {
         }
         
         /*
+         * sort systems by z
+         */
+        Collections.sort(out.getNodes(), (sys1, sys2)->{
+            return ((StarSystem)sys1.getAdditionalProperties().get("starSystem")).getZ().compareTo(((StarSystem)sys2.getAdditionalProperties().get("starSystem")).getZ());
+        });
+        
+        /*
          * Add stations
          */
         for (Node systemNode: out.getNodes()) {
