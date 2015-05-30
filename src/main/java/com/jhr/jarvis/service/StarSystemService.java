@@ -77,8 +77,8 @@ public class StarSystemService {
         MapData out = new MapData();
 
         List<StarSystem> closeSystems = new ArrayList<>(this.closeStarSystems(starSystem, jumpDistance));
-        closeSystems.remove(starSystem);
-        closeSystems.add(0, starSystem);
+        //closeSystems.remove(starSystem);
+        //closeSystems.add(0, starSystem);
         
         double xOffset = 350 - (starSystem.getX() * lyDistanceMultiplier);
         double yOffset = 350 - (starSystem.getY() * lyDistanceMultiplier);
@@ -86,20 +86,13 @@ public class StarSystemService {
         /* 
          * add all the neighbor systems first
          */
-        int nodeIndex = 0;
+        
         for (StarSystem system: closeSystems) {
             Node systemNode = new Node(system.getName(), xOffset + (system.getX() * lyDistanceMultiplier), yOffset + (system.getY() * lyDistanceMultiplier), true);
             systemNode.getAdditionalProperties().put("starSystem", system);
-            systemNode.getAdditionalProperties().put("idx", nodeIndex);
-            if (nodeIndex > 0) {
-                // connect every new node to node 0
-                double distance = this.distanceCalc(system.getX(), starSystem.getX(), system.getY(), starSystem.getY(), system.getZ(), starSystem.getZ());
-                com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge(0, nodeIndex, Math.round(distance*100.0)/100.0);
-                out.getEdges().add(edge);
-            }
-            
+            //systemNode.getAdditionalProperties().put("idx", nodeIndex);
             out.getNodes().add(systemNode);
-            nodeIndex++;
+            //nodeIndex++;
         }
         
         /*
@@ -109,21 +102,33 @@ public class StarSystemService {
             return ((StarSystem)sys1.getAdditionalProperties().get("starSystem")).getZ().compareTo(((StarSystem)sys2.getAdditionalProperties().get("starSystem")).getZ());
         });
         
+//        int nodeIndex = 0;
+//        
+//        if (nodeIndex > 0) {
+//            // connect every new node to node 0
+//            double distance = this.distanceCalc(system.getX(), starSystem.getX(), system.getY(), starSystem.getY(), system.getZ(), starSystem.getZ());
+//            com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge(0, nodeIndex, Math.round(distance*100.0)/100.0);
+//            out.getEdges().add(edge);
+//        }
+        
+        
         /*
          * Add stations
          */
+        int nodeIndex = 0;
         for (Node systemNode: out.getNodes()) {
+            systemNode.getAdditionalProperties().put("idx", nodeIndex);
+            nodeIndex++;
             try {
                 StarSystem starSystemWithStations = this.findExactSystemAndStationsOrientDb(systemNode.getName(), false);
                 for (Station station: starSystemWithStations.getStations()) {
                     Node stationNode = new Node(station.getName(), 0, 0, false);
                     stationNode.getAdditionalProperties().put("station", station);
-                    stationNode.getAdditionalProperties().put("idx", nodeIndex);
+                    stationNode.getAdditionalProperties().put("idx", out.getNodes().size());
                     out.getNodes().add(stationNode);
-                    com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge((Integer) systemNode.getAdditionalProperties().get("idx"), nodeIndex, 1.0);
+                    com.jhr.jarvis.model.Edge edge = new com.jhr.jarvis.model.Edge((Integer) systemNode.getAdditionalProperties().get("idx"), (Integer) stationNode.getAdditionalProperties().get("idx"), 1.0);
                     edge.getAdditionalProperties().put("station", station);
-                    out.getEdges().add(edge);
-                    nodeIndex++;
+                    out.getEdges().add(edge);                   
                 }                
             } catch (SystemNotFoundException | IOException e) {
                 e.printStackTrace();
