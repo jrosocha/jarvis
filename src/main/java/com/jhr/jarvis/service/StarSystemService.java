@@ -353,14 +353,20 @@ public class StarSystemService {
     public synchronized void addPropertyToSystem(String systemName, String propertyName, Object value) throws SystemNotFoundException {
         OrientGraph graph = null;
 
+        if (StringUtils.isBlank(systemName) || StringUtils.isBlank(propertyName) || value == null) {
+            return;
+        }
+        
         try {
             graph = orientDbService.getFactory().getTx();
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
             if (vertexSystem == null) {
                 throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
             }
-            vertexSystem.setProperty(propertyName, value);
-            System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
+            if (vertexSystem.getProperty(propertyName) != null && !vertexSystem.getProperty(propertyName).equals(value)) {
+                vertexSystem.setProperty(propertyName, value);
+                System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
+            }
             graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
