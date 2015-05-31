@@ -131,7 +131,7 @@ public class StarSystemService {
                     out.getEdges().add(edge);                   
                 }                
             } catch (SystemNotFoundException | IOException e) {
-                e.printStackTrace();
+                System.out.println("System not yet in graph (go visit it!): " + systemNode.getName());
                 continue;
             }
         }

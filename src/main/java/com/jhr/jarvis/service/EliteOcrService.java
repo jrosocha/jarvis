@@ -102,6 +102,7 @@ public class EliteOcrService implements ApplicationEventPublisherAware {
             // Chemaku;Kaku Orbital;Hydrogen Fuel;106;112;;;617885;Med;2015-01-08T01:58:48+00:00;    
             
             while ((line = br.readLine()) != null) {
+                try {
                 String[] splitLine = line.split(";");
                 
                 if (currentSystem == null || !currentSystem.getName().equals(splitLine[0].toUpperCase())) {
@@ -153,6 +154,9 @@ public class EliteOcrService implements ApplicationEventPublisherAware {
                 
                 exchanges++;
                 stationService.createCommodityExchangeRelationshipOrientDb(currentStation, currentCommodity, buyPrice, sellPrice, supply, demand, date); 
+                } catch (Exception e) {
+                    System.out.println("Error handline line: " + line);
+                }
             }
         }
         

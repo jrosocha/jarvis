@@ -114,6 +114,7 @@ public class LogFileService implements ApplicationEventPublisherAware {
     public class NetLogTailerListener extends TailerListenerAdapter {
         public void handle(String line) {            
             try {
+                System.out.println("log scan...");
                 last10LogLinesRead.add(line);
                 // look for a line containing: System:26(Hyroks)    
                 Pattern pattern = Pattern.compile("System:\\d*\\(([^)]*)\\)");
