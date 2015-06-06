@@ -88,7 +88,7 @@ public class EddnService implements ApplicationEventPublisherAware {
                         EddnMessage message = JarvisConfig.MAPPER.readValue(outputString, EddnMessage.class);
                         
                         if (message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR") ||
-                            message.getHeader().getSoftwareName().equalsIgnoreCase("EDCE")) {
+                            message.getHeader().getSoftwareName().startsWith("E:D Market Connector")) {
                             eddnMessageQueue.add(message);
                             lastMessageReceived = LocalDateTime.now();
                             eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
