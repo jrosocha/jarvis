@@ -87,7 +87,8 @@ public class EddnService implements ApplicationEventPublisherAware {
                         String outputString = new String(output, 0, output.length, "UTF-8");
                         EddnMessage message = JarvisConfig.MAPPER.readValue(outputString, EddnMessage.class);
                         
-                        if (message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR")) {
+                        if (message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR") ||
+                            message.getHeader().getSoftwareName().equalsIgnoreCase("EDCE")) {
                             eddnMessageQueue.add(message);
                             lastMessageReceived = LocalDateTime.now();
                             eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
