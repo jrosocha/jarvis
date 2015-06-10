@@ -238,11 +238,20 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         String buyOrSell = FxUtil.getComboBoxValue(buyOrSellComboBox);
         String commodity = FxUtil.getComboBoxValue(commodityComboBox);
         
+        System.out.println("fromStation->" + fromStation);
+        System.out.println("toStation->" + toStation);
+        System.out.println("tradeStops->" + numberOfTrades);
+        System.out.println("maxJumpsBetweenTrades->" + numberOfJumpsBetweenStations);
+        System.out.println("buy/sell->" + buyOrSell);
+        System.out.println("commodity->" + commodity);
+        
         // crazy state machine to determine type of search. 
         if ( (numberOfJumpsBetweenStations == null || numberOfJumpsBetweenStations == 0 || StringUtils.isBlank(fromStation)) 
                 && StringUtils.isBlank(toStation)
                 && StringUtils.isNotBlank(commodity)
                 && StringUtils.isNotBlank(buyOrSell)) {
+            
+            System.out.println("buy/sell anywhere state");
             /*
              * buy or sell anywhere
              */
@@ -270,6 +279,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             /*
              * buy or sell in range
              */
+            System.out.println("buy/sell in range of fromStation");
             Runnable task = () -> {
                 if (buyOrSell.equals("sell")) {
                     Set<BestExchange> exchanges = tradeService.sellOrientDb(fromStation, shipService.getActiveShip(), numberOfJumpsBetweenStations, commodity);
@@ -290,6 +300,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             /*
              * Multiple stop trade
              */
+            System.out.println("multistop trade fromStation");
             Runnable task = () -> { 
                 Set<BestExchange> endOfRunTrades = new ConcurrentSkipListSet<>();
                 tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
@@ -305,6 +316,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             /*
              * Single stop trade
              */
+            System.out.println("single stop trade fromStation");
             Runnable task = () -> { 
                 Set<BestExchange> endOfRunTrades = new ConcurrentSkipListSet<>();
                 Set<BestExchange> sortedBestExchangeList = tradeService.tradeNOrientDb(fromStation, null, shipService.getActiveShip(), numberOfJumpsBetweenStations, numberOfTrades, endOfRunTrades);
@@ -317,6 +329,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             /*
              * Station to Station Trade 
              */
+            System.out.println("station to station trade");
             Runnable task = () -> { 
                 Set<BestExchange> bestExchanges = new ConcurrentSkipListSet<>();
                 try {
@@ -344,6 +357,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              * 
              */
             searchProgress.setVisible(false);
+            System.out.println("not a valid set of options to get a search result");
         }
 
     }
