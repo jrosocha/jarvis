@@ -31,6 +31,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
 @Service
@@ -105,11 +106,11 @@ public class TradeService {
      */
     public Set<BestExchange> tradeOrientDb(String fromStationName, BestExchange parent, Ship ship, int maxJumps) {
         Station fromStation = new Station();
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         SortedSet<BestExchange> bestExchangeSet = new ConcurrentSkipListSet<>();
         
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             //starting station
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", fromStationName);
@@ -150,8 +151,6 @@ public class TradeService {
                     }
                 }
             }
-            
-            graph.commit();
         
         } catch (Exception e) {
             e.printStackTrace();
@@ -173,9 +172,9 @@ public class TradeService {
     public Set<BestExchange> sellOrientDb(String fromStationName, Ship ship, int maxJumps, String commodity) {
         Date start = new Date();
         Set<BestExchange> out = new ConcurrentSkipListSet<>();
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             Vertex stationVertex = graph.getVertexByKey("Station.name", fromStationName);
             Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
@@ -215,11 +214,8 @@ public class TradeService {
                     }
                 }
             }           
-            graph.commit();
         } catch(Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         
         Comparator<BestExchange> bySellPrice =
@@ -238,9 +234,9 @@ public class TradeService {
     public Set<BestExchange> buyOrientDb(String fromStation, Ship ship, int maxJumps, String commodity) {
 
         Set<BestExchange> out = new ConcurrentSkipListSet<>();
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             Vertex stationVertex = graph.getVertexByKey("Station.name", fromStation);
             Vertex systemVertex = stationService.getSystemVertexForStationVertex(stationVertex);
@@ -281,11 +277,8 @@ public class TradeService {
                     
                 }
             }           
-            graph.commit();
         } catch(Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         
         Comparator<BestExchange> byBuyPrice =
@@ -304,9 +297,9 @@ public class TradeService {
     public Set<BestExchange> bestBuyPriceOrientDb(String originSystem, String commodityName) {
         
         Set<BestExchange> out = new ConcurrentSkipListSet<>();
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             OrientVertex startSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", originSystem);
             
@@ -335,11 +328,8 @@ public class TradeService {
                     out.add(exchange);
                 }
             }
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         
         Comparator<BestExchange> byBuyPrice =
@@ -361,9 +351,9 @@ public class TradeService {
         
         List<BestExchange> out = new ArrayList<>();
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             //starting commodity
             OrientVertex commodityVertex = (OrientVertex) graph.getVertexByKey("Commodity.name", commodityName);
             
@@ -397,11 +387,8 @@ public class TradeService {
                     out.add(exchange);
                 }
             }
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         
         
@@ -421,13 +408,13 @@ public class TradeService {
     
     public Set<BestExchange> stationToStation(Station fromStation, Station toStation, Ship ship) {
 
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         Map<String, Commodity> buyCommodities = new HashMap<>();
         Map<String, Commodity> sellCommodities = new HashMap<>();
         Set<BestExchange> exchanges = new ConcurrentSkipListSet<>();
         
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             //starting station
             OrientVertex stationFromVertex = (OrientVertex) graph.getVertexByKey("Station.name", fromStation.getName());
@@ -438,8 +425,6 @@ public class TradeService {
             // populate worthwile buy commodities
             buyCommodities = stationService.getStationBuyCommodities(stationFromVertex, ship);
             sellCommodities = stationService.getReleventStationSellCommodities(stationToVertex, buyCommodities, ship);
-            graph.commit();
-        
             
             for (String key: sellCommodities.keySet()){
                 
@@ -465,7 +450,6 @@ public class TradeService {
             }        
         } catch (Exception e) {
             e.printStackTrace();
-            graph.rollback();
         }
         
         return exchanges;
@@ -500,9 +484,8 @@ public class TradeService {
         
         long exchangeCount = 0;
         try {
-            OrientGraph graph = orientDbService.getFactory().getTx();
+            OrientGraphNoTx graph = orientDbService.getFactory().getNoTx();
             exchangeCount = graph.countEdges("Exchange");
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }

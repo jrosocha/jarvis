@@ -41,6 +41,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientDynaElementIterable;
 import com.tinkerpop.blueprints.impls.orient.OrientElement;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
 @Service
@@ -195,7 +196,7 @@ public class StarSystemService {
         return systemsWithinOneJumpOfDistance;
     }
 
-    public Set<Vertex> findSystemsWithinNFrameshiftJumpsOfDistance(OrientGraph graph, Vertex system, float jumpDistance, int jumps) {
+    public Set<Vertex> findSystemsWithinNFrameshiftJumpsOfDistance(OrientGraphNoTx graph, Vertex system, float jumpDistance, int jumps) {
 
         // "traverse in_Frameshift, out_Frameshift, Frameshift.in, Frameshift.out from #11:4 while $depth <= 4"
         // select from (traverse in_Frameshift, out_Frameshift, Frameshift.in,
@@ -356,14 +357,14 @@ public class StarSystemService {
     }
 
     public synchronized void addPropertyToSystem(String systemName, String propertyName, Object value) throws SystemNotFoundException {
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
 
         if (StringUtils.isBlank(systemName) || StringUtils.isBlank(propertyName) || value == null) {
             return;
         }
         
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
             if (vertexSystem == null) {
                 throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
@@ -372,12 +373,9 @@ public class StarSystemService {
                 vertexSystem.setProperty(propertyName, value);
                 System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
             }
-            graph.commit();
+
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
     }
 
@@ -389,11 +387,11 @@ public class StarSystemService {
      */
     public synchronized void saveOrUpdateSystemToOrient(StarSystem system, boolean updateEdges, boolean replaceAllSystemData) {
 
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         boolean existingSystem = false;
 
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
 
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", system.getName().toUpperCase());
             if (vertexSystem != null) {
@@ -483,14 +481,10 @@ public class StarSystemService {
                     }
                 }
             }
-        
-            graph.commit();
+
             System.out.println("Added: " + system);
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
     }
 
@@ -608,18 +602,15 @@ public class StarSystemService {
 
         StarSystem foundSystem = null;
 
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
             if (vertexSystem != null) {
                 foundSystem = convertVertexToSystem(vertexSystem);
             }
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
        
         if (foundSystem == null) {
@@ -643,10 +634,10 @@ public class StarSystemService {
      * @return
      */
     public List<StarSystem> findSystemsOrientDb(String partial) {
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         List<StarSystem> out = new ArrayList<>();
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             String queryWhere = partial == null ? "" : " where name like '" + partial.toUpperCase() + "%'";
             
@@ -658,9 +649,7 @@ public class StarSystemService {
                 out.add(foundSystem);
             }
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         return out;
     }
@@ -669,9 +658,8 @@ public class StarSystemService {
         
         long systemCount = 0;
         try {
-            OrientGraph graph = orientDbService.getFactory().getTx();
+            OrientGraphNoTx graph = orientDbService.getFactory().getNoTx();
             systemCount = graph.countVertices("System");
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -682,9 +670,8 @@ public class StarSystemService {
         
         long shiftCount = 0;
         try {
-            OrientGraph graph = orientDbService.getFactory().getTx();
+            OrientGraphNoTx graph = orientDbService.getFactory().getNoTx();
             shiftCount = graph.countEdges("Frameshift");
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -700,14 +687,14 @@ public class StarSystemService {
     }
 
     public MapData calculateShortestPathBetweenSystems(Ship ship, List<String> systemsInRoute) {
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         
         MapData out = new MapData();
         double lyDistanceMultiplier = 20;
 
         LinkedList<OrientVertex> path = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             // handle a 1 system solution 
             if (systemsInRoute.size() == 1) {
@@ -775,25 +762,21 @@ public class StarSystemService {
                 yOffset = 350 - ((float)lastSystemVertex.getProperty("y") * lyDistanceMultiplier);
             }
  
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
         return out;
     }
 
     
     public MapData calculateShortestPathBetweenSystems(Ship ship, String startSystemName, String finishSystemName) {
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         
         MapData out = new MapData();
         
         LinkedList<OrientVertex> path = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex startSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", startSystemName);
             OrientVertex destinationSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", finishSystemName);
 
@@ -832,12 +815,8 @@ public class StarSystemService {
                 lastSystem = vertex;
                 nodeIndex ++;
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
         return out;
     }
@@ -850,38 +829,78 @@ public class StarSystemService {
         this.currentStarSystem = currentStarSystem;
     }
     
-//    public MapData shortestPath(String startSystemVertex, String destinationSystemVertex, double maxJumpRange) {
-//        
-//        OrientGraph graph = null;
-//        MapData out = new MapData();
-//
-//        try {
-//            graph = orientDbService.getFactory().getTx();
-//        
-//            Map<String, VertexWrapper> systems = new HashMap<>();
-//            
-//            for (Vertex system: graph.getVerticesOfClass("System")) {
-//                systems.put(system.getProperty("name"), new VertexWrapper(system));
+    public MapData shortestPath(String startSystemName, String destinationSystemName, double maxJumpRange) {
+        
+        OrientGraphNoTx graph = null;
+        MapData out = new MapData();
+
+        try {
+            graph = orientDbService.getFactory().getNoTx();
+        
+            Map<String, VertexWrapper> systems = new HashMap<>();
+            
+            OrientVertex startSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", startSystemName);
+            OrientVertex destinationSystemVertex = (OrientVertex) graph.getVertexByKey("System.name", destinationSystemName);
+            
+            double distanceBetweenStartAndFinish = distanceCalc(startSystemVertex, destinationSystemVertex);
+            
+            for (Vertex system: graph.getVerticesOfClass("System")) {
+                if (distanceCalc(startSystemVertex, system) <= distanceBetweenStartAndFinish || distanceCalc(destinationSystemVertex, system) <= distanceBetweenStartAndFinish) {
+                    systems.put(system.getProperty("name"), new VertexWrapper((OrientVertex) system));
+                }
+            }
+            
+            computePaths(systems.get(startSystemVertex), maxJumpRange, systems);
+            
+            List<VertexWrapper> path = new ArrayList<VertexWrapper>();
+            for (VertexWrapper vertex = systems.get(destinationSystemVertex); vertex != null; vertex = vertex.previous) {
+                path.add(vertex);
+            }
+    
+            Collections.reverse(path);
+            
+            int nodeIndex = 0;
+            VertexWrapper currentVertex = path.get(0);
+            Node systemNode = new Node(currentVertex.vertex.getProperty("name"), currentVertex.vertex.getProperty("x"), currentVertex.vertex.getProperty("y"), true);
+            systemNode.getAdditionalProperties().put("idx", nodeIndex);
+            out.getNodes().add(systemNode);
+            nodeIndex ++; 
+            
+            while (currentVertex.previous != null) {
+                systemNode = new Node(currentVertex.previous.vertex.getProperty("name"), currentVertex.previous.vertex.getProperty("x"), currentVertex.previous.vertex.getProperty("y"), true);
+                systemNode.getAdditionalProperties().put("idx", nodeIndex);
+                out.getNodes().add(systemNode);
+                
+                Edge frameshift = currentVertex.vertex.getEdges(currentVertex.previous.vertex, Direction.BOTH, "Frameshift").iterator().next();                    
+                com.jhr.jarvis.model.Edge mapEdge = new com.jhr.jarvis.model.Edge(nodeIndex - 1, nodeIndex,  Math.round(((double) frameshift.getProperty("ly"))*100.0)/100.0);
+                out.getEdges().add(mapEdge);
+                
+                currentVertex = currentVertex.previous;
+                nodeIndex ++;
+            }
+            
+            
+//            OrientVertex lastSystem = null;
+//            int nodeIndex = 0;
+//            for (VertexWrapper vertexWrapper: path) {
+//                if (lastSystem != null) {
+//                    Edge frameshift = lastSystem.getEdges(vertex, Direction.BOTH, "Frameshift").iterator().next();                    
+//                    com.jhr.jarvis.model.Edge mapEdge = new com.jhr.jarvis.model.Edge(nodeIndex - 1, nodeIndex,  Math.round(((double) frameshift.getProperty("ly"))*100.0)/100.0);
+//                    out.getEdges().add(mapEdge);
+//                }
+//                Node systemNode = new Node(vertex.getProperty("name"), vertex.getProperty("x"), vertex.getProperty("y"), true);
+//                systemNode.getAdditionalProperties().put("idx", nodeIndex);
+//                out.getNodes().add(systemNode);
+//                lastSystem = vertex;
+//                nodeIndex ++;
 //            }
-//            
-//            // we can probably start from a reduced set but for now tool the whole graph for start system.
-//            computePaths(systems.get(startSystemVertex), maxJumpRange, systems);
-//            
-//            List<VertexWrapper> path = new ArrayList<VertexWrapper>();
-//            for (VertexWrapper vertex = systems.get(destinationSystemVertex); vertex != null; vertex = vertex.previous)
-//                path.add(vertex);
-//    
-//            Collections.reverse(path);
-//            return path;
-//            
-//            graph.commit();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            if (graph != null) {
-//                graph.rollback();
-//            }
-//        }
-//    }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return out;
+    }
     
     private void computePaths(VertexWrapper source, double maxJumpRange, Map<String, VertexWrapper> data) {
         
@@ -925,10 +944,10 @@ public class StarSystemService {
     }
     
     private class VertexWrapper implements Comparable<VertexWrapper> {
-         public final Vertex vertex;
+         public final OrientVertex vertex;
          public double minDistance = Double.POSITIVE_INFINITY;
          public VertexWrapper previous;
-         public VertexWrapper(Vertex vertex) { this.vertex = vertex; }
+         public VertexWrapper(OrientVertex vertex) { this.vertex = vertex; }
          
          public int compareTo(VertexWrapper other)
          {

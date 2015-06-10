@@ -20,6 +20,7 @@ import com.jhr.jarvis.model.Settings;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
 @Service
@@ -72,9 +73,9 @@ public class CommodityService {
         
         List<Commodity> out = new ArrayList<>();
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             String whereClause = StringUtils.isBlank(partial) ? "" : " where name like '" + partial.toUpperCase() + "%'"; 
             
@@ -86,9 +87,6 @@ public class CommodityService {
             
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
         
         return out;
@@ -128,19 +126,16 @@ public class CommodityService {
         
         Commodity commodity = null;
        
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex comodityVertex = (OrientVertex) graph.getVertexByKey("Commodity.name", commodityName);
             if (comodityVertex != null) {
                 commodity = new Commodity(comodityVertex.getProperty("name"));
                 commodity.setGroup(getCommodityGroup(commodity.getName()));
             }
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
+            e.printStackTrace();
         }
         
         if (commodity == null) {

@@ -92,7 +92,8 @@ public class RouteController implements ApplicationListener<ApplicationEvent> {
                     Platform.runLater(()->{
                         mapInformation.setText(String.format("Exchange Route from system %s with a %f ly jump range", drawRouteMapEvent.getSystemsInRoute().get(0), shipService.getActiveShip().getJumpDistance()));
                     });            
-                    mapData = starSystemService.calculateShortestPathBetweenSystems(shipService.getActiveShip(), drawRouteMapEvent.getSystemsInRoute());
+                    //mapData = starSystemService.calculateShortestPathBetweenSystems(shipService.getActiveShip(), drawRouteMapEvent.getSystemsInRoute());
+                    
                 } else if (event instanceof UpdateMapEvent){
                     UpdateMapEvent updateMapEvent = (UpdateMapEvent) event;
                     mapData = updateMapEvent.getMessage();

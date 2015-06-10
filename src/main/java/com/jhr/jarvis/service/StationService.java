@@ -23,6 +23,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
 @Service
@@ -107,8 +108,8 @@ public class StationService {
     }
     
     public Station findExactStationOrientDb(String stationName) throws StationNotFoundException {
-        OrientGraph graph = null;
-        graph = orientDbService.getFactory().getTx();
+        OrientGraphNoTx graph = null;
+        graph = orientDbService.getFactory().getNoTx();
         Station out = new Station();
         try {    
             OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", stationName);
@@ -118,20 +119,15 @@ public class StationService {
             out = vertexToStation(stationVertex);
             List<Commodity> stationCommodities = getStationCommodities(stationVertex);
             out.getAvailableCommodityExchanges().addAll(stationCommodities);
-            
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
             throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
         }
         return out;
    }
     
     public Station deleteStationOrientDb(String stationName) throws StationNotFoundException {
-        OrientGraph graph = null;
-        graph = orientDbService.getFactory().getTx();
+        OrientGraphNoTx graph = null;
+        graph = orientDbService.getFactory().getNoTx();
         Station out = new Station();
         try {    
             OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", stationName);
@@ -139,11 +135,7 @@ public class StationService {
                 throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
             }
             stationVertex.remove();
-            graph.commit();
         } catch (Exception e) {
-            if (graph != null) {
-                graph.rollback();
-            }
             throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
         }
         return out;
@@ -217,9 +209,9 @@ public class StationService {
         
         List<Station> out = new ArrayList<>();
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             
             String whereClause = StringUtils.isEmpty(partial) ? "" : " where name like '" + partial.toUpperCase() + "%'";
             for (Vertex stationVertex : (Iterable<Vertex>) graph.command(new OCommandSQL("select from Station" + whereClause)).execute()) {
@@ -227,12 +219,8 @@ public class StationService {
                 Station station = vertexToStation(stationVertex);
                 out.add(station);
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
         
         if (out.size() == 1 && loadToMemory) {
@@ -251,9 +239,9 @@ public class StationService {
      */
     public void createStationOrientDb(StarSystem system, Station station) {
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
             if (vertexStation == null) {
                 vertexStation = graph.addVertex("class:Station");
@@ -263,37 +251,31 @@ public class StationService {
                 graph.addEdge(vertexSystem.getProperty("name") + "-" + station.getName(), vertexSystem, vertexStation, "Has");
                 
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
     }
 
     public void deleteCommodityExchangeRelationshipOrientDb(Station station, Commodity commodity) {
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
             OrientVertex vertexCommodity = (OrientVertex) graph.getVertexByKey("Commodity.name", commodity.getName());
             for (Edge exchange: vertexStation.getEdges(vertexCommodity, Direction.BOTH)) {
                 exchange.remove();
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            graph.rollback();
         }
     }
     
     public void createCommodityExchangeRelationshipOrientDb(Station station, Commodity commodity, int sellPrice, int buyPrice, int supply, int demand, long date) {
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
             OrientVertex vertexCommodity = (OrientVertex) graph.getVertexByKey("Commodity.name", commodity.getName());
             OrientEdge edgeExchange = graph.addEdge(station.getName() + "-" + commodity.getName(), vertexStation, vertexCommodity, "Exchange");
@@ -302,35 +284,31 @@ public class StationService {
             edgeExchange.setProperty("supply", supply);
             edgeExchange.setProperty("demand", demand);
             edgeExchange.setProperty("date", date);
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            graph.rollback();
         }
     }
 
     public void createCommodityOrientDb(Commodity commodity) {
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexCommodity = (OrientVertex) graph.getVertexByKey("Commodity.name", commodity.getName());
             if (vertexCommodity == null) {
                 vertexCommodity = graph.addVertex("class:Commodity");
                 vertexCommodity.setProperty("name", commodity.getName());
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            graph.rollback();
         }
     }
     
     public int clearStationOfExchangesOrientDb(Station station) {
         int edgesRemoved = 0;
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
             for (Edge exchange: vertexStation.getEdges(Direction.OUT, "Exchange")) {
                 exchange.remove();
@@ -338,7 +316,7 @@ public class StationService {
             };
             
         } catch (Exception e) {
-            graph.rollback();
+            e.printStackTrace();
         }
         return edgesRemoved;
     }
@@ -354,9 +332,9 @@ public class StationService {
     public List<Station> getStationsForSystemOrientDb(String system) {
         
         List<Station> stations = new ArrayList<>();
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             Vertex systemVertex = graph.getVertexByKey("System.name", system);
             Set<Vertex> systemStations = starSystemService.findStationsInSystemOrientDb(systemVertex, null);
             
@@ -365,10 +343,8 @@ public class StationService {
                 Station station = vertexToStation(stationVertex);
                 stations.add(station);
             }
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            graph.rollback();
         }
     
         return stations;
@@ -378,9 +354,8 @@ public class StationService {
         
         long stationCount = 0;
         try {
-            OrientGraph graph = orientDbService.getFactory().getTx();
+            OrientGraphNoTx graph = orientDbService.getFactory().getNoTx();
             stationCount = graph.countVertices("Station");
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -389,20 +364,16 @@ public class StationService {
     
     public void addPropertyToStationOrientDb(Station station, String property, Object value) {
         
-        OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try {
-            graph = orientDbService.getFactory().getTx();
+            graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexStation = (OrientVertex) graph.getVertexByKey("Station.name", station.getName());
             if (vertexStation == null) {            	
             	throw new StationNotFoundException(station.getName() + " not found.");
             }
             vertexStation.setProperty(property, value);
-            graph.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            if (graph != null) {
-                graph.rollback();
-            }
         }
     }
     
