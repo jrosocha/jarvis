@@ -70,12 +70,16 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     
     @FXML
     private Node view;
+    
     @FXML
     private TableView<Station> stationTable;
+    
     @FXML
     private TableColumn<Station, String> stationNameColumn;
+    
     @FXML
     private TableColumn<Station, Boolean> stationBlackMarketFlagColumn;
+    
     @FXML
     private TableColumn<Station, LocalDateTime> stationDataAgeColumn;
     
@@ -96,10 +100,6 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     private ObservableList<String> government = FXCollections.observableArrayList();
     
     @FXML
-    private ComboBox<String> factionComboBox;
-    private ObservableList<String> faction = FXCollections.observableArrayList();
-    
-    @FXML
     private ComboBox<String> primaryEconomyComboBox;
     private ObservableList<String> primaryEconomy = FXCollections.observableArrayList();
 
@@ -110,22 +110,35 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     public void onApplicationEvent(ApplicationEvent event) {
         
         if (event instanceof CurrentSystemChangedEvent) {
+            System.out.println("CurrentSystemChangedEvent received by CurrentSystemController.");
             CurrentSystemChangedEvent currentSystemChangedEvent = (CurrentSystemChangedEvent) event;
             if (event.getSource() != null) {
-                starSystemService.setCurrentStarSystem(currentSystemChangedEvent.getStarSystem());
-                Platform.runLater(new UpdateCurrentSystem(currentSystemChangedEvent.getStarSystem()));
+                StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
+                starSystemService.setCurrentStarSystem(starSystem);
+                System.out.println("Updating to: " + starSystem);
+                Platform.runLater(()->{
+                    stations.clear();
+                    stations.addAll(starSystem.getStations());
+                    stationTable.setItems(stations);
+                    currentSystemComboBox.getSelectionModel().select(starSystem.getName());
+                    allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
+                    governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
+                    primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
+                });
             }
         }
         
         if (event instanceof OcrCompletedEvent) {
             Platform.runLater(()->{
+                System.out.println("OcrCompletedEvent received by CurrentSystemController.");
                 String starSystemName = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
                 populateSystems();
                 if (starSystemName != null) {
                     StarSystem reloadedStarSystem;
                     try {
                         reloadedStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystemName, false);
-                        eventPublisher.publishEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
+                        this.onApplicationEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
+                        //eventPublisher.publishEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -136,27 +149,6 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     
     public Node getView() {
         return view;
-    }
-    
-    private class UpdateCurrentSystem implements Runnable {
-        
-        private StarSystem starSystem;
-        
-        public UpdateCurrentSystem(StarSystem starSystem) {
-            this.starSystem = starSystem;
-        }
-        
-        @Override
-        public void run() {
-            stations.clear();
-            stations.addAll(starSystem.getStations());
-            stationTable.setItems(stations);
-            currentSystemComboBox.getSelectionModel().select(starSystem.getName());
-            allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
-            governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
-            factionComboBox.getSelectionModel().select(starSystem.getFaction());
-            primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
-        }
     }
     
     @PostConstruct
@@ -192,14 +184,14 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         });
         //FxUtil.autoCompleteComboBox(governmentComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
-        this.factionComboBox.setItems(this.faction);
-        factionComboBox.setOnAction((event)->{
-            try {
-                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "faction", factionComboBox.getSelectionModel().getSelectedItem());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+//        this.factionComboBox.setItems(this.faction);
+//        factionComboBox.setOnAction((event)->{
+//            try {
+//                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "faction", factionComboBox.getSelectionModel().getSelectedItem());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
         //FxUtil.autoCompleteComboBox(factionComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.primaryEconomyComboBox.setItems(this.primaryEconomy);
@@ -309,8 +301,8 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         
         this.allegiance.clear();
         this.allegiance.addAll(starSystemService.getAllegiances());
-        this.faction.clear();
-        this.faction.addAll(starSystemService.getFactions());
+//        this.faction.clear();
+//        this.faction.addAll(starSystemService.getFactions());
         this.government.clear();
         this.government.addAll(starSystemService.getGovernments());
         this.primaryEconomy.clear();
