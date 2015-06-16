@@ -88,8 +88,11 @@ public class FxUtil {
     }
 
     public static<T> T getComboBoxValue(ComboBox<T> comboBox){
-        
-        return comboBox.getValue();
+        try {
+            return comboBox.getItems().get(comboBox.getSelectionModel().getSelectedIndex());
+        } catch (Exception e) {
+            return comboBox.getValue();
+        }
         
 //        try {
 //            if(comboBox.getValue() == null || comboBox.getValue().toString().isEmpty())
