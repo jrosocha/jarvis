@@ -2,6 +2,8 @@ package com.jhr.jarvis.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +67,10 @@ public class StarSystemService {
     
     private StarSystem currentStarSystem = null;
 
+    public void getLatestSystemsFileFromEddb(File eddbSystemsJson) throws MalformedURLException, IOException {        
+        FileUtils.copyURLToFile(new URL("http://eddb.io/archive/v3/systems.json"), eddbSystemsJson);
+    }
+    
     /**
      * produces the d3 map data for the system you are in and the systems you can reach with 1 jump.
      * 

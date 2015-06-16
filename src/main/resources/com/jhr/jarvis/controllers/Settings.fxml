@@ -9,7 +9,7 @@
       <TextField fx:id="orientGraphDb" layoutX="140.0" layoutY="28.0" prefHeight="20.0" prefWidth="615.0" />
       <Label layoutX="10.0" layoutY="32.0" prefHeight="12.0" prefWidth="109.0" text="Database Directory" />
       <Label layoutX="10.0" layoutY="54.0" prefHeight="12.0" prefWidth="109.0" text="Systems File" />
-      <TextField fx:id="systemsFile" layoutX="140.0" layoutY="50.0" prefHeight="20.0" prefWidth="615.0" />
+      <TextField fx:id="systemsFile" layoutX="140.0" layoutY="50.0" prefHeight="20.0" prefWidth="495.0" />
       <TextField fx:id="commodityFile" layoutX="140.0" layoutY="72.0" prefHeight="20.0" prefWidth="615.0" />
       <Label layoutX="10.0" layoutY="76.0" prefHeight="12.0" prefWidth="109.0" text="Commodities FIle" />
       <Label layoutX="10.0" layoutY="98.0" prefHeight="12.0" prefWidth="109.0" text="Ship File" />
@@ -28,5 +28,6 @@
       <Label layoutX="10.0" layoutY="232.0" prefHeight="12.0" prefWidth="122.0" text="OCR Archive Enabled" />
       <CheckBox fx:id="eliteOcrScanArchiveEnabed" layoutX="140.0" layoutY="230.0" mnemonicParsing="false" />
       <Label layoutX="10.0" layoutY="10.0" text="Settings File" />
+      <Button fx:id="getSystemsEddnButton" layoutX="638.0" layoutY="50.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Get Latest from EDDN" />
    </children>
 </Pane>

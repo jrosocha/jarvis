@@ -1,5 +1,6 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.File;
 import java.io.IOException;
 
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jhr.jarvis.model.Settings;
+import com.jhr.jarvis.service.StarSystemService;
 
 /**
  * Not annotated as @Component because we want to use the springFxmlLoader so the @FXML annotations get populated.
@@ -24,6 +26,9 @@ public class SettingsController {
 
     @Autowired
     private Settings settings;
+
+    @Autowired
+    private StarSystemService starSystemService;
     
     @FXML
     private Node view;
@@ -61,6 +66,8 @@ public class SettingsController {
     @FXML
     private Button saveConfigButton;
     
+    @FXML
+    private Button getSystemsEddnButton;
     
     public Node getView() {
         return view;
@@ -74,6 +81,16 @@ public class SettingsController {
         saveConfigButton.setOnAction((event) -> {
             saveSettings();
             loadSettings();
+        });
+        
+        getSystemsEddnButton.setOnAction((event) -> {
+            try {
+                File systemsFile = new File(settings.getSystemsFile());
+                starSystemService.getLatestSystemsFileFromEddb(systemsFile);
+                starSystemService.loadSystemsV2(systemsFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
     
