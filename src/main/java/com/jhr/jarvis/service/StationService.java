@@ -134,6 +134,7 @@ public class StationService {
             if (stationVertex == null) {
                 throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
             }
+            stationVertex.getEdges(Direction.BOTH).forEach((edge)->{edge.remove();});
             stationVertex.remove();
         } catch (Exception e) {
             throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
