@@ -3,10 +3,12 @@ package com.jhr.jarvis.controllers;
 import java.io.File;
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 
 import javax.annotation.PostConstruct;
@@ -69,6 +71,10 @@ public class SettingsController {
     @FXML
     private Button getSystemsEddnButton;
     
+    @FXML
+    private ProgressIndicator getSystemsEddnLoading;
+    
+    
     public Node getView() {
         return view;
     }
@@ -78,20 +84,30 @@ public class SettingsController {
     public void initController() {
         
         loadSettings();
+        
         saveConfigButton.setOnAction((event) -> {
             saveSettings();
             loadSettings();
         });
         
-        getSystemsEddnButton.setOnAction((event) -> {
-            try {
-                File systemsFile = new File(settings.getSystemsFile());
-                starSystemService.getLatestSystemsFileFromEddb(systemsFile);
-                starSystemService.loadSystemsV2(systemsFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        getSystemsEddnButton.setOnAction((event) -> {            
+                getSystemsEddnLoading.setVisible(true);               
+                Runnable task = () -> {             
+                    try {
+                        File systemsFile = new File(settings.getSystemsFile());
+                        starSystemService.getLatestSystemsFileFromEddb(systemsFile);
+                        starSystemService.loadSystemsV2(systemsFile);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        getSystemsEddnLoading.setVisible(false);
+                    }
+
+                };
+                new Thread(task).start();                
         });
+        
+        getSystemsEddnLoading.setVisible(false);
     }
     
     public void loadSettings() {
