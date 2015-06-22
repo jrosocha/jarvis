@@ -2,6 +2,7 @@ package com.jhr.jarvis;
 
 import java.io.File;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -24,6 +25,7 @@ import com.jhr.jarvis.controllers.ShipController;
 import com.jhr.jarvis.controllers.StationOverviewController;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.service.EddnService;
+import com.jhr.jarvis.service.OrientDbService;
 import com.jhr.jarvis.service.StarSystemService;
 
 @Import(JarvisConfig.class)
@@ -43,19 +45,27 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     @Autowired
     private Settings settings;
     
+    @Autowired
+    private OrientDbService orientDbService;
+    
     RootLayoutController rootLayoutController;
     
     private BorderPane rootLayout;    
     private TabPane center;
 
+    @Override  
+    public void stop() {       
+        orientDbService.shutDownDb();
+        Platform.exit();
+        System.out.println("Shutting down...");
+        System.exit(0);
+    }  
+    
 	@Override
 	public void start(Stage stage) throws Exception {
 
         this.primaryStage = stage;
         this.primaryStage.setTitle("Jarvis");
-
-        
-        
         initRootLayout();
 	}
 

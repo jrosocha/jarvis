@@ -22,6 +22,12 @@ public class OrientDbService {
 
     private OrientGraphFactory factory = null;
     
+    public void shutDownDb() {
+        System.out.println("Shutting down db...");
+        factory.close();
+        System.out.println("Shut down db.");
+    }
+    
     private void startDb() {
         
         if (factory == null) {

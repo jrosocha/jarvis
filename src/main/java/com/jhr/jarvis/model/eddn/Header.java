@@ -11,51 +11,66 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.joda.time.DateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "uploaderID",
-    "softwareName",
     "softwareVersion",
-    "gatewayTimestamp"
+    "gatewayTimestamp",
+    "softwareName",
+    "uploaderID"
 })
 public class Header {
 
-    @JsonProperty("uploaderID")
-    private String uploaderID;
-    @JsonProperty("softwareName")
-    private String softwareName;
     @JsonProperty("softwareVersion")
     private String softwareVersion;
-    /**
-     * Timestamp upon receipt at the gateway. If present, this property will be overwritten by the gateway; submitters are not intended to populate this property.
-     * 
-     */
     @JsonProperty("gatewayTimestamp")
-    private DateTime gatewayTimestamp;
+    private String gatewayTimestamp;
+    @JsonProperty("softwareName")
+    private String softwareName;
+    @JsonProperty("uploaderID")
+    private String uploaderID;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      * 
      * @return
-     *     The uploaderID
+     *     The softwareVersion
      */
-    @JsonProperty("uploaderID")
-    public String getUploaderID() {
-        return uploaderID;
+    @JsonProperty("softwareVersion")
+    public String getSoftwareVersion() {
+        return softwareVersion;
     }
 
     /**
      * 
-     * @param uploaderID
-     *     The uploaderID
+     * @param softwareVersion
+     *     The softwareVersion
      */
-    @JsonProperty("uploaderID")
-    public void setUploaderID(String uploaderID) {
-        this.uploaderID = uploaderID;
+    @JsonProperty("softwareVersion")
+    public void setSoftwareVersion(String softwareVersion) {
+        this.softwareVersion = softwareVersion;
+    }
+
+    /**
+     * 
+     * @return
+     *     The gatewayTimestamp
+     */
+    @JsonProperty("gatewayTimestamp")
+    public String getGatewayTimestamp() {
+        return gatewayTimestamp;
+    }
+
+    /**
+     * 
+     * @param gatewayTimestamp
+     *     The gatewayTimestamp
+     */
+    @JsonProperty("gatewayTimestamp")
+    public void setGatewayTimestamp(String gatewayTimestamp) {
+        this.gatewayTimestamp = gatewayTimestamp;
     }
 
     /**
@@ -81,43 +96,21 @@ public class Header {
     /**
      * 
      * @return
-     *     The softwareVersion
+     *     The uploaderID
      */
-    @JsonProperty("softwareVersion")
-    public String getSoftwareVersion() {
-        return softwareVersion;
+    @JsonProperty("uploaderID")
+    public String getUploaderID() {
+        return uploaderID;
     }
 
     /**
      * 
-     * @param softwareVersion
-     *     The softwareVersion
+     * @param uploaderID
+     *     The uploaderID
      */
-    @JsonProperty("softwareVersion")
-    public void setSoftwareVersion(String softwareVersion) {
-        this.softwareVersion = softwareVersion;
-    }
-
-    /**
-     * Timestamp upon receipt at the gateway. If present, this property will be overwritten by the gateway; submitters are not intended to populate this property.
-     * 
-     * @return
-     *     The gatewayTimestamp
-     */
-    @JsonProperty("gatewayTimestamp")
-    public DateTime getGatewayTimestamp() {
-        return gatewayTimestamp;
-    }
-
-    /**
-     * Timestamp upon receipt at the gateway. If present, this property will be overwritten by the gateway; submitters are not intended to populate this property.
-     * 
-     * @param gatewayTimestamp
-     *     The gatewayTimestamp
-     */
-    @JsonProperty("gatewayTimestamp")
-    public void setGatewayTimestamp(DateTime gatewayTimestamp) {
-        this.gatewayTimestamp = gatewayTimestamp;
+    @JsonProperty("uploaderID")
+    public void setUploaderID(String uploaderID) {
+        this.uploaderID = uploaderID;
     }
 
     @Override

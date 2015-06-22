@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -85,10 +86,14 @@ public class EddnService implements ApplicationEventPublisherAware {
                         }
                         byte[] output = outputStream.toByteArray();
                         String outputString = new String(output, 0, output.length, "UTF-8");
+                        
+                        System.out.println("received->" + outputString);
+                        
                         EddnMessage message = JarvisConfig.MAPPER.readValue(outputString, EddnMessage.class);
                         
-                        if (message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR") ||
-                            message.getHeader().getSoftwareName().startsWith("E:D Market Connector")) {
+                        if ( message.get$schemaRef().equals("http://schemas.elite-markets.net/eddn/commodity/2") &&
+                                message.getHeader().getSoftwareName().equalsIgnoreCase("EliteOCR") ||
+                                message.getHeader().getSoftwareName().startsWith("E:D Market Connector")) {
                             eddnMessageQueue.add(message);
                             lastMessageReceived = LocalDateTime.now();
                             eventPublisher.publishEvent(new ConsoleEvent("new EDDN record: " + message));
@@ -100,7 +105,7 @@ public class EddnService implements ApplicationEventPublisherAware {
                             System.out.println("Not accepting data from applicaion: " + message.getHeader().getSoftwareName());
                         }
                         
-                    } catch (IOException | DataFormatException e) {
+                    } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
@@ -157,28 +162,39 @@ public class EddnService implements ApplicationEventPublisherAware {
         /*
          * add station to graph if needed
          */
-        currentStation = new Station(msg.getMessage().getStationName().toUpperCase(), currentSystem.getName().toUpperCase());
-        stationService.createStationOrientDb(currentSystem, currentStation);
+        if (StringUtils.isNotBlank(msg.getMessage().getStationName())) {
+            currentStation = new Station(msg.getMessage().getStationName().toUpperCase(), currentSystem.getName().toUpperCase());
+            stationService.createStationOrientDb(currentSystem, currentStation);
+        }
 
-        /*
-         * add commodity to graph if needed
-         */
-        Commodity currentCommodity = new Commodity(msg.getMessage().getItemName().toUpperCase());
-        stationService.createCommodityOrientDb(currentCommodity);
+        if (msg.getMessage().getCommodities() != null && msg.getMessage().getCommodities().size() > 0){
+            
+            for (com.jhr.jarvis.model.eddn.Commodity commodity: msg.getMessage().getCommodities()) {
+                
+                try {
+                    /*
+                     * add commodity to graph if needed
+                     */
+                    Commodity currentCommodity = new Commodity(commodity.getName().toUpperCase());
+                    stationService.createCommodityOrientDb(currentCommodity);
+                    /*
+                    * delete existing exchange if it exists
+                    */
+                    stationService.deleteCommodityExchangeRelationshipOrientDb(currentStation, currentCommodity);
+                    
+                    int buyPrice = commodity.getBuyPrice() == null ? 0 : commodity.getBuyPrice().intValue();
+                    int sellPrice = commodity.getSellPrice() == null ? 0 : commodity.getSellPrice().intValue();
+                    int supply = commodity.getSupply() == null ? 0 : commodity.getSupply().intValue();
+                    int demand =commodity.getDemand() == null ? 0 : commodity.getDemand().intValue();
+                    stationService.createCommodityExchangeRelationshipOrientDb(currentStation, currentCommodity, sellPrice, buyPrice, supply, demand, new Date().toInstant().toEpochMilli());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        }
 
-        /*
-         * delete existing exchange if it exists
-         */
-        stationService.deleteCommodityExchangeRelationshipOrientDb(currentStation, currentCommodity);
-
-        int buyPrice = msg.getMessage().getBuyPrice() == null ? 0 : msg.getMessage().getBuyPrice().intValue();
-        int sellPrice = msg.getMessage().getSellPrice() == null ? 0 : msg.getMessage().getSellPrice().intValue();
-        int supply = msg.getMessage().getStationStock() == null ? 0 : msg.getMessage().getStationStock().intValue();
-        int demand = msg.getMessage().getDemand() == null ? 0 : msg.getMessage().getDemand().intValue();
-        long date = msg.getMessage().getTimestamp() == null ? 0 : msg.getMessage().getTimestamp().getMillis();
-        stationService.createCommodityExchangeRelationshipOrientDb(currentStation, currentCommodity, sellPrice, buyPrice, supply, demand, date);
-
-        eventPublisher.publishEvent(new ConsoleEvent("added exchange " + msg.getMessage().toString()));
+        eventPublisher.publishEvent(new ConsoleEvent("added exchange " + msg.toString()));
         eventPublisher.publishEvent(new ConsoleEvent("activity completed in " + ((new Date().getTime() - start.getTime()) / 1000.0) + " seconds"));
 
     };
