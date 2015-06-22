@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 
 import javax.annotation.PostConstruct;
 
@@ -49,18 +50,24 @@ public class SettingsController {
     
     @FXML
     private TextField avoidStationsFile;
+
+    @FXML
+    private Button csvImportDirectoryBrowseButton;
     
     @FXML
-    private TextField eliteOcrScanDirectory;
+    private TextField csvImportDirectory;
     
     @FXML
-    private CheckBox eliteOcrScanArchiveEnabed;
+    private CheckBox csvImportArchiveEnabed;
     
     @FXML
     private TextField longestDistanceEdge;
     
     @FXML
     private TextField closeSystemDistance;
+
+    @FXML
+    private Button eliteDangerousAppDirectoryButton;
     
     @FXML
     private TextField eliteDangerousAppDirectory;
@@ -84,6 +91,36 @@ public class SettingsController {
     public void initController() {
         
         loadSettings();
+        
+        csvImportDirectoryBrowseButton.setOnAction((event) -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setInitialDirectory(new File(settings.getEliteOcrScanDirectory()));
+            
+            File selectedDirectory = 
+                    directoryChooser.showDialog(view.getScene().getWindow());
+            
+            if(selectedDirectory == null){
+                csvImportDirectory.setText(settings.getEliteOcrScanDirectory());
+            }else{
+                csvImportDirectory.setText(selectedDirectory.getAbsolutePath());
+            }
+            
+        });
+        
+        eliteDangerousAppDirectoryButton.setOnAction((event) -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setInitialDirectory(new File(settings.getEliteDangerousAppDirectory()));
+            
+            File selectedDirectory = 
+                    directoryChooser.showDialog(view.getScene().getWindow());
+            
+            if(selectedDirectory == null){
+                eliteDangerousAppDirectory.setText(settings.getEliteDangerousAppDirectory());
+            }else{
+                eliteDangerousAppDirectory.setText(selectedDirectory.getAbsolutePath());
+            }
+            
+        });
         
         saveConfigButton.setOnAction((event) -> {
             saveSettings();
@@ -120,8 +157,8 @@ public class SettingsController {
         longestDistanceEdge.setText(settings.getLongestDistanceEdge() + "");
         closeSystemDistance.setText(settings.getCloseSystemDistance() + "");
         eliteDangerousAppDirectory.setText(settings.getEliteDangerousAppDirectory());
-        eliteOcrScanDirectory.setText(settings.getEliteOcrScanDirectory());
-        eliteOcrScanArchiveEnabed.setSelected(settings.isEliteOcrScanArchiveEnabed());
+        csvImportDirectory.setText(settings.getEliteOcrScanDirectory());
+        csvImportArchiveEnabed.setSelected(settings.isEliteOcrScanArchiveEnabed());
         
     }
     
@@ -132,11 +169,11 @@ public class SettingsController {
         settings.setCommodityFile(commodityFile.getText());
         settings.setShipFile(shipFile.getText());
         settings.setAvoidStationsFile(avoidStationsFile.getText());
-        settings.setEliteOcrScanDirectory(eliteOcrScanDirectory.getText());
+        settings.setEliteOcrScanDirectory(csvImportDirectory.getText());
         settings.setLongestDistanceEdge(Integer.parseInt(longestDistanceEdge.getText()));
         settings.setCloseSystemDistance(Integer.parseInt(closeSystemDistance.getText()));
         settings.setEliteDangerousAppDirectory(eliteDangerousAppDirectory.getText());
-        settings.setEliteOcrScanArchiveEnabed(eliteOcrScanArchiveEnabed.isSelected());
+        settings.setEliteOcrScanArchiveEnabed(csvImportArchiveEnabed.isSelected());
         try {
             settings.saveSettings();
         } catch (IOException e) {

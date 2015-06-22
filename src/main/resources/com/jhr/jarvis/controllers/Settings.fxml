@@ -16,8 +16,8 @@
       <TextField fx:id="shipFile" layoutX="140.0" layoutY="94.0" prefHeight="20.0" prefWidth="495.0" />
       <TextField fx:id="avoidStationsFile" layoutX="140.0" layoutY="116.0" prefHeight="20.0" prefWidth="495.0" />
       <Label layoutX="10.0" layoutY="120.0" prefHeight="12.0" prefWidth="109.0" text="Avoid Stations File" />
-      <Label layoutX="10.0" layoutY="142.0" prefHeight="12.0" prefWidth="122.0" text="Elite OCR Scan Directory" />
-      <TextField fx:id="eliteOcrScanDirectory" layoutX="140.0" layoutY="138.0" prefHeight="20.0" prefWidth="495.0" />
+      <Label layoutX="10.0" layoutY="142.0" prefHeight="12.0" prefWidth="122.0" text="CSV Import Directory" />
+      <TextField fx:id="csvImportDirectory" layoutX="140.0" layoutY="138.0" prefHeight="20.0" prefWidth="495.0" />
       <TextField fx:id="longestDistanceEdge" layoutX="140.0" layoutY="160.0" prefHeight="20.0" prefWidth="49.0" />
       <Label layoutX="10.0" layoutY="164.0" prefHeight="12.0" prefWidth="122.0" text="Longest Distance Edge" />
       <Label layoutX="10.0" layoutY="186.0" prefHeight="12.0" prefWidth="122.0" text="Close System Distance" />
@@ -25,10 +25,12 @@
       <Label layoutX="10.0" layoutY="208.0" prefHeight="12.0" prefWidth="122.0" text="Elite:Dangerous App Dir" />
       <TextField fx:id="eliteDangerousAppDirectory" layoutX="140.0" layoutY="204.0" prefHeight="20.0" prefWidth="495.0" />
       <Button fx:id="saveConfigButton" layoutX="689.0" layoutY="251.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Save Configuration" />
-      <Label layoutX="10.0" layoutY="232.0" prefHeight="12.0" prefWidth="122.0" text="OCR Archive Enabled" />
-      <CheckBox fx:id="eliteOcrScanArchiveEnabed" layoutX="140.0" layoutY="230.0" mnemonicParsing="false" />
+      <Label layoutX="10.0" layoutY="232.0" prefHeight="12.0" prefWidth="122.0" text="CSV Archive Enabled" />
+      <CheckBox fx:id="csvImportArchiveEnabed" layoutX="140.0" layoutY="230.0" mnemonicParsing="false" />
       <Label layoutX="10.0" layoutY="10.0" text="Settings File" />
-      <Button fx:id="getSystemsEddnButton" layoutX="670.0" layoutY="50.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Get Latest from EDDN" />
-      <ProgressIndicator fx:id="getSystemsEddnLoading" layoutX="645.0" layoutY="53.0" maxHeight="15.0" maxWidth="15.0" />
+      <Button fx:id="getSystemsEddnButton" layoutX="638.0" layoutY="50.0" mnemonicParsing="false" style="-fx-background-color: lightgreen;" text="Get Latest from EDDN" />
+      <ProgressIndicator fx:id="getSystemsEddnLoading" layoutX="758.0" layoutY="53.0" maxHeight="15.0" maxWidth="15.0" />
+      <Button fx:id="csvImportDirectoryBrowseButton" layoutX="638.0" layoutY="138.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="66.0" text="Browse" />
+      <Button fx:id="eliteDangerousAppDirectoryButton" layoutX="638.0" layoutY="204.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="66.0" text="Browse" />
    </children>
 </Pane>
