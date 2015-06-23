@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.orientDb.functions.OSQLFunctionDijkstraWithWeightMax;
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.sql.OSQLEngine;
 import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.Vertex;
@@ -41,6 +42,23 @@ public class OrientDbService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            
+            /*
+             * ### Caches
+                We completely removed Level2 cache. Now only Level1 and Storage DiskCache are used. This change should be transparent with code that run on previous versions, unless you enable/disable Level2 cache in your code.
+                
+                Furthermore it's not possible anymore to disable Cache, so method `setEnable()` has been removed.
+                
+                #### Changes
+                
+                |Context|1.7.x|2.0.x|
+                |----|----------|-------------|
+                |API|ODatabaseRecord.getLevel1Cache()|ODatabaseRecord.getLocalCache()|
+                |API|ODatabaseRecord.getLevel2Cache()|Not available|
+                |Configuration|OGlobalConfiguration.CACHE_LEVEL1_ENABLED|OGlobalConfiguration.CACHE_LOCAL_ENABLED|
+                |Configuration|OGlobalConfiguration.CACHE_LEVEL2_ENABLED|Not available|
+             */
+            //OGlobalConfiguration.CACHE_LOCAL_ENABLED.setValue(false); // i dont think this owrks
             
             factory = new OrientGraphFactory("plocal:" + settings.getOrientGraphDb(),"admin","admin").setupPool(1,10);
             factory.setUseLightweightEdges(false);            

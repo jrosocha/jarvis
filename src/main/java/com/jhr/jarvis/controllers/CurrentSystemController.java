@@ -102,7 +102,10 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
     @FXML
     private ComboBox<String> primaryEconomyComboBox;
     private ObservableList<String> primaryEconomy = FXCollections.observableArrayList();
-
+    
+    @FXML
+    private ComboBox<String> secondaryEconomyComboBox;
+    private ObservableList<String> secondaryEconomy = FXCollections.observableArrayList();
     
     private ApplicationEventPublisher eventPublisher;
     
@@ -119,11 +122,13 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
                 Platform.runLater(()->{
                     stations.clear();
                     stations.addAll(starSystem.getStations());
+                    stationTable.getItems().clear();
                     stationTable.setItems(stations);
                     currentSystemComboBox.getSelectionModel().select(starSystem.getName());
                     allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
                     governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
                     primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
+                    secondaryEconomyComboBox.getSelectionModel().select(starSystem.getSecondaryEconomy());
                 });
             }
         }
@@ -182,17 +187,7 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
                 e.printStackTrace();
             }
         });
-        //FxUtil.autoCompleteComboBox(governmentComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
-        
-//        this.factionComboBox.setItems(this.faction);
-//        factionComboBox.setOnAction((event)->{
-//            try {
-//                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "faction", factionComboBox.getSelectionModel().getSelectedItem());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-        //FxUtil.autoCompleteComboBox(factionComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+
         
         this.primaryEconomyComboBox.setItems(this.primaryEconomy);
         primaryEconomyComboBox.setOnAction((event)->{
@@ -202,7 +197,15 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
                 e.printStackTrace();
             }
         });
-        //FxUtil.autoCompleteComboBox(primaryEconomyComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        
+        this.secondaryEconomyComboBox.setItems(this.secondaryEconomy);
+        secondaryEconomyComboBox.setOnAction((event)->{
+            try {
+                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "secondaryEconomy", secondaryEconomyComboBox.getSelectionModel().getSelectedItem());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         
         currentSystemComboBox.setOnAction((event) -> {
             currentSystemComboBoxTimer.cancel();
@@ -307,6 +310,8 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         this.government.addAll(starSystemService.getGovernments());
         this.primaryEconomy.clear();
         this.primaryEconomy.addAll(starSystemService.getEconomies());
+        this.secondaryEconomy.clear();
+        this.secondaryEconomy.addAll(starSystemService.getEconomies());
            
     }
     

@@ -36,6 +36,7 @@ import com.jhr.jarvis.model.Ship;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
+import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.core.sql.filter.OSQLPredicate;
 import com.tinkerpop.blueprints.Direction;
@@ -370,19 +371,29 @@ public class StarSystemService {
             return;
         }
         
-        try {
-            graph = orientDbService.getFactory().getNoTx();
-            OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
-            if (vertexSystem == null) {
-                throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
+        
+        for (int retry = 0; retry < JarvisConfig.MAX_SAVE_RETRIES; retry++) {
+        
+            OrientVertex vertexSystem;
+            try {
+                graph = orientDbService.getFactory().getNoTx();
+                vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
+                if (vertexSystem == null) {
+                    throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
+                }
+                if (vertexSystem.getProperty(propertyName) != null && !vertexSystem.getProperty(propertyName).equals(value)) {
+                    vertexSystem.setProperty(propertyName, value);
+                    System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
+                }
+                break;
+    
+            } catch (OConcurrentModificationException e1)  {
+                System.out.println("save retry #" + retry + "; cause="  + e1);
+                retry++;
+            } catch (Exception e) {
+                e.printStackTrace();
+                break;
             }
-            if (vertexSystem.getProperty(propertyName) != null && !vertexSystem.getProperty(propertyName).equals(value)) {
-                vertexSystem.setProperty(propertyName, value);
-                System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -449,6 +460,10 @@ public class StarSystemService {
             
             if (StringUtils.isBlank((String)vertexSystem.getProperty("primaryEconomy")) || replaceAllSystemData) {
                 vertexSystem.setProperty("primaryEconomy", system.getPrimaryEconomy() != null ? system.getPrimaryEconomy().toUpperCase() : "");
+            }
+            
+            if (StringUtils.isBlank((String)vertexSystem.getProperty("secondaryEconomy")) || replaceAllSystemData) {
+                vertexSystem.setProperty("secondaryEconomy", system.getSecondaryEconomy() != null ? system.getSecondaryEconomy().toUpperCase() : "");
             }
             
             if (StringUtils.isBlank((String)vertexSystem.getProperty("security")) || replaceAllSystemData) {
@@ -544,6 +559,7 @@ public class StarSystemService {
             starSystem.setNeedsPermit(systemVertex.getProperty("needsPermit"));
             starSystem.setPopulation(systemVertex.getProperty("population"));
             starSystem.setPrimaryEconomy(systemVertex.getProperty("primaryEconomy"));
+            starSystem.setSecondaryEconomy(systemVertex.getProperty("secondaryEconomy"));
             starSystem.setSecurity(systemVertex.getProperty("security"));
             starSystem.setState(systemVertex.getProperty("state"));
         }

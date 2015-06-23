@@ -56,6 +56,8 @@ public class StarSystem implements Comparable<StarSystem>{
     private String security;
     @JsonProperty("primary_economy")
     private String primaryEconomy;
+    @JsonProperty("secondary_economy")
+    private String secondaryEconomy;
     @JsonProperty("needs_permit")
     private Boolean needsPermit;
     @JsonProperty("updated_at")
@@ -322,6 +324,17 @@ public class StarSystem implements Comparable<StarSystem>{
         this.primaryEconomy = primaryEconomy != null ? primaryEconomy.toUpperCase() : null;
     }
 
+    @JsonProperty("secondary_economy")
+    public void setSecondaryEconomy(String economy) {
+        this.primaryEconomy = economy != null ? economy.toUpperCase() : null;
+    }
+
+    @JsonProperty("secondary_economy")
+    public String getSecondaryEconomy() {
+        return secondaryEconomy;
+    }
+
+
     /**
      * 
      * @return
@@ -400,8 +413,8 @@ public class StarSystem implements Comparable<StarSystem>{
     @Override
     public String toString() {
         return "StarSystem [id=" + id + ", name=" + name + ", x=" + x + ", y=" + y + ", z=" + z + ", faction=" + faction + ", population=" + population + ", government=" + government
-                + ", allegiance=" + allegiance + ", state=" + state + ", security=" + security + ", primaryEconomy=" + primaryEconomy + ", needsPermit=" + needsPermit + ", updatedAt=" + updatedAt
-                + ", additionalProperties=" + additionalProperties + "]";
+                + ", allegiance=" + allegiance + ", state=" + state + ", security=" + security + ", primaryEconomy=" + primaryEconomy + ", secondaryEconomy=" + secondaryEconomy + ", needsPermit="
+                + needsPermit + ", updatedAt=" + updatedAt + ", additionalProperties=" + additionalProperties + ", stations=" + stations + "]";
     }
 
     public List<Station> getStations() {

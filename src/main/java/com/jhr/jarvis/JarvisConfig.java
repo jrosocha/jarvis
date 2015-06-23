@@ -41,6 +41,8 @@ public class JarvisConfig {
     @Autowired 
     private SpringFxmlLoader springFxmlLoader;
     
+    public static final int MAX_SAVE_RETRIES = 10;
+    
     public static final ObjectMapper MAPPER = new ObjectMapper();
     static {
         MAPPER.registerModule(new JodaModule());
