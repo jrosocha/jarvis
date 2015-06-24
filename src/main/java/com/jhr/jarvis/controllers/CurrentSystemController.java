@@ -123,7 +123,8 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
                     stations.clear();
                     stations.addAll(starSystem.getStations());
                     stationTable.getItems().clear();
-                    stationTable.setItems(stations);
+                    stationTable.getItems().addAll(stations);
+                    //stationTable.setItems(stations);
                     currentSystemComboBox.getSelectionModel().select(starSystem.getName());
                     allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
                     governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
