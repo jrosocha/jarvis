@@ -117,19 +117,19 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
             CurrentSystemChangedEvent currentSystemChangedEvent = (CurrentSystemChangedEvent) event;
             if (event.getSource() != null) {
                 StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
-                starSystemService.setCurrentStarSystem(starSystem);
+                //starSystemService.setCurrentStarSystem(starSystem);
                 System.out.println("Updating to: " + starSystem);
                 Platform.runLater(()->{
                     stations.clear();
                     stations.addAll(starSystem.getStations());
                     stationTable.getItems().clear();
                     stationTable.getItems().addAll(stations);
-                    //stationTable.setItems(stations);
                     currentSystemComboBox.getSelectionModel().select(starSystem.getName());
                     allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
                     governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
                     primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
                     secondaryEconomyComboBox.getSelectionModel().select(starSystem.getSecondaryEconomy());
+                    
                 });
             }
         }
@@ -137,14 +137,15 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         if (event instanceof OcrCompletedEvent) {
             Platform.runLater(()->{
                 System.out.println("OcrCompletedEvent received by CurrentSystemController.");
-                String starSystemName = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
+                String starSystemName = currentSystemComboBox.getEditor().getText();
+                System.out.println("Updating current system " + starSystemName);
                 populateSystems();
                 if (starSystemName != null) {
                     StarSystem reloadedStarSystem;
                     try {
                         reloadedStarSystem = starSystemService.findExactSystemAndStationsOrientDb(starSystemName, false);
+                        System.out.println("Updating current system to " + reloadedStarSystem);
                         this.onApplicationEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
-                        //eventPublisher.publishEvent(new CurrentSystemChangedEvent(reloadedStarSystem));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -172,46 +173,61 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         
         this.allegianceComboBox.setItems(this.allegiance);
         allegianceComboBox.setOnAction((event)->{
-            try {
-                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "allegiance", allegianceComboBox.getSelectionModel().getSelectedItem());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (allegianceComboBox.getSelectionModel().getSelectedItem() != null) {
+                try {
+                    starSystemService.addPropertyToSystem(currentSystemComboBox.getEditor().getText().toUpperCase(), "allegiance", allegianceComboBox.getSelectionModel().getSelectedItem());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-        //FxUtil.autoCompleteComboBox(allegianceComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
         
         this.governmentComboBox.setItems(this.government);
         governmentComboBox.setOnAction((event)->{
-            try {
-                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "government", governmentComboBox.getSelectionModel().getSelectedItem());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (governmentComboBox.getSelectionModel().getSelectedItem() != null) {
+                try {
+                    starSystemService.addPropertyToSystem(currentSystemComboBox.getEditor().getText().toUpperCase(), "government", governmentComboBox.getSelectionModel().getSelectedItem());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-
         
         this.primaryEconomyComboBox.setItems(this.primaryEconomy);
         primaryEconomyComboBox.setOnAction((event)->{
-            try {
-                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "primaryEconomy", primaryEconomyComboBox.getSelectionModel().getSelectedItem());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (primaryEconomyComboBox.getSelectionModel().getSelectedItem() != null) {
+                try {
+                    starSystemService.addPropertyToSystem(currentSystemComboBox.getEditor().getText().toUpperCase(), "primaryEconomy", primaryEconomyComboBox.getSelectionModel().getSelectedItem());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         
         this.secondaryEconomyComboBox.setItems(this.secondaryEconomy);
         secondaryEconomyComboBox.setOnAction((event)->{
+            if (secondaryEconomyComboBox.getSelectionModel().getSelectedItem() != null) {
+                try {
+                    starSystemService.addPropertyToSystem(currentSystemComboBox.getEditor().getText().toUpperCase(), "secondaryEconomy", secondaryEconomyComboBox.getSelectionModel().getSelectedItem());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
             try {
-                starSystemService.addPropertyToSystem(currentSystemComboBox.getSelectionModel().getSelectedItem().toUpperCase(), "secondaryEconomy", secondaryEconomyComboBox.getSelectionModel().getSelectedItem());
+                System.out.println("Updated to->" + starSystemService.findExactSystemAndStationsOrientDb(currentSystemComboBox.getEditor().getText().toUpperCase(), false));
             } catch (Exception e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         });
         
         currentSystemComboBox.setOnAction((event) -> {
-            currentSystemComboBoxTimer.cancel();
-            currentSystemComboBoxTimer = new Timer();
-            currentSystemComboBoxTimer.schedule(new CurrentSystemComboBoxAutocompleteTask(), 200);            
+            if (currentSystemComboBox.getSelectionModel().getSelectedItem() != null) {
+                currentSystemComboBoxTimer.cancel();
+                currentSystemComboBoxTimer = new Timer();
+                currentSystemComboBoxTimer.schedule(new CurrentSystemComboBoxAutocompleteTask(), 200); 
+            }
         });
         
         stationBlackMarketFlagColumn.setCellFactory( tableCell -> new CheckBoxTableCell<>());
@@ -305,8 +321,6 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         
         this.allegiance.clear();
         this.allegiance.addAll(starSystemService.getAllegiances());
-//        this.faction.clear();
-//        this.faction.addAll(starSystemService.getFactions());
         this.government.clear();
         this.government.addAll(starSystemService.getGovernments());
         this.primaryEconomy.clear();

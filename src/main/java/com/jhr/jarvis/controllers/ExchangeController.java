@@ -257,15 +257,15 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
              */
             Runnable task = () -> {
                 
-                String originSystem = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
+                //String originSystem = starSystemService.getCurrentStarSystem() != null ? starSystemService.getCurrentStarSystem().getName() : null;
                 
                 if (buyOrSell.equals("sell")) {
-                    Set<BestExchange> exchanges = tradeService.bestSellPriceOrientDb(originSystem, commodity);
+                    Set<BestExchange> exchanges = tradeService.bestSellPriceOrientDb(fromSystem, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.SELL_COMMODITY_ANYWHERE));
                 }
                 
                 if (buyOrSell.equals("buy")) {
-                    Set<BestExchange> exchanges = tradeService.bestBuyPriceOrientDb(originSystem, commodity);
+                    Set<BestExchange> exchanges = tradeService.bestBuyPriceOrientDb(fromSystem, commodity);
                     eventPublisher.publishEvent(new ExchangeCompletedEvent(exchanges, ExchangeType.BUY_COMMODITY_ANYWHERE));
                 }
             };

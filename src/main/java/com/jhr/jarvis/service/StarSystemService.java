@@ -66,7 +66,7 @@ public class StarSystemService {
     @Autowired
     private Settings settings;
     
-    private StarSystem currentStarSystem = null;
+    //private StarSystem currentStarSystem = null;
 
     public void getLatestSystemsFileFromEddb(File eddbSystemsJson) throws MalformedURLException, IOException {        
         FileUtils.copyURLToFile(new URL("http://eddb.io/archive/v3/systems.json"), eddbSystemsJson);
@@ -364,7 +364,7 @@ public class StarSystemService {
         return systems;
     }
 
-    public synchronized void addPropertyToSystem(String systemName, String propertyName, Object value) throws SystemNotFoundException {
+    public void addPropertyToSystem(String systemName, String propertyName, Object value) throws SystemNotFoundException {
         OrientGraphNoTx graph = null;
 
         if (StringUtils.isBlank(systemName) || StringUtils.isBlank(propertyName) || value == null) {
@@ -381,7 +381,8 @@ public class StarSystemService {
                 if (vertexSystem == null) {
                     throw new SystemNotFoundException("Unique station could not be identified for '" + systemName + "'.");
                 }
-                if (vertexSystem.getProperty(propertyName) != null && !vertexSystem.getProperty(propertyName).equals(value)) {
+                if (vertexSystem.getProperty(propertyName) == null ||
+                        (vertexSystem.getProperty(propertyName) != null && !vertexSystem.getProperty(propertyName).equals(value))) {
                     vertexSystem.setProperty(propertyName, value);
                     System.out.println("Set " + propertyName + "-->" + value + " for " + systemName);
                 }
@@ -393,8 +394,13 @@ public class StarSystemService {
             } catch (Exception e) {
                 e.printStackTrace();
                 break;
+            } finally {
+                graph.shutdown();
             }
         }
+        
+        
+        
     }
 
     /**
@@ -546,6 +552,11 @@ public class StarSystemService {
     
     
     public StarSystem convertVertexToSystem(OrientVertex systemVertex) {
+
+        if (systemVertex != null) {
+            systemVertex.getPropertyKeys().forEach((key)->{System.out.println("to convert " + systemVertex.getProperty("name") + ": " + key + "-->" + systemVertex.getProperty(key));});
+        }
+        
         StarSystem starSystem = null;
         if (systemVertex != null) {
             starSystem = new StarSystem(systemVertex.getProperty("name"));
@@ -563,6 +574,8 @@ public class StarSystemService {
             starSystem.setSecurity(systemVertex.getProperty("security"));
             starSystem.setState(systemVertex.getProperty("state"));
         }
+        
+        System.out.println("converted=" + starSystem);
         return starSystem;
     }
     
@@ -619,6 +632,8 @@ public class StarSystemService {
      */
     public StarSystem findExactSystemAndStationsOrientDb(String systemName, boolean updateAgainstEddb) throws SystemNotFoundException, IOException {
 
+        System.out.println("findExactSystemAndStationsOrientDb called with systemName=" + systemName + ", updateAgainstEddb=" + updateAgainstEddb);
+        
         if (systemName == null) {
             throw new SystemNotFoundException("Exact system '" + systemName + "' could not be identified");
         }
@@ -629,6 +644,10 @@ public class StarSystemService {
         try {
             graph = orientDbService.getFactory().getNoTx();
             OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", systemName);
+            if (vertexSystem != null) {
+                vertexSystem.getPropertyKeys().forEach((key)->{System.out.println(vertexSystem.getProperty("name") + ": " + key + "-->" + vertexSystem.getProperty(key));});
+            }
+            
             if (vertexSystem != null) {
                 foundSystem = convertVertexToSystem(vertexSystem);
             }
@@ -844,14 +863,14 @@ public class StarSystemService {
         return out;
     }
 
-    public StarSystem getCurrentStarSystem() {
-        return currentStarSystem;
-    }
-
-    public void setCurrentStarSystem(StarSystem currentStarSystem) {
-        this.currentStarSystem = currentStarSystem;
-    }
-    
+//    public StarSystem getCurrentStarSystem() {
+//        return currentStarSystem;
+//    }
+//
+//    public void setCurrentStarSystem(StarSystem currentStarSystem) {
+//        this.currentStarSystem = currentStarSystem;
+//    }
+//    
     public MapData shortestPath(String startSystemName, String destinationSystemName, double maxJumpRange) {
         
         OrientGraphNoTx graph = null;

@@ -326,7 +326,7 @@ public class StarSystem implements Comparable<StarSystem>{
 
     @JsonProperty("secondary_economy")
     public void setSecondaryEconomy(String economy) {
-        this.primaryEconomy = economy != null ? economy.toUpperCase() : null;
+        this.secondaryEconomy = economy != null ? economy.toUpperCase() : null;
     }
 
     @JsonProperty("secondary_economy")
