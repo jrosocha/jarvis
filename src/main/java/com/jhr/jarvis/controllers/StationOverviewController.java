@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -130,12 +132,23 @@ public class StationOverviewController implements ApplicationListener<Applicatio
         
         @Override
         public void run() {
-            commodities.clear();
-            commodities.addAll(station.getAvailableCommodityExchanges());           
-            systemNameLabel.setText(station.getSystem());           
-            stationComboBox.getSelectionModel().select(station.getName());
-            blackMarketCheckBox.setSelected(station.getBlackMarket() != null && station.getBlackMarket() ? true : false);
-            ageOfDataLabel.setText(ChronoUnit.DAYS.between(station.getDate(), LocalDateTime.now()) + "");
+            
+            System.out.println("Running event UpdateStationOverview with : " + station);
+            
+            if (station == null) {
+                clearStationOverview();
+            } else {            
+                commodities.clear();
+                commodities.addAll(station.getAvailableCommodityExchanges());           
+                systemNameLabel.setText(station.getSystem());
+                
+                EventHandler<ActionEvent> onActionStationComboBox = stationComboBox.getOnAction();
+                stationComboBox.setOnAction(null);
+                stationComboBox.getSelectionModel().select(station.getName());
+                stationComboBox.setOnAction(onActionStationComboBox);
+                blackMarketCheckBox.setSelected(station.getBlackMarket() != null && station.getBlackMarket() ? true : false);
+                ageOfDataLabel.setText(ChronoUnit.DAYS.between(station.getDate(), LocalDateTime.now()) + "");
+            }
         }
     }
     
@@ -164,8 +177,11 @@ public class StationOverviewController implements ApplicationListener<Applicatio
  
         deleteStationButton.setOnAction((event)->{
              String stationName = FxUtil.getComboBoxValue(stationComboBox);
+             System.out.println("Running delete for: " + stationName);
+             stationComboBox.getSelectionModel().clearSelection();
              try {
                 stationService.deleteStationOrientDb(stationName);
+                clearStationOverview();
                 eventPublisher.publishEvent(new OcrCompletedEvent(Boolean.TRUE));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -195,10 +211,23 @@ public class StationOverviewController implements ApplicationListener<Applicatio
         stations.addAll(stationsAsStrings);
     }
     
+    public void clearStationOverview() {
+        commodities.clear();
+        systemNameLabel.setText("");
+        EventHandler<ActionEvent> onActionStationComboBox = stationComboBox.getOnAction();
+        stationComboBox.setOnAction(null);
+        stationComboBox.getSelectionModel().clearSelection();
+        stationComboBox.setOnAction(onActionStationComboBox);
+        blackMarketCheckBox.setSelected(false);
+        ageOfDataLabel.setText("");
+    }
+    
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
     }
+    
+    
     
     class StationComboBoxAutocompleteTask extends TimerTask {
         public void run() {            

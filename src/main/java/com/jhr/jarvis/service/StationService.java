@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
+import com.jhr.jarvis.JarvisConfig;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.Commodity;
 import com.jhr.jarvis.model.Ship;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
+import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -125,21 +127,29 @@ public class StationService {
         return out;
    }
     
-    public Station deleteStationOrientDb(String stationName) throws StationNotFoundException {
+    public void deleteStationOrientDb(String stationName) throws StationNotFoundException {
+        
         OrientGraphNoTx graph = null;
-        graph = orientDbService.getFactory().getNoTx();
-        Station out = new Station();
-        try {    
-            OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", stationName);
-            if (stationVertex == null) {
+        
+        for (int retry = 0; retry < JarvisConfig.MAX_SAVE_RETRIES; ) {
+            graph = orientDbService.getFactory().getNoTx();
+            try {    
+                OrientVertex stationVertex = (OrientVertex) graph.getVertexByKey("Station.name", stationName);
+                if (stationVertex == null) {
+                    throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
+                }
+                stationVertex.getEdges(Direction.BOTH).forEach((edge)->{edge.remove();});
+                stationVertex.remove();
+                break;
+            } catch (OConcurrentModificationException e1)  {
+                System.out.println("delete retry #" + retry + "; cause="  + e1);
+                retry++;
+            } catch (Exception e) {
                 throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
+            } finally {
+                graph.shutdown();
             }
-            stationVertex.getEdges(Direction.BOTH).forEach((edge)->{edge.remove();});
-            stationVertex.remove();
-        } catch (Exception e) {
-            throw new StationNotFoundException("No station matching '" + stationName + "' in graph.");
         }
-        return out;
    }
     
     /**
