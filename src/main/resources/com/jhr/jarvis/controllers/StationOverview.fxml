@@ -23,7 +23,7 @@
       </AnchorPane>
       <Pane>
          <children>
-            <TableView fx:id="commodityTable" layoutX="5.0" layoutY="5.0" maxHeight="1.7976931348623157E308" maxWidth="790.0" minHeight="715.0" minWidth="790.0" prefHeight="715.0" prefWidth="790.0" style="-fx-font-size: 10;">
+            <TableView fx:id="commodityTable" layoutX="5.0" layoutY="5.0" maxHeight="1.7976931348623157E308" maxWidth="790.0" minHeight="400.0" minWidth="790.0" prefHeight="400.0" prefWidth="790.0" style="-fx-font-size: 10;">
               <columns>
                 <TableColumn fx:id="commodityTypeColumn" prefWidth="150.0" text="Type" />
                 <TableColumn fx:id="commodityNameColumn" prefWidth="150.0" text="Commodity" />

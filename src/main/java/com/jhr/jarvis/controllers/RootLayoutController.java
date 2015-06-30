@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
@@ -31,7 +32,7 @@ public class RootLayoutController {
     private Pane commandsPane;
     
     @FXML
-    private TabPane center;
+    private HBox center;
     
     public Node getView() {
         return view;
@@ -41,7 +42,7 @@ public class RootLayoutController {
         return left;
     }
 
-    public TabPane getCenter() {
+    public HBox getCenter() {
         return center;
     }
 

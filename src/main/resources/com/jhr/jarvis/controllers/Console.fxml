@@ -4,8 +4,8 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="800.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ConsoleController">
+<Pane fx:id="view" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="600.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.ConsoleController">
    <children>
-      <TextArea fx:id="console" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="700.0" prefWidth="775.0" />
+      <TextArea fx:id="console" editable="false" layoutX="5.0" layoutY="5.0" prefHeight="990.0" prefWidth="590.0" />
    </children>
 </Pane>

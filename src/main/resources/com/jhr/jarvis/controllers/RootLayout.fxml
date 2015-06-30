@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="1000.0" minWidth="1000.0" prefWidth="1000.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.RootLayoutController">
+<BorderPane fx:id="view" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="1000.0" minWidth="1600.0" prefWidth="1600.0" style="-fx-font-size: 10;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jhr.jarvis.controllers.RootLayoutController">
    <center>
-      <TabPane fx:id="center" maxHeight="1.7976931348623157E308" maxWidth="800.0" prefHeight="800.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
+      <HBox fx:id="center" minHeight="1000.0" BorderPane.alignment="CENTER" />
    </center>
    <left>
       <VBox fx:id="left" maxHeight="1.7976931348623157E308" prefWidth="200.0" BorderPane.alignment="CENTER">

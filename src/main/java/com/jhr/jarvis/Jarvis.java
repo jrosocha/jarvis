@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -51,7 +53,7 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     RootLayoutController rootLayoutController;
     
     private BorderPane rootLayout;    
-    private TabPane center;
+    private HBox center;
 
     @Override  
     public void stop() {       
@@ -79,19 +81,23 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
 	    rootLayout = (BorderPane) rootLayoutController.getView();
 	    center = rootLayoutController.getCenter();
 	    
+	    center.getChildren().add(new VBox());
+	    center.getChildren().add(new TabPane());
+	    
+	    
         Scene scene = new Scene(rootLayout);
         primaryStage.setScene(scene);
         primaryStage.show();
-        
         showCurrentSystem();
-        showStationOverview();
-        //showShip();
         showCommands();
+        
+        showStationOverview();
         showExchange();
+        
+        showMap();
         showConsole();
         showSettings();
-        showMap();
-        showRoute();
+        //showRoute();
         
         eddnService.scanForEddnMessages();
     }
@@ -105,11 +111,8 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     public void showStationOverview() {
 
         StationOverviewController controller = this.getApplicationContext().getBean(StationOverviewController.class);
-        
-        Tab stationOverviewTab = new Tab();
-        stationOverviewTab.setText("Station Overview");
-        stationOverviewTab.setContent(controller.getView());
-        center.getTabs().add(stationOverviewTab);
+        VBox pane = (VBox) center.getChildren().get(0);
+        pane.getChildren().add(controller.getView());
     }
     
     public void showCommands() {
@@ -121,57 +124,60 @@ public class Jarvis extends AbstractJavaFxApplicationSupport {
     public void showExchange() {
 
         ExchangeController controller = this.getApplicationContext().getBean(ExchangeController.class);
-        Tab exchangesTab = new Tab();
-        exchangesTab.setText("Exchange");
-        exchangesTab.setContent(controller.getView());
-        center.getTabs().add(exchangesTab);
-        //controller.x();
+        VBox pane = (VBox) center.getChildren().get(0);
+        pane.getChildren().add(controller.getView());        
         controller.populateSystems();
+        
     }
     
     public void showConsole() {
 
         ConsoleController controller = this.getApplicationContext().getBean(ConsoleController.class);
+        TabPane pane = (TabPane) center.getChildren().get(1);
         
         Tab consoleTab = new Tab();
         consoleTab.setText("Console");
         consoleTab.setContent(controller.getView());
-        center.getTabs().add(consoleTab);
+        pane.getTabs().add(consoleTab);
     }
     
     public void showSettings() {
 
         SettingsController settingsController = this.getApplicationContext().getBean(SettingsController.class);
         ShipController shipController = this.getApplicationContext().getBean(ShipController.class);
+        TabPane pane = (TabPane) center.getChildren().get(1);
+        
         
         Tab settingsTab = new Tab();
         settingsTab.setText("Settings");
         VBox settingsVbox = new VBox();
-        settingsVbox.setMinSize(700, 700);
+        settingsVbox.setMinSize(500, 1000);
         settingsVbox.getChildren().add(settingsController.getView());
         settingsVbox.getChildren().add(shipController.getView());
         settingsTab.setContent(settingsVbox);
-        center.getTabs().add(settingsTab);
+        pane.getTabs().add(settingsTab);
     }
 
     public void showMap() {
 
         MapController controller = this.getApplicationContext().getBean(MapController.class);
+        TabPane pane = (TabPane) center.getChildren().get(1);
         
         Tab mapTab = new Tab();
         mapTab.setText("Map");
         mapTab.setContent(controller.getView());
-        center.getTabs().add(mapTab);
+        pane.getTabs().add(mapTab);
     }
     
     public void showRoute() {
 
         RouteController controller = this.getApplicationContext().getBean(RouteController.class);
+        TabPane pane = (TabPane) center.getChildren().get(1);
         
         Tab routeTab = new Tab();
         routeTab.setText("Route");
         routeTab.setContent(controller.getView());
-        center.getTabs().add(routeTab);
+        pane.getTabs().add(routeTab);
     }
     
     

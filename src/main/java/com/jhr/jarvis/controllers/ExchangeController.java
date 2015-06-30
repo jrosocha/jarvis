@@ -373,8 +373,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.setLayoutY(5);
             exchangeTable.setMaxWidth(790);
             exchangeTable.setPrefWidth(790);
-            exchangeTable.setPrefHeight(715);
-            exchangeTable.setMaxHeight(Integer.MAX_VALUE);
+            //exchangeTable.setPrefHeight(715);
+            //exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             paddingPane.getChildren().add(exchangeTable);
             
             TableColumn<BestExchange,String> stopNumber = new TableColumn<>("#");
@@ -581,8 +581,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             exchangeTable.setLayoutY(5);
             exchangeTable.setMaxWidth(790);
             exchangeTable.setPrefWidth(790);
-            exchangeTable.setPrefHeight(715);
-            exchangeTable.setMaxHeight(Integer.MAX_VALUE);
+            //exchangeTable.setPrefHeight(400);
+            //exchangeTable.setMaxHeight(Integer.MAX_VALUE);
             paddingPane.getChildren().add(exchangeTable);
             
             TableColumn<BestExchange, String> stopNumber = new TableColumn<>("Leg");
@@ -796,8 +796,8 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         exchangeTable.setLayoutY(5);
         exchangeTable.setMaxWidth(790);
         exchangeTable.setPrefWidth(790);
-        exchangeTable.setPrefHeight(715);
-        exchangeTable.setMaxHeight(Integer.MAX_VALUE);
+        //exchangeTable.setPrefHeight(715);
+        //exchangeTable.setMaxHeight(Integer.MAX_VALUE);
         paddingPane.getChildren().add(exchangeTable);
         
         TableColumn<BestExchange,String> stopNumber = new TableColumn<>("#");
