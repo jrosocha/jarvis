@@ -79,9 +79,9 @@ public class StarSystemService {
      * @param jumpDistance
      * @return
      */
-    public MapData getMapDataForSystem(StarSystem starSystem, float jumpDistance) {
+    public MapData getMapDataForSystem(StarSystem starSystem, float jumpDistance, int gridX, int gridY) {
 
-        double lyDistanceMultiplier = 20;
+        double lyDistanceMultiplier = 15;
         
         MapData out = new MapData();
 
@@ -89,8 +89,8 @@ public class StarSystemService {
         //closeSystems.remove(starSystem);
         //closeSystems.add(0, starSystem);
         
-        double xOffset = 350 - (starSystem.getX() * lyDistanceMultiplier);
-        double yOffset = 350 - (starSystem.getY() * lyDistanceMultiplier);
+        double xOffset = (gridX/2) - (starSystem.getX() * lyDistanceMultiplier);
+        double yOffset = (gridY/2) - (starSystem.getY() * lyDistanceMultiplier);
         
         /* 
          * add all the neighbor systems first

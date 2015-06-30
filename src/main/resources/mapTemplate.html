@@ -76,9 +76,10 @@
            })
           .attr("r", function(d) {
             if (d.station) {
-              return 5;
+              return 3;
             }
-            return offsetZ + d.starSystem.z;
+            return 5;
+            //return offsetZ + d.starSystem.z;
           })
           .style("fill",function(d,i){
             if (d.station && d.station.blackMarket) {
