@@ -115,23 +115,25 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         if (event instanceof CurrentSystemChangedEvent) {
             System.out.println("CurrentSystemChangedEvent received by CurrentSystemController.");
             CurrentSystemChangedEvent currentSystemChangedEvent = (CurrentSystemChangedEvent) event;
-            if (event.getSource() != null) {
-                StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
-                //starSystemService.setCurrentStarSystem(starSystem);
-                System.out.println("Updating to: " + starSystem);
-                Platform.runLater(()->{
-                    stations.clear();
-                    stations.addAll(starSystem.getStations());
-                    stationTable.getItems().clear();
-                    stationTable.getItems().addAll(stations);
-                    currentSystemComboBox.getSelectionModel().select(starSystem.getName());
-                    allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
-                    governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
-                    primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
-                    secondaryEconomyComboBox.getSelectionModel().select(starSystem.getSecondaryEconomy());
-                    
-                });
-            }
+            StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
+            System.out.println("Updating to: " + starSystem);
+            Platform.runLater(()->{
+                stations.clear();
+                stations.addAll(starSystem.getStations());
+                stationTable.getItems().clear();
+                stationTable.getItems().addAll(stations);
+                
+                EventHandler<ActionEvent> onActionurrentSystemComboBox = currentSystemComboBox.getOnAction();
+                currentSystemComboBox.setOnAction(null);
+                currentSystemComboBox.getSelectionModel().select(starSystem.getName());
+                currentSystemComboBox.setOnAction(onActionurrentSystemComboBox);
+                
+                allegianceComboBox.getSelectionModel().select(starSystem.getAllegiance());
+                governmentComboBox.getSelectionModel().select(starSystem.getGovernment());
+                primaryEconomyComboBox.getSelectionModel().select(starSystem.getPrimaryEconomy());
+                secondaryEconomyComboBox.getSelectionModel().select(starSystem.getSecondaryEconomy());
+                
+            });
         }
         
         if (event instanceof OcrCompletedEvent) {
