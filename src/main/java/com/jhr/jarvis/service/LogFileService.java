@@ -120,7 +120,7 @@ public class LogFileService implements ApplicationEventPublisherAware {
                 Matcher matcher = pattern.matcher(line);
                 while (matcher.find()) {
                     String foundSystem =  matcher.group(1);
-                    if (lastFoundSystemInNetLog == null || !(lastFoundSystemInNetLog.equalsIgnoreCase(foundSystem))){
+                    if (lastFoundSystemInNetLog == null || !(lastFoundSystemInNetLog.equalsIgnoreCase(foundSystem))) {
                         lastFoundSystemInNetLog = foundSystem;
                         
                         StarSystem starSystem = null;                      
@@ -134,7 +134,7 @@ public class LogFileService implements ApplicationEventPublisherAware {
                                     System.out.println("Cant find system: " + starSystem + "; Creating...");
                                     starSystemService.saveOrUpdateSystemToOrient(starSystem, true, true);
                                 }
-
+                                System.out.println("Publishing CurrentSystemChangedEvent: " + starSystem);
                                 eventPublisher.publishEvent(new CurrentSystemChangedEvent(starSystem));
                             } else {
                                 System.out.println("Cant find system: " + lastFoundSystemInNetLog.toUpperCase());

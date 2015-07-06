@@ -295,6 +295,8 @@ public class StationService {
             edgeExchange.setProperty("date", date);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            graph.shutdown();
         }
     }
 
@@ -310,6 +312,8 @@ public class StationService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            graph.shutdown();
         }
     }
     
@@ -326,6 +330,8 @@ public class StationService {
             
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            graph.shutdown();
         }
         return edgesRemoved;
     }

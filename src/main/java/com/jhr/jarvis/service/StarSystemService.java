@@ -511,6 +511,8 @@ public class StarSystemService {
             System.out.println("Added: " + system);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            graph.shutdown();
         }
     }
 
