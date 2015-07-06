@@ -1,17 +1,10 @@
 package com.jhr.jarvis.model;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -19,6 +12,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Station {
     
@@ -35,13 +31,22 @@ public class Station {
     
     public Station(String name, String system) {
         super();
-        setName(name);
+        
+        if (name.contains("@")) {
+            setName(name);
+        } else {
+            setName(name + "@" + system);
+        }
         setSystem(system);
     }
     
     public Station(String name, String system, long date) {
         super();
-        setName(name);
+        if (name.contains("@")) {
+            setName(name);
+        } else {
+            setName(name + "@" + system);
+        }
         setSystem(system);
         setDate(date);
     }
@@ -110,7 +115,7 @@ public class Station {
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name.set(name);
+        this.name.set(name.toUpperCase());
     }
 
     /**
@@ -130,7 +135,7 @@ public class Station {
      * @param system the system to set
      */
     public void setSystem(String system) {
-        this.system.set(system);
+        this.system.set(system.toUpperCase());
     }
 
     /**

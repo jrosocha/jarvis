@@ -20,7 +20,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.input.KeyEvent;
 
 import javax.annotation.PostConstruct;
 
@@ -31,13 +30,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 
-import com.jhr.jarvis.controllers.CurrentSystemController.CurrentSystemComboBoxAutocompleteTask;
-import com.jhr.jarvis.event.CurrentSystemChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.Commodity;
-import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.StationService;
 import com.jhr.jarvis.util.FxUtil;

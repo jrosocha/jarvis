@@ -24,7 +24,6 @@ import com.jhr.jarvis.exceptions.SettingNotFoundException;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
-import com.jhr.jarvis.model.Station;
 
 @Service
 public class LogFileService implements ApplicationEventPublisherAware {

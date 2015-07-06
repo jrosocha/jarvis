@@ -2,8 +2,6 @@ package com.jhr.jarvis.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;

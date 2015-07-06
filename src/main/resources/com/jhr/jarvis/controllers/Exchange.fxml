@@ -35,6 +35,10 @@
             <Label layoutX="6.0" layoutY="66.0" prefHeight="12.0" prefWidth="611.0" text="* The system drop downs dont really do much other than filter the stations. Select a station if you want somehing to happen." />
          </children>
       </Pane>
-      <VBox fx:id="exchangesVbox" maxWidth="800.0" minHeight="400.0" minWidth="800.0" prefWidth="800.0" />
+      <ScrollPane hbarPolicy="NEVER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" vbarPolicy="ALWAYS">
+         <content>
+            <VBox fx:id="exchangesVbox" maxWidth="800.0" minHeight="400.0" minWidth="800.0" prefWidth="800.0" />
+         </content>
+      </ScrollPane>
    </children>
 </VBox>

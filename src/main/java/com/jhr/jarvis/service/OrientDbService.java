@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.orientDb.functions.OSQLFunctionDijkstraWithWeightMax;
-import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.sql.OSQLEngine;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
@@ -96,9 +96,34 @@ public class OrientDbService {
                     graphNoTx.createEdgeType("Exchange");
                 }
                 
+                /**
+                 * migrate station names to station @ system names
+                 */
+                System.out.println("Migrating to station names with system names...");
+                
+                for (Vertex station: graphNoTx.getVerticesOfClass("Station")) {
+                    String stationName = station.getProperty("name");
+                    if (!stationName.contains("@")) {
+                        System.out.println("Station found for migration: " + stationName);
+                        String systemName = null;
+                        for (Vertex system: station.getVertices(Direction.BOTH, "Has")) {
+                            systemName = system.getProperty("name");
+                            System.out.println("System " + systemName +" found for station: " + stationName);
+                        }
+                        if (systemName == null) {
+                            continue;
+                        }
+                        stationName = stationName + "@" + systemName;
+                        station.setProperty("name", stationName);
+                        System.out.println("Station " + stationName + " updated");
+                    }                    
+                }
+                
 
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                graphNoTx.shutdown();
             }
         }
         

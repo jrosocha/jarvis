@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableList;
 import com.jhr.jarvis.JarvisConfig;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.model.Commodity;
@@ -24,7 +23,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
@@ -257,13 +255,13 @@ public class StationService {
             if (vertexStation == null) {
                 vertexStation = graph.addVertex("class:Station");
                 vertexStation.setProperty("name", station.getName());
-                
                 OrientVertex vertexSystem = (OrientVertex) graph.getVertexByKey("System.name", system.getName());
-                graph.addEdge(vertexSystem.getProperty("name") + "-" + station.getName(), vertexSystem, vertexStation, "Has");
-                
+                vertexSystem.addEdge("Has", vertexStation);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            graph.shutdown();
         }
     }
 

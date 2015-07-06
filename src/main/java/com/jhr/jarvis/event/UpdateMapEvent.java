@@ -1,9 +1,6 @@
 package com.jhr.jarvis.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import com.jhr.jarvis.model.MapData;
-import com.jhr.jarvis.model.StarSystem;
 
 public class UpdateMapEvent extends DrawMapEvent {
 

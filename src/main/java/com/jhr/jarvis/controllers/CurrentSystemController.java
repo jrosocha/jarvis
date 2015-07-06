@@ -19,7 +19,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -30,7 +29,6 @@ import javafx.util.Callback;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,8 +40,6 @@ import com.jhr.jarvis.event.ExchangeStationChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
-import com.jhr.jarvis.exceptions.SystemNotFoundException;
-import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
@@ -171,7 +167,7 @@ public class CurrentSystemController implements ApplicationListener<ApplicationE
         }
         
         currentSystemComboBox.setItems(allSystems);
-        FxUtil.autoCompleteComboBox(currentSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(currentSystemComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         
         this.allegianceComboBox.setItems(this.allegiance);
         allegianceComboBox.setOnAction((event)->{

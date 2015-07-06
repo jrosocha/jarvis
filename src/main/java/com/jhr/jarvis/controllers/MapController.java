@@ -1,13 +1,8 @@
 package com.jhr.jarvis.controllers;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -25,9 +20,6 @@ import org.springframework.context.ApplicationListener;
 import com.google.common.io.CharStreams;
 import com.jhr.jarvis.JarvisConfig;
 import com.jhr.jarvis.event.CurrentSystemChangedEvent;
-import com.jhr.jarvis.event.DrawMapEvent;
-import com.jhr.jarvis.event.DrawRouteMapEvent;
-import com.jhr.jarvis.event.UpdateMapEvent;
 import com.jhr.jarvis.model.MapData;
 import com.jhr.jarvis.model.Settings;
 import com.jhr.jarvis.model.StarSystem;

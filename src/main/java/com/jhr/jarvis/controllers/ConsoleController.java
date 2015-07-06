@@ -1,11 +1,11 @@
 package com.jhr.jarvis.controllers;
 
-import javax.annotation.PostConstruct;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TextArea;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationListener;

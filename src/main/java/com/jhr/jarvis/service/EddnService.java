@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import org.apache.commons.lang.StringUtils;

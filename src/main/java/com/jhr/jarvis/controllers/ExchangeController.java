@@ -8,14 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -32,14 +30,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import javafx.util.converter.NumberStringConverter;
 
 import javax.annotation.PostConstruct;
 
@@ -58,12 +52,10 @@ import com.jhr.jarvis.event.ExchangeCompletedEvent.ExchangeType;
 import com.jhr.jarvis.event.ExchangeStationChangedEvent;
 import com.jhr.jarvis.event.OcrCompletedEvent;
 import com.jhr.jarvis.event.StationOverviewChangedEvent;
-import com.jhr.jarvis.event.UpdateMapEvent;
 import com.jhr.jarvis.exceptions.StationNotFoundException;
 import com.jhr.jarvis.exceptions.SystemNotFoundException;
 import com.jhr.jarvis.model.BestExchange;
 import com.jhr.jarvis.model.Commodity;
-import com.jhr.jarvis.model.MapData;
 import com.jhr.jarvis.model.StarSystem;
 import com.jhr.jarvis.model.Station;
 import com.jhr.jarvis.service.CommodityService;
@@ -159,7 +151,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
     public void initilizeExchangeForm() {
         
         fromSystemComboBox.setItems(allSystems);
-        FxUtil.autoCompleteComboBox(fromSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(fromSystemComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         fromSystemComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 String selectedSystem = FxUtil.getComboBoxValue(fromSystemComboBox);
@@ -171,10 +163,10 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         });
         
         fromStationComboBox.setItems(fromStation);
-        FxUtil.autoCompleteComboBox(fromStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(fromStationComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         
         toSystemComboBox.setItems(allSystems);
-        FxUtil.autoCompleteComboBox(toSystemComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(toSystemComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         toSystemComboBox.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 String selectedSystem = FxUtil.getComboBoxValue(toSystemComboBox);
@@ -185,10 +177,10 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
         });
         
         toStationComboBox.setItems(toStation);
-        FxUtil.autoCompleteComboBox(toStationComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(toStationComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         
         commodityComboBox.setItems(allCommodities);
-        FxUtil.autoCompleteComboBox(commodityComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
+        FxUtil.autoCompleteComboBox(commodityComboBox, FxUtil.AutoCompleteMode.CONTAINING);
         
         numberOfTradesComboBox.setItems(numberOfTradesOptions);
         FxUtil.autoCompleteComboBox(numberOfTradesComboBox, FxUtil.AutoCompleteMode.STARTS_WITH);
@@ -424,7 +416,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> from = new TableColumn<>("From");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
-            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName()) );
             from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -478,7 +470,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> to = new TableColumn<>("To");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
-            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName()) );
             to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -643,7 +635,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> from = new TableColumn<>("From");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
-            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName()) );
             from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -698,7 +690,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> to = new TableColumn<>("To");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
-            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName()) );
             to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -849,7 +841,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> from = new TableColumn<>("From");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
-            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName()) );
             from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -901,7 +893,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> to = new TableColumn<>("To");
             to.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
-            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName()) );
             to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -955,7 +947,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> to = new TableColumn<>("From");
             to.setPrefWidth(200);
             exchangeTable.getColumns().add(to);
-            to.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getSellStationName() + "@" + column.getValue().getSellSystemName()) );
+            to.setCellValueFactory(column -> new SimpleStringProperty(column.getValue().getSellStationName()) );
             to.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
@@ -1007,7 +999,7 @@ public class ExchangeController implements ApplicationListener<ApplicationEvent>
             TableColumn<BestExchange,String> from = new TableColumn<>("To");
             from.setPrefWidth(200);
             exchangeTable.getColumns().add(from);
-            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName() + "@" + column.getValue().getBuySystemName()) );
+            from.setCellValueFactory(column -> new SimpleStringProperty( column.getValue().getBuyStationName()) );
             from.setCellFactory(new Callback<TableColumn<BestExchange, String>, TableCell<BestExchange, String>>() {
                 @Override
                 public TableCell<BestExchange, String> call(TableColumn<BestExchange, String> col) {
