@@ -35,11 +35,11 @@
     
     var minZ = 999999;
     for (idx = 0; idx < dataset.nodes.length; idx++) {
-    	  if (dataset.nodes[idx].starSystem && dataset.nodes[idx].starSystem.z) {
-    	    minZ = dataset.nodes[idx].starSystem.z < minZ ? dataset.nodes[idx].starSystem.z : minZ;
-    	  }
+          if (dataset.nodes[idx].starSystem && dataset.nodes[idx].starSystem.z) {
+            minZ = dataset.nodes[idx].starSystem.z < minZ ? dataset.nodes[idx].starSystem.z : minZ;
+          }
     }
-    var offsetZ = 5 - minZ;
+    var offsetZ = minZ < 0 ? (Math.abs(minZ) + 5) : ((-minZ) + 5);
         
         var svg = d3.select(".canvas")
         .append("svg")
@@ -78,9 +78,10 @@
             if (d.station) {
               return 3;
             }
-            return 5;
-            //return offsetZ + d.starSystem.z;
+            //return 5;
+            return offsetZ + d.starSystem.z;
           })
+          //.style("opacity", 0.5)
           .style("fill",function(d,i){
             if (d.station && d.station.blackMarket) {
               return "#000"

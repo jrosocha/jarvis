@@ -79,7 +79,7 @@ public class StarSystemService {
      */
     public MapData getMapDataForSystem(StarSystem starSystem, float jumpDistance, int gridX, int gridY) {
 
-        double lyDistanceMultiplier = 15;
+        double lyDistanceMultiplier = 20;
         
         MapData out = new MapData();
 
@@ -256,7 +256,7 @@ public class StarSystemService {
         Set<StarSystem> systems = new ConcurrentSkipListSet<>();
         
         sw.start("Parse EDDB File @ " + eddbSystemsJson.getAbsolutePath());
-        try (JsonParser parser = jsonFactory.createParser(eddbSystemsJson)) { 
+        try (JsonParser parser = jsonFactory.createParser(eddbSystemsJson)) {
             
             if(parser.nextToken() != JsonToken.START_ARRAY) {
                 throw new IllegalStateException("Expected an array");
@@ -264,8 +264,13 @@ public class StarSystemService {
             
               while(parser.nextToken() == JsonToken.START_OBJECT) {
                 // read everything from this START_OBJECT to the matching END_OBJECT
-                StarSystem node = JarvisConfig.MAPPER.readValue(parser, StarSystem.class);
-                systems.add(node);
+                try {
+                    StarSystem node = JarvisConfig.MAPPER.readValue(parser, StarSystem.class);
+                    systems.add(node);
+                } catch (Exception e) {
+                    // skip
+                    e.printStackTrace();
+                }
               }
               System.out.println("setting " + systems.size() + " systems");
               starSystemData = systems;

@@ -3,6 +3,7 @@ package com.jhr.jarvis.controllers;
 import java.io.File;
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -136,7 +137,9 @@ public class SettingsController {
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
-                        getSystemsEddnLoading.setVisible(false);
+                        Platform.runLater(()->{
+                            getSystemsEddnLoading.setVisible(false);
+                        });
                     }
 
                 };

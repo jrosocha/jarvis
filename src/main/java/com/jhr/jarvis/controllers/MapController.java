@@ -1,8 +1,10 @@
 package com.jhr.jarvis.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -77,14 +79,14 @@ public class MapController implements ApplicationListener<ApplicationEvent> {
             CurrentSystemChangedEvent currentSystemChangedEvent = (CurrentSystemChangedEvent) event;
             StarSystem starSystem = currentSystemChangedEvent.getStarSystem();
             Platform.runLater(()->{mapInformation.setText(String.format("Routes from system %s with a %f ly jump range", starSystem.getName(), shipService.getActiveShip().getJumpDistance()));});            
-            MapData mapData = starSystemService.getMapDataForSystem(starSystem, shipService.getActiveShip().getJumpDistance(), 580, 890);
+            MapData mapData = starSystemService.getMapDataForSystem(starSystem, shipService.getActiveShip().getJumpDistance(), 580, 580);
             
             try {
                 mapData.getOptimalWindowSizeAndAdjustEverythingPositive();
                 String mapDataAsString = JarvisConfig.MAPPER.writeValueAsString(mapData);
                 String newMapHtml = mapHtml.replace("__DATA__", mapDataAsString);
                 newMapHtml = newMapHtml.replace("__X__", "580");
-                newMapHtml = newMapHtml.replace("__Y__", "890");
+                newMapHtml = newMapHtml.replace("__Y__", "580");
                 final String newMapHtmlFinal = newMapHtml;
                 //Files.write(new File("/Users/jrosocha/trade/map.html").toPath(), newMapHtml.getBytes("UTF-8"));
                 
